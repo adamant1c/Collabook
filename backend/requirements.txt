@@ -7,4 +7,5 @@ pydantic
 pydantic-settings
 langchain
 langchain-openai
+google-generativeai
 python-multipart

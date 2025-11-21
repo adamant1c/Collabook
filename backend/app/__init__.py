@@ -1,0 +1,3 @@
+"""
+Collabook Backend - Init file
+"""

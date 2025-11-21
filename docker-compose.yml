@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=collabook
+      - POSTGRES_PASSWORD=collabook_pass
+      - POSTGRES_DB=collabook_db
+    ports:
+      - "5432:5432"
+    networks:
+      - collabook-net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - collabook-net
+
+  backend:
+    build: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://collabook:collabook_pass@db:5432/collabook_db
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - collabook-net
+
+  frontend:
+    build: ./frontend
+    command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "8501:8501"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - collabook-net
+
+networks:
+  collabook-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

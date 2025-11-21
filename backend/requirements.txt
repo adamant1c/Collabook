@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+redis
+pydantic
+pydantic-settings
+langchain
+langchain-openai
+python-multipart

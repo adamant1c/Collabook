@@ -16,6 +16,14 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+class UserCreate(BaseModel):
+    """Schema for creating a new user (admin only)"""
+    username: str = Field(..., min_length=3, max_length=50)
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    name: str = Field(..., min_length=1, max_length=100)
+    role: str = "player"  # admin or player
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

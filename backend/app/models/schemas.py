@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from datetime import datetime
 
 # User schemas
@@ -52,7 +52,7 @@ class PasswordReset(BaseModel):
     token: str
     new_password: str = Field(..., min_length=6)
 
-# Character/Story schemas (updated)
+# Character/Story schemas
 class StoryCreate(BaseModel):
     title: str
     world_description: str
@@ -82,6 +82,7 @@ class CharacterResponse(BaseModel):
     story_id: str
     insertion_point: Optional[str]
     status: str
+    gold: int
     created_at: datetime
     
     class Config:
@@ -95,6 +96,61 @@ class InteractionResponse(BaseModel):
     turn_id: str
     narration: str
     turn_number: int
+    quest_hint: Optional[str] = None  # Phase 3: LLM can suggest quest completion
     
     class Config:
         from_attributes = True
+
+# Quest schemas (Phase 3)
+class QuestObjective(BaseModel):
+    id: str
+    description: str
+
+class QuestCreate(BaseModel):
+    story_id: str
+    title: str
+    description: str
+    quest_type: str  # "main" or "side"
+    objectives: List[QuestObjective]
+    xp_reward: int = 0
+    gold_reward: int = 0
+    quest_giver: Optional[str] = None
+    quest_giver_description: Optional[str] = None
+    required_level: int = 1
+    is_repeatable: bool = False
+
+class QuestResponse(BaseModel):
+    id: str
+    story_id: str
+    title: str
+    description: str
+    quest_type: str
+    objectives: List[Dict[str, Any]]
+    xp_reward: int
+    gold_reward: int
+    quest_giver: Optional[str]
+    quest_giver_description: Optional[str]
+    required_level: int
+    is_repeatable: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class PlayerQuestResponse(BaseModel):
+    id: str
+    quest: QuestResponse
+    status: str
+    objectives_completed: List[str]
+    progress_notes: Optional[str]
+    started_at: datetime
+    completed_at: Optional[datetime]
+    
+    class Config:
+        from_attributes = True
+
+class QuestAccept(BaseModel):
+    character_id: str
+
+class QuestComplete(BaseModel):
+    character_id: str

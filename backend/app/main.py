@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
-from app.api import users, stories, interactions, auth
+from app.api import users, stories, interactions, auth, quests
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -22,6 +22,7 @@ app.include_router(auth.router)  # Auth first!
 app.include_router(users.router)
 app.include_router(stories.router)
 app.include_router(interactions.router)
+app.include_router(quests.router)  # Phase 3: Quests
 
 @app.get("/")
 async def root():

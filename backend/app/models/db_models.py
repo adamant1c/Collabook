@@ -12,6 +12,16 @@ class UserRole(str, enum.Enum):
     ADMIN = "admin"
     PLAYER = "player"
 
+class QuestType(str, enum.Enum):
+    MAIN = "main"
+    SIDE = "side"
+
+class QuestStatus(str, enum.Enum):
+    NOT_STARTED = "not_started"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    FAILED = "failed"
+
 class User(Base):
     __tablename__ = "users"
     
@@ -68,6 +78,7 @@ class Story(Base):
     # Relationships
     characters = relationship("Character", back_populates="story", cascade="all, delete-orphan")
     turns = relationship("Turn", back_populates="story", cascade="all, delete-orphan")
+    quests = relationship("Quest", back_populates="story", cascade="all, delete-orphan")
 
 class Character(Base):
     __tablename__ = "characters"
@@ -87,12 +98,16 @@ class Character(Base):
     deaths = Column(Integer, default=0)
     can_resurrect = Column(Boolean, default=True)
     
+    # Currency (Phase 3)
+    gold = Column(Integer, default=0)
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
     user = relationship("User", back_populates="characters")
     story = relationship("Story", back_populates="characters")
     turns = relationship("Turn", back_populates="character", cascade="all, delete-orphan")
+    player_quests = relationship("PlayerQuest", back_populates="character", cascade="all, delete-orphan")
 
 class Turn(Base):
     __tablename__ = "turns"
@@ -113,3 +128,58 @@ class Turn(Base):
     # Relationships
     story = relationship("Story", back_populates="turns")
     character = relationship("Character", back_populates="turns")
+
+class Quest(Base):
+    __tablename__ = "quests"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=False)
+    
+    # Quest info
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=False)
+    quest_type = Column(SQLEnum(QuestType), nullable=False)
+    
+    # Objectives (JSON list of objectives)
+    # Example: [{"id": "obj1", "description": "Find the ancient tome", "completed": false}]
+    objectives = Column(JSON, nullable=False, default=list)
+    
+    # Rewards
+    xp_reward = Column(Integer, default=0)
+    gold_reward = Column(Integer, default=0)
+    item_rewards = Column(JSON, nullable=True, default=list)  # Phase 3B - Inventory
+    
+    # Quest giver NPC
+    quest_giver = Column(String, nullable=True)
+    quest_giver_description = Column(Text, nullable=True)
+    
+    # Requirements
+    is_repeatable = Column(Boolean, default=False)
+    required_level = Column(Integer, default=1)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    story = relationship("Story", back_populates="quests")
+    player_quests = relationship("PlayerQuest", back_populates="quest", cascade="all, delete-orphan")
+
+class PlayerQuest(Base):
+    __tablename__ = "player_quests"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    character_id = Column(String, ForeignKey("characters.id"), nullable=False)
+    quest_id = Column(String, ForeignKey("quests.id"), nullable=False)
+    
+    status = Column(SQLEnum(QuestStatus), default=QuestStatus.NOT_STARTED)
+    
+    # Progress tracking
+    objectives_completed = Column(JSON, default=list)  # List of completed objective IDs
+    progress_notes = Column(Text, nullable=True)  # LLM-generated notes about progress
+    
+    # Timestamps
+    started_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+    
+    # Relationships
+    character = relationship("Character", back_populates="player_quests")
+    quest = relationship("Quest", back_populates="player_quests")

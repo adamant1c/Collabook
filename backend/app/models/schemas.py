@@ -154,3 +154,44 @@ class QuestAccept(BaseModel):
 
 class QuestComplete(BaseModel):
     character_id: str
+
+# Combat schemas (Phase 4)
+class CombatActionRequest(BaseModel):
+    character_id: str
+    action: str  # "attack", "magic", "defend", "flee"
+
+class EnemyInfo(BaseModel):
+    name: str
+    description: Optional[str]
+    level: int
+    hp: int
+    max_hp: int
+    type: str  # "common", "elite", "boss"
+
+class CombatResult(BaseModel):
+    success: bool
+    message: str
+    combat_log: List[str]
+    
+    # Combat state
+    combat_continues: bool = False
+    player_hp: Optional[int] = None
+    player_max_hp: Optional[int] = None
+    enemy_hp: Optional[int] = None
+    enemy_max_hp: Optional[int] = None
+    
+    # Outcomes
+    victory: bool = False
+    defeat: bool = False
+    fled: bool = False
+    
+    # Rewards (on victory)
+    xp_gained: Optional[int] = None
+    gold_gained: Optional[int] = None
+    level_up: bool = False
+    new_level: Optional[int] = None
+    
+    # Death/Resurrection
+    resurrected: bool = False
+    permanent_death: bool = False
+    penalty: Optional[str] = None

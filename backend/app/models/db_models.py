@@ -84,6 +84,7 @@ class Story(Base):
     characters = relationship("Character", back_populates="story", cascade="all, delete-orphan")
     turns = relationship("Turn", back_populates="story", cascade="all, delete-orphan")
     quests = relationship("Quest", back_populates="story", cascade="all, delete-orphan")
+    enemies = relationship("Enemy", back_populates="story", cascade="all, delete-orphan")
 
 class Character(Base):
     __tablename__ = "characters"
@@ -99,7 +100,7 @@ class Character(Base):
     thirst = Column(Integer, default=100)
     fatigue = Column(Integer, default=0)
     
-    # Death tracking
+    # Death tracking (Phase 4 - Combat)
     deaths = Column(Integer, default=0)
     can_resurrect = Column(Boolean, default=True)
     
@@ -127,12 +128,14 @@ class Turn(Base):
     # Combat tracking (Phase 4)
     was_combat = Column(Boolean, default=False)
     combat_result = Column(JSON, nullable=True)  # Store combat details
+    combat_enemy_id = Column(String, ForeignKey("enemies.id"), nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
     story = relationship("Story", back_populates="turns")
     character = relationship("Character", back_populates="turns")
+    combat_enemy = relationship("Enemy")
 
 class Quest(Base):
     __tablename__ = "quests"
@@ -188,3 +191,32 @@ class PlayerQuest(Base):
     # Relationships
     character = relationship("Character", back_populates="player_quests")
     quest = relationship("Quest", back_populates="player_quests")
+
+class Enemy(Base):
+    __tablename__ = "enemies"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=False)
+    
+    # Enemy info
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    enemy_type = Column(SQLEnum(EnemyType), default=EnemyType.COMMON)
+    
+    # Combat stats
+    level = Column(Integer, default=1)
+    hp = Column(Integer, nullable=False)
+    max_hp = Column(Integer, nullable=False)  # For display
+    attack = Column(Integer, nullable=False)
+    defense = Column(Integer, nullable=False)
+    
+    # Loot rewards
+    xp_reward = Column(Integer, default=0)
+    gold_min = Column(Integer, default=0)
+    gold_max = Column(Integer, default=0)
+    loot_table = Column(JSON, nullable=True, default=list)  # Future: item drops
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    story = relationship("Story", back_populates="enemies")

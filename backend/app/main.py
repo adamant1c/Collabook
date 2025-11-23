@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
-from app.api import users, stories, interactions, auth, quests
+from app.api import users, stories, interactions, auth, quests, combat
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Collabook API", version="2.0.0")
+app = FastAPI(title="Collabook API", version="2.1.0")  # Phase 4
 
 # CORS middleware for frontend
 app.add_middleware(
@@ -23,6 +23,7 @@ app.include_router(users.router)
 app.include_router(stories.router)
 app.include_router(interactions.router)
 app.include_router(quests.router)  # Phase 3: Quests
+app.include_router(combat.router)  # Phase 4: Combat
 
 @app.get("/")
 async def root():

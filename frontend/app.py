@@ -1,5 +1,6 @@
 import streamlit as st
 from api_client import CollabookAPI
+from localization import t, Language
 from ui_components import (
     apply_custom_css, render_title, render_stat_card, 
     render_quest_card, render_combat_log, render_enemy_card,
@@ -31,6 +32,8 @@ if "in_combat" not in st.session_state:
     st.session_state.in_combat = False
 if "combat_enemy" not in st.session_state:
     st.session_state.combat_enemy = None
+if "language" not in st.session_state:
+    st.session_state.language = "en"  # Default English
 
 def main():
     """Main application entry point"""
@@ -71,18 +74,50 @@ def check_backend():
 def show_auth_page():
     """Authentication page with login and registration"""
     
-    render_title("Collabook RPG", icon="⚔️")
-    st.markdown("""
+    # Get current language
+    lang = Language(st.session_state.get("language", "en"))
+    
+    render_title(t("app_title", lang), icon="⚔️")
+    
+    # Subtitle with translation
+    subtitle = t("app_subtitle", lang) if lang == Language.EN else "Avventure Epiche ti Aspettano!"
+    welcome_text = "Enter a world of collaborative storytelling and heroic quests" if lang == Language.EN else "Entra in un mondo di narrazione collaborativa e missioni eroiche"
+    
+    st.markdown(f"""
         <div style='text-align: center; font-family: "Cinzel", serif; font-size: 1.3rem; 
-                    color: var(--wood-dark); margin-bottom: 2rem;'>
-            🎲 Epic Adventures Await! 🎲<br/>
-            <span style='font-size: 1rem; color: var(--stone-gray);'>
-                Enter a world of collaborative storytelling and heroic quests
+                    color: var(--gold); margin-bottom: 2rem;'>
+            🎲 {subtitle} 🎲<br/>
+            <span style='font-size: 1rem; color: var(--parchment-light);'>
+                {welcome_text}
             </span>
         </div>
     """, unsafe_allow_html=True)
     
-    tab1, tab2, tab3 = st.tabs(["🔐 Login", "✨ Register", "🔑 Reset Password"])
+    # Language selector
+    st.markdown("<div style='text-align: right; margin-bottom: 1rem;'>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([6, 1, 1])
+    with col2:
+        if st.button("🇬🇧 EN", use_container_width=True, help="English"):
+            st.session_state.language = "en"
+            st.rerun()
+    with col3:
+        if st.button("🇮🇹 IT", use_container_width=True, help="Italiano"):
+            st.session_state.language = "it"
+            st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Show current language
+    current_lang = st.session_state.get("language", "en")
+    lang_display = "🇬🇧 English" if current_lang == "en" else "🇮🇹 Italiano"
+    lang_label = "Language" if current_lang == "en" else "Lingua"
+    st.markdown(f"<p style='text-align: right; color: var(--gold); font-size: 0.9rem;'>{lang_label}: {lang_display}</p>", unsafe_allow_html=True)
+    
+    # Tabs with translations
+    login_tab = f"🔐 {t('login', lang)}"
+    register_tab = f"✨ {t('register', lang)}"
+    reset_tab = "🔑 Reset Password" if lang == Language.EN else "🔑 Recupera Password"
+    
+    tab1, tab2, tab3 = st.tabs([login_tab, register_tab, reset_tab])
     
     with tab1:
         show_login()
@@ -95,125 +130,132 @@ def show_auth_page():
 
 def show_login():
     """Login form"""
-    st.markdown("""
+    lang = Language(st.session_state.get("language", "en"))
+    
+    # Translated headers
+    title = "Login to Your Account" if lang == Language.EN else "Accedi al Tuo Account"
+    subtitle = "Continue your epic adventure" if lang == Language.EN else "Continua la tua avventura epica"
+    
+    st.markdown(f"""
         <h3 style='color: #d4af37; font-family: "Cinzel", serif; 
                    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
-            🔐 Login to Your Account
+            🔐 {title}
         </h3>
         <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
-            Continue your epic adventure
+            {subtitle}
         </p>
         <style>
             /* Login form styling */
-            .stTextInput label {
+            .stTextInput label {{
                 color: #d4af37 !important;
                 font-weight: 600;
                 font-size: 1.05rem;
-            }
-            .stTextInput > div > div > input {
+            }}
+            .stTextInput > div > div > input {{
                 background-color: rgba(245, 235, 210, 0.95) !important;
                 color: #3d2f1f !important;
                 border: 2px solid #8b7355 !important;
-            }
-            .stTextInput > div > div > input:focus {
+            }}
+            .stTextInput > div > div > input:focus {{
                 border-color: #d4af37 !important;
                 box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
-            }
+            }}
         </style>
     """, unsafe_allow_html=True)
     
     with st.form("login_form"):
-        username = st.text_input("⚔️ Username")
-        password = st.text_input("🔑 Password", type="password")
-        submitted = st.form_submit_button("🎮 Login")
+        username = st.text_input(f"⚔️ {t('username', lang)}")
+        password = st.text_input(f"🔑 {t('password', lang)}", type="password")
+        submit_text = t('login', lang).upper() if lang == Language.EN else "ACCEDI"
+        submitted = st.form_submit_button(f"🎮 {submit_text}")
         
         if submitted:
+            error_msg = "Please fill in all fields" if lang == Language.EN else "Compila tutti i campi"
+            success_msg = "✓ Login successful!" if lang == Language.EN else "✓ Accesso riuscito!"
+            error_prefix = "Login failed" if lang == Language.EN else "Accesso fallito"
+            
             if not username or not password:
-                st.error("Please fill in all fields")
+                st.error(error_msg)
                 return
             
             try:
                 token = CollabookAPI.login(username, password)
                 st.session_state.token = token
-                st.success("✓ Login successful!")
+                st.success(success_msg)
                 st.rerun()
             except Exception as e:
-                st.error(f"Login failed: {str(e)}")
+                st.error(f"{error_prefix}: {str(e)}")
 
 def show_registration():
     """Registration wizard with guided character creation"""
-    st.markdown("""
+    lang = Language(st.session_state.get("language", "en"))
+    
+    # Translated headers
+    title = "Create Your Hero" if lang == Language.EN else "Crea il Tuo Eroe"
+    subtitle = "Begin your legendary journey" if lang == Language.EN else "Inizia il tuo viaggio leggendario"
+    
+    st.markdown(f"""
         <h3 style='color: #d4af37; font-family: "Cinzel", serif;
                    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
-            ✨ Create Your Hero
+            ✨ {title}
         </h3>
         <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
-            Begin your legendary journey
+            {subtitle}
         </p>
         <style>
             /* Registration form styling */
-            div[data-baseweb="input"] label {
+            div[data-baseweb="input"] label {{
                 color: #d4af37 !important;
                 font-weight: 600;
-            }
+            }}
         </style>
     """, unsafe_allow_html=True)
     
     with st.form("registration_form"):
-        st.markdown("#### Account Information")
-        username = st.text_input("Username", max_chars=50, 
-                                 help="Your unique username (3-50 characters)")
-        email = st.text_input("Email", help="Required for password recovery")
-        password = st.text_input("Password", type="password", 
-                                help="Minimum 6 characters")
-        password_confirm = st.text_input("Confirm Password", type="password")
+        # Section headers
+        account_info = "Account Information" if lang == Language.EN else "Informazioni Account"
+        character_info = "Character Details" if lang == Language.EN else "Dettagli Personaggio"
         
-        st.markdown("#### Character Information")
-        name = st.text_input("Character Name", 
-                            placeholder="e.g., Elara the Wise",
-                            help="Your character's display name")
+        st.markdown(f"#### {account_info}")
         
-        profession = st.selectbox("Profession", [
-            "",
-            "Warrior - Master of combat and weaponry",
-            "Mage - Wielder of arcane magic",
-            "Rogue - Skilled in stealth and cunning",
-            "Cleric - Healer and divine magic user",
-            "Ranger - Expert tracker and archer",
-            "Paladin - Holy warrior with divine powers",
-            "Bard - Inspirer and jack-of-all-trades",
-            "Druid - Nature magic and shapeshifting"
-        ])
+        username = st.text_input(f"⚔️ {t('username', lang)}", max_chars=50)
+        email = st.text_input(f"📧 {t('email', lang)}")
+        password = st.text_input(f"🔑 {t('password', lang)}", type="password")
+        password_confirm = st.text_input("🔑 Confirm Password" if lang == Language.EN else "🔑 Conferma Password", type="password")
         
-        if profession:
-            profession = profession.split(" - ")[0]  # Extract just the name
+        st.markdown(f"#### {character_info}")
         
-        description = st.text_area("Character Background", 
-                                   placeholder="Describe your character's personality, goals, and backstory...",
-                                   help="This helps the AI understand your character")
+        name = st.text_input(f"👤 {t('character_name', lang)}", max_chars=100)
+        profession = st.text_input(f"🛡️ {t('profession', lang)}", placeholder="Warrior, Mage, Rogue..." if lang == Language.EN else "Guerriero, Mago, Ladro...")
+        description = st.text_area("📜 Description (Optional)" if lang == Language.EN else "📜 Descrizione (Opzionale)", max_chars=500)
+        avatar_description = st.text_area("🎨 Avatar (Optional)" if lang == Language.EN else "🎨 Avatar (Opzionale)", max_chars=200)
         
-        avatar_description = st.text_area("Physical Appearance", 
-                                          placeholder="Describe how your character looks...",
-                                          help="Hair color, build, distinctive features, clothing style...")
-        
-        submitted = st.form_submit_button("⚔️ Begin Your Adventure")
+        submit_text = "Begin Your Adventure" if lang == Language.EN else "Inizia la Tua Avventura"
+        submitted = st.form_submit_button(f"⚔️ {submit_text}")
         
         if submitted:
-            # Validation
-            if not all([username, email, password, password_confirm, name]):
-                st.error("Please fill in all required fields")
+            # Validation messages
+            fill_all = "Please fill in all required fields" if lang == Language.EN else "Compila tutti i campi obbligatori"
+            password_match = "Passwords do not match" if lang == Language.EN else "Le password non corrispondono"
+            password_len = "Password must be at least 6 characters" if lang == Language.EN else "La password deve essere di almeno 6 caratteri"
+            username_len = "Username must be at least 3 characters" if lang == Language.EN else "Il nome utente deve essere di almeno 3 caratteri"
+            success_msg = "✓ Welcome, {name}! Your adventure begins..." if lang == Language.EN else "✓ Benvenuto, {name}! La tua avventura inizia..."
+            error_prefix = "Registration failed" if lang == Language.EN else "Registrazione fallita"
+            
+            if not username or not email or not password or not name:
+                st.error(fill_all)
                 return
             
             if password != password_confirm:
-                st.error("Passwords do not match")
+                st.error(password_match)
                 return
             
             if len(password) < 6:
-                st.error("Password must be at least 6 characters")
+                st.error(password_len)
                 return
             
             if len(username) < 3:
-                st.error("Username must be at least 3 characters")
+                st.error(username_len)
                 return
             
             try:
@@ -227,47 +269,76 @@ def show_registration():
                     avatar_description=avatar_description if avatar_description else None
                 )
                 st.session_state.token = token
-                st.success(f"✓ Welcome, {name}! Your adventure begins...")
+                success_text = f"✓ Welcome, {name}! Your adventure begins..." if lang == Language.EN else f"✓ Benvenuto, {name}! La tua avventura inizia..."
+                st.success(success_text)
                 st.balloons()
                 st.rerun()
             except Exception as e:
-                st.error(f"Registration failed: {str(e)}")
+                error_text = "Registration failed" if lang == Language.EN else "Registrazione fallita"
+                st.error(f"{error_text}: {str(e)}")
 
 def show_password_reset():
     """Password reset form"""
-    st.markdown("""
+    lang = Language(st.session_state.get("language", "en"))
+    
+    # Translated headers
+    title = "Reset Your Password" if lang == Language.EN else "Recupera la Tua Password"
+    subtitle = "Recover your account" if lang == Language.EN else "Recupera il tuo account"
+    
+    st.markdown(f"""
         <h3 style='color: #d4af37; font-family: "Cinzel", serif;
                    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
-            🔑 Reset Your Password
+            🔑 {title}
         </h3>
         <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
-            Recover your account
+            {subtitle}
         </p>
     """, unsafe_allow_html=True)
     
-    reset_step = st.radio("Step", ["Request Reset", "Enter Reset Code"], horizontal=True)
+    step_label = "Step" if lang == Language.EN else "Passo"
+    request_text = "Request Reset" if lang == Language.EN else "Richiedi Reset"
+    enter_code = "Enter Reset Code" if lang == Language.EN else "Inserisci Codice"
     
-    if reset_step == "Request Reset":
+    reset_step = st.radio(step_label, [request_text, enter_code], horizontal=True)
+    
+    if reset_step == request_text:
         with st.form("request_reset_form"):
-            email = st.text_input("Email Address")
-            submitted = st.form_submit_button("Send Reset Link")
+            email_label = f"📧 {t('email', lang)}" if lang == Language.EN else "📧 Email"
+            email = st.text_input(email_label)
+            
+            button_text = "Send Reset Link" if lang == Language.EN else "Invia Link Reset"
+            submitted = st.form_submit_button(button_text)
             
             if submitted and email:
                 try:
                     CollabookAPI.request_password_reset(email)
-                    st.success("✓ If the email exists, a reset link has been sent. Check your console for now (email not configured).")
+                    success = "✓ If the email exists, a reset link has been sent. Check your console for now (email not configured)." if lang == Language.EN else "✓ Se l'email esiste, un link di reset è stato inviato. Controlla la console per ora (email non configurata)."
+                    st.success(success)
                 except Exception as e:
-                    st.error(f"Error: {str(e)}")
+                    error = "Error" if lang == Language.EN else "Errore"
+                    st.error(f"{error}: {str(e)}")
     else:
         with st.form("reset_password_form"):
-            token = st.text_input("Reset Token", help="Check your email or console logs")
-            new_password = st.text_input("New Password", type="password")
-            confirm_password = st.text_input("Confirm New Password", type="password")
-            submitted = st.form_submit_button("Reset Password")
+            token_label = "Reset Token" if lang == Language.EN else "Token Reset"
+            token_help = "Check your email or console logs" if lang == Language.EN else "Controlla la tua email o i log della console"
+            new_pass = "New Password" if lang == Language.EN else "Nuova Password"
+            confirm_pass = "Confirm New Password" if lang == Language.EN else "Conferma Nuova Password"
+            
+            token = st.text_input(token_label, help=token_help)
+            new_password = st.text_input(new_pass, type="password")
+            confirm_password = st.text_input(confirm_pass, type="password")
+            
+            button_text = "Reset Password" if lang == Language.EN else "Reimposta Password"
+            submitted = st.form_submit_button(button_text)
             
             if submitted:
+                password_match = "Passwords do not match" if lang == Language.EN else "Le password non corrispondono"
+                password_len = "Password must be at least 6 characters" if lang == Language.EN else "La password deve essere di almeno 6 caratteri"
+                success_reset = "✓ Password reset successful! You can now login." if lang == Language.EN else "✓ Password reimpostata con successo! Ora puoi accedere."
+                error_prefix = "Error" if lang == Language.EN else "Errore"
+
                 if new_password != confirm_password:
-                    st.error("Passwords do not match")
+                    st.error(password_match)
                     return
                 
                 if len(new_password) < 6:

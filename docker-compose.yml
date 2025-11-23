@@ -42,7 +42,7 @@ services:
       - redis
     networks:
       - collabook-net
-    restart: unless-stopped
+    restart: no
 
   frontend:
     build: ./frontend

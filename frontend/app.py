@@ -95,12 +95,37 @@ def show_auth_page():
 
 def show_login():
     """Login form"""
-    st.subheader("Login to Your Account")
+    st.markdown("""
+        <h3 style='color: #d4af37; font-family: "Cinzel", serif; 
+                   text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
+            🔐 Login to Your Account
+        </h3>
+        <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
+            Continue your epic adventure
+        </p>
+        <style>
+            /* Login form styling */
+            .stTextInput label {
+                color: #d4af37 !important;
+                font-weight: 600;
+                font-size: 1.05rem;
+            }
+            .stTextInput > div > div > input {
+                background-color: rgba(245, 235, 210, 0.95) !important;
+                color: #3d2f1f !important;
+                border: 2px solid #8b7355 !important;
+            }
+            .stTextInput > div > div > input:focus {
+                border-color: #d4af37 !important;
+                box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+            }
+        </style>
+    """, unsafe_allow_html=True)
     
     with st.form("login_form"):
-        username = st.text_input("Username")
-        password = st.text_input("Password", type="password")
-        submitted = st.form_submit_button("Login")
+        username = st.text_input("⚔️ Username")
+        password = st.text_input("🔑 Password", type="password")
+        submitted = st.form_submit_button("🎮 Login")
         
         if submitted:
             if not username or not password:
@@ -117,7 +142,22 @@ def show_login():
 
 def show_registration():
     """Registration wizard with guided character creation"""
-    st.subheader("Create Your Hero")
+    st.markdown("""
+        <h3 style='color: #d4af37; font-family: "Cinzel", serif;
+                   text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
+            ✨ Create Your Hero
+        </h3>
+        <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
+            Begin your legendary journey
+        </p>
+        <style>
+            /* Registration form styling */
+            div[data-baseweb="input"] label {
+                color: #d4af37 !important;
+                font-weight: 600;
+            }
+        </style>
+    """, unsafe_allow_html=True)
     
     with st.form("registration_form"):
         st.markdown("#### Account Information")
@@ -195,7 +235,15 @@ def show_registration():
 
 def show_password_reset():
     """Password reset form"""
-    st.subheader("Reset Your Password")
+    st.markdown("""
+        <h3 style='color: #d4af37; font-family: "Cinzel", serif;
+                   text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
+            🔑 Reset Your Password
+        </h3>
+        <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
+            Recover your account
+        </p>
+    """, unsafe_allow_html=True)
     
     reset_step = st.radio("Step", ["Request Reset", "Enter Reset Code"], horizontal=True)
     

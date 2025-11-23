@@ -7,7 +7,7 @@ Endpoints for managing character inventory and using consumable items.
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.core.security import get_current_user
+from app.api.auth import get_current_user
 from app.models.db_models import User, Character, Item, Inventory, ItemType
 from app.models.schemas import ItemCreate, ItemResponse, InventoryResponse, UseItemRequest, RestRequest
 from app.core.survival import consume_item, rest_action

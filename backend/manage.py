@@ -10,7 +10,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.database import SessionLocal, engine, Base
-from app.models.db_models import User, UserRole, Story
+from app.models.db_models import User, UserRole, Story, Quest, QuestType
 from app.core.security import hash_password
 from datetime import datetime
 
@@ -151,7 +151,7 @@ def seed_worlds():
             title="Echoes of the Past",
             world_description="A historically-inspired world set in medieval Europe during the height of the Renaissance. "
                             "Great kingdoms rise and fall, knights defend their honor, and scholars unlock ancient secrets. "
-                            "Navigate political intrigue, participate in grand tournaments, or explore forgotten ruins.",
+                            "Navigate political intrigue,  participate in grand tournaments, or explore forgotten ruins.",
             genre="Historical Adventure",
             is_default=True,
             current_state="The kingdom prepares for the annual Tournament of Champions...",
@@ -207,15 +207,154 @@ def seed_worlds():
         db.add(fantasy)
         db.add(scifi)
         db.commit()
+        db.refresh(historical)
+        db.refresh(fantasy)
+        db.refresh(scifi)
         
         click.echo(click.style("\n✓ Default worlds created successfully!", fg='green'))
         click.echo("\n  1. Echoes of the Past (Historical)")
         click.echo("  2. Realm of Eternal Magic (Fantasy)")
         click.echo("  3. Horizon Beyond Stars (Sci-Fi)")
         
+        # Store IDs for quest seeding
+        db.close()
+        
     except Exception as e:
         db.rollback()
         click.echo(click.style(f"Error creating worlds: {str(e)}", fg='red'))
+    finally:
+        db.close()
+
+@cli.command()
+def seed_quests():
+    """Create default quests for the 3 worlds"""
+    db = SessionLocal()
+    
+    try:
+        # Get worlds
+        historical = db.query(Story).filter(Story.title == "Echoes of the Past").first()
+        fantasy = db.query(Story).filter(Story.title == "Realm of Eternal Magic").first()
+        scifi = db.query(Story).filter(Story.title == "Horizon Beyond Stars").first()
+        
+        if not all([historical, fantasy, scifi]):
+            click.echo(click.style("Error: Default worlds not found. Run 'seed-worlds' first!", fg='red'))
+            return
+        
+        quests_to_add = []
+        
+        # HISTORICAL QUESTS
+        quests_to_add.append(Quest(
+            story_id=historical.id,
+            title="The King's Tournament",
+            description="Prove your worth in the Grand Tournament",
+            quest_type=QuestType.MAIN,
+            objectives=[
+                {"id": "train", "description": "Train with the Master-at-Arms"},
+                {"id": "qualify", "description": "Win 3 practice duels"},
+                {"id": "champion", "description": "Defeat the reigning champion"}
+            ],
+            xp_reward=500,
+            gold_reward=1000,
+            quest_giver="King Harold III",
+            required_level=1
+        ))
+        
+        quests_to_add.append(Quest(
+            story_id=historical.id,
+            title="Lost Heirloom",
+            description="Find the merchant's stolen family ring",
+            quest_type=QuestType.SIDE,
+            objectives=[
+                {"id": "investigate", "description": "Question witnesses in the market"},
+                {"id": "hideout", "description": "Find the thieves' hideout"},
+                {"id": "recover", "description": "Recover the stolen ring"}
+            ],
+            xp_reward=100,
+            gold_reward=200,
+            quest_giver="Merchant Giovanni",
+            required_level=1
+        ))
+        
+        # FANTASY QUESTS
+        quests_to_add.append(Quest(
+            story_id=fantasy.id,
+            title="The Arcane Disturbance",
+            description="Investigate the disruption in magical ley lines",
+            quest_type=QuestType.MAIN,
+            objectives=[
+                {"id": "investigate", "description": "Speak with the Council of Mages"},
+                {"id": "locate", "description": "Find the source of the disturbance"},
+                {"id": "restore", "description": "Restore balance to the ley lines"}
+            ],
+            xp_reward=500,
+            gold_reward=800,
+            quest_giver="Archmage Elendril",
+            required_level=1
+        ))
+        
+        quests_to_add.append(Quest(
+            story_id=fantasy.id,
+            title="Dragon's Hoard",
+            description="Retrieve a magical artifact from an ancient dragon",
+            quest_type=QuestType.SIDE,
+            objectives=[
+                {"id": "locate", "description": "Find the dragon's lair"},
+                {"id": "negotiate", "description": "Negotiate or battle for the artifact"}
+            ],
+            xp_reward=200,
+            gold_reward=500,
+            quest_giver="Sage Thorin",
+            required_level=3
+        ))
+        
+        # SCI-FI QUESTS
+        quests_to_add.append(Quest(
+            story_id=scifi.id,
+            title="The Jupiter Conspiracy",
+            description="Uncover a corporate plot at the trading station",
+            quest_type=QuestType.MAIN,
+            objectives=[
+                {"id": "dock", "description": "Dock at the trading station"},
+                {"id": "gather_intel", "description": "Gather intelligence on suspicious activity"},
+                {"id": "expose", "description": "Expose the conspiracy"}
+            ],
+            xp_reward=500,
+            gold_reward=1500,
+            quest_giver="Station Commander Chen",
+            required_level=1
+        ))
+        
+        quests_to_add.append(Quest(
+            story_id=scifi.id,
+            title="Smuggler's Run",
+            description="Transport illegal cargo past Alliance patrols",
+            quest_type=QuestType.SIDE,
+            objectives=[
+                {"id": "acquire", "description": "Acquire the contraband"},
+                {"id": "evade", "description": "Evade Alliance patrols"},
+                {"id": "deliver", "description": "Deliver to the buyer"}
+            ],
+            xp_reward=150,
+            gold_reward=400,
+            quest_giver="Smuggler Kane",
+            required_level=2
+        ))
+        
+        # Add all quests
+        for quest in quests_to_add:
+            db.add(quest)
+        
+        db.commit()
+        
+        click.echo(click.style("\n✓ Default quests created successfully!", fg='green'))
+        click.echo(f"\n  {len(quests_to_add)} quests added:")
+        click.echo("  - Echoes of the Past: 2 quests (1 main, 1 side)")
+        click.echo("  - Realm of Eternal Magic: 2 quests (1 main, 1 side)")
+        click.echo("  - Horizon Beyond Stars: 2 quests (1 main, 1 side)")
+        
+    except Exception as e:
+        db.rollback()
+        click.echo(click.style(f"Error creating quests: {str(e)}", fg='red'))
     finally:
         db.close()
 

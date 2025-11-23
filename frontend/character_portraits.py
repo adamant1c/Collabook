@@ -21,9 +21,13 @@ import os
 import re
 from pathlib import Path
 from typing import List, Dict, Optional
+from PIL import Image
 
 # Supported image formats
 SUPPORTED_FORMATS = ['.png', '.jpg', '.jpeg', '.webp']
+
+# Target size for portraits (square)
+TARGET_SIZE = (512, 512)
 
 # Assets directory
 ASSETS_DIR = Path(__file__).parent / "assets" / "characters"
@@ -31,6 +35,42 @@ ASSETS_DIR = Path(__file__).parent / "assets" / "characters"
 def ensure_assets_directory():
     """Create assets directory if it doesn't exist"""
     ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+
+def resize_and_optimize_image(image_path: Path, target_size: tuple = TARGET_SIZE) -> None:
+    """
+    Resize image to target size if needed and optimize
+    
+    Args:
+        image_path: Path to image file
+        target_size: Target (width, height) tuple
+    """
+    try:
+        img = Image.open(image_path)
+        
+        # Only resize if image is larger than target or not square
+        if img.size != target_size:
+            # Create thumbnail (maintains aspect ratio, then crop to square)
+            img.thumbnail(target_size, Image.Resampling.LANCZOS)
+            
+            # Create new square image with padding if needed
+            new_img = Image.new('RGB' if img.mode != 'RGBA' else 'RGBA', target_size, (255, 255, 255, 0))
+            
+            # Calculate position to paste (center)
+            paste_x = (target_size[0] - img.width) // 2
+            paste_y = (target_size[1] - img.height) // 2
+            
+            new_img.paste(img, (paste_x, paste_y))
+            
+            # Save optimized version
+            if image_path.suffix.lower() in ['.jpg', '.jpeg']:
+                new_img.convert('RGB').save(image_path, 'JPEG', quality=85, optimize=True)
+            elif image_path.suffix.lower() == '.png':
+                new_img.save(image_path, 'PNG', optimize=True)
+            elif image_path.suffix.lower() == '.webp':
+                new_img.save(image_path, 'WEBP', quality=85, method=6)
+                
+    except Exception as e:
+        print(f"⚠️ Error resizing {image_path}: {e}")
 
 def normalize_character_name(name: str) -> str:
     """

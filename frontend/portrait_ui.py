@@ -164,6 +164,11 @@ def show_portrait_upload_ui():
         with open(filepath, "wb") as f:
             f.write(uploaded_file.getbuffer())
         
-        st.success(f"✅ Portrait saved: `{filename}`")
+        # Auto-resize to 512x512
+        from character_portraits import resize_and_optimize_image
+        resize_and_optimize_image(filepath)
+        
+        st.success(f"✅ Portrait saved and optimized: `{filename}`")
         st.info(f"💡 LLM can now reference: **{character_name}**")
+        st.caption("📐 Image automatically resized to 512x512px")
         st.balloons()

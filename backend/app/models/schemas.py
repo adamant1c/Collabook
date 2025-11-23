@@ -104,7 +104,10 @@ class InteractionResponse(BaseModel):
     turn_id: str
     narration: str
     turn_number: int
-    quest_hint: Optional[str] = None  # Phase 3: LLM can suggest quest completion
+    quest_hint: Optional[str] = None
+    survival_warnings: List[str] = []
+    critical_condition: bool = False
+    # Phase 3: LLM can suggest quest completion
     
     class Config:
         from_attributes = True
@@ -203,3 +206,50 @@ class CombatResult(BaseModel):
     resurrected: bool = False
     permanent_death: bool = False
     penalty: Optional[str] = None
+
+# Item schemas (Phase 5)
+class ItemCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=100)
+    item_type: str  # food, water, potion, misc
+    description: Optional[str] = None
+    hunger_restore: int = 0
+    thirst_restore: int = 0
+    fatigue_restore: int = 0
+    hp_restore: int = 0
+    gold_cost: int = 0
+    is_consumable: bool = True
+
+class ItemResponse(BaseModel):
+    id: str
+    name: str
+    item_type: str
+    description: Optional[str]
+    hunger_restore: int
+    thirst_restore: int
+    fatigue_restore: int
+    hp_restore: int
+    gold_cost: int
+    is_consumable: bool
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class InventoryResponse(BaseModel):
+    id: str
+    character_id: str
+    item_id: str
+    quantity: int
+    item: ItemResponse
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class UseItemRequest(BaseModel):
+    character_id: str
+    item_id: str
+
+class RestRequest(BaseModel):
+    character_id: str
+    hours: int = Field(default=8, ge=1, le=24)

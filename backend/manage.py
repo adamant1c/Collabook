@@ -479,5 +479,123 @@ def seed_enemies():
     finally:
         db.close()
 
+@cli.command()
+def seed_items():
+    """Create default consumable items for survival mechanics"""
+    from app.models.db_models import Item, ItemType
+    from app.core.database import SessionLocal
+    
+    db = SessionLocal()
+    
+    try:
+        # Check if items already exist
+        existing = db.query(Item).count()
+        if existing > 0:
+            click.echo(click.style(f"⚠ Items already exist ({existing} items). Use --force to recreate.", fg='yellow'))
+            if not click.confirm("Delete existing items and recreate?"):
+                return
+            db.query(Item).delete()
+        
+        items = []
+        
+        # Food items
+        items.append(Item(
+            name="Bread",
+            item_type=ItemType.FOOD,
+            description="Simple bread loaf. Fills you up.",
+            hunger_restore=20,
+            gold_cost=5
+        ))
+        
+        items.append(Item(
+            name="Cooked Meat",
+            item_type=ItemType.FOOD,
+            description="Freshly cooked meat. Satisfying and nutritious.",
+            hunger_restore=40,
+            gold_cost=15
+        ))
+        
+        items.append(Item(
+            name="Royal Feast",
+            item_type=ItemType.FOOD,
+            description="Luxurious multi-course meal. Completely satiates hunger.",
+            hunger_restore=80,
+            gold_cost=50
+        ))
+        
+        # Water items
+        items.append(Item(
+            name="Water Flask",
+            item_type=ItemType.WATER,
+            description="Clean drinking water. Essential for survival.",
+            thirst_restore=30,
+            gold_cost=3
+        ))
+        
+        items.append(Item(
+            name="Wine",
+            item_type=ItemType.WATER,
+            description="Fine wine. Quenches thirst and relaxes you.",
+            thirst_restore=25,
+            fatigue_restore=5,
+            gold_cost=10
+        ))
+        
+        items.append(Item(
+            name="Elixir of Vitality",
+            item_type=ItemType.WATER,
+            description="Magical elixir. Completely refreshes you.",
+            thirst_restore=50,
+            fatigue_restore=10,
+            gold_cost=30
+        ))
+        
+        # Potions
+        items.append(Item(
+            name="Health Potion",
+            item_type=ItemType.POTION,
+            description="Restores health immediately.",
+            hp_restore=30,
+            gold_cost=50
+        ))
+        
+        items.append(Item(
+            name="Energy Tonic",
+            item_type=ItemType.POTION,
+            description="Reduces fatigue and increases alertness.",
+            fatigue_restore=50,
+            gold_cost=40
+        ))
+        
+        items.append(Item(
+            name="Stamina Brew",
+            item_type=ItemType.POTION,
+            description="Comprehensive restoration. Expensive but effective.",
+            hunger_restore=30,
+            thirst_restore=30,
+            fatigue_restore=30,
+            hp_restore=20,
+            gold_cost=100
+        ))
+        
+        # Add all items
+        for item in items:
+            db.add(item)
+        
+        db.commit()
+        
+        click.echo(click.style("\n✓ Default items created successfully!", fg='green'))
+        click.echo(f"\n  {len(items)} items added:")
+        click.echo("  - Food: Bread, Cooked Meat, Royal Feast")
+        click.echo("  - Water: Water Flask, Wine, Elixir of Vitality")
+        click.echo("  - Potions: Health Potion, Energy Tonic, Stamina Brew")
+        click.echo("\n💡 Players can use items to restore hunger, thirst, and fatigue!")
+        
+    except Exception as e:
+        db.rollback()
+        click.echo(click.style(f"Error creating items: {str(e)}", fg='red'))
+    finally:
+        db.close()
+
 if __name__ == '__main__':
     cli()

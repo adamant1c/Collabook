@@ -27,6 +27,12 @@ class EnemyType(str, enum.Enum):
     ELITE = "elite"
     BOSS = "boss"
 
+class ItemType(str, enum.Enum):
+    FOOD = "food"
+    WATER = "water"
+    POTION = "potion"
+    MISC = "misc"
+
 class User(Base):
     __tablename__ = "users"
     
@@ -220,3 +226,42 @@ class Enemy(Base):
     
     # Relationships
     story = relationship("Story", back_populates="enemies")
+
+class Item(Base):
+    """Items for survival mechanics (food, water, potions)"""
+    __tablename__ = "items"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    name = Column(String, nullable=False)
+    item_type = Column(SQLEnum(ItemType), default=ItemType.MISC)
+    description = Column(Text, nullable=True)
+    
+    # Restoration effects
+    hunger_restore = Column(Integer, default=0)  # How much hunger it restores
+    thirst_restore = Column(Integer, default=0)  # How much thirst it restores
+    fatigue_restore = Column(Integer, default=0)  # How much fatigue it reduces
+    hp_restore = Column(Integer, default=0)       # HP healing
+    
+    # Properties
+    gold_cost = Column(Integer, default=0)
+    is_consumable = Column(Boolean, default=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    inventory_items = relationship("Inventory", back_populates="item", cascade="all, delete-orphan")
+
+class Inventory(Base):
+    """Character inventory for items"""
+    __tablename__ = "inventory"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    character_id = Column(String, ForeignKey("characters.id"), nullable=False)
+    item_id = Column(String, ForeignKey("items.id"), nullable=False)
+    quantity = Column(Integer, default=1)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    character = relationship("Character")
+    item = relationship("Item", back_populates="inventory_items")

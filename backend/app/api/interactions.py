@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.redis_client import redis_client
 from app.core.context_optimizer import create_compact_context, create_optimized_prompt
+from app.core.survival import update_survival_stats, get_survival_penalties, apply_starvation_death
 from app.core.llm_client import llm_client
 from app.api.auth import get_current_user
 from app.models.schemas import InteractionRequest, InteractionResponse
@@ -80,6 +81,23 @@ async def create_interaction(
     )
     db.add(db_turn)
     
+    # Update survival stats (Phase 5)
+    survival_result = update_survival_stats(character, turns_elapsed=1)
+    
+    # Apply HP drain if any
+    if survival_result["penalties"]["hp_drain"] > 0:
+        current_user.hp = max(0, current_user.hp - survival_result["penalties"]["hp_drain"])
+    
+    # Check for death from starvation/dehydration
+    death_result = apply_starvation_death(character, current_user, db)
+    if death_result.get("permanent_death"):
+        return InteractionResponse(
+            turn_id=db_turn.id,
+            narration=death_result["message"],
+            turn_number=turn_number,
+            critical_warning=True
+        )
+    
     # Update story current_state (compact summary)
     last_action = interaction.user_action[:100]
     last_result = narration[:150]
@@ -92,5 +110,7 @@ async def create_interaction(
         turn_id=db_turn.id,
         narration=narration,
         turn_number=turn_number,
-        quest_hint=quest_hint
+        quest_hint=quest_hint,
+        survival_warnings=survival_result.get("warnings", []),
+        critical_condition=survival_result.get("critical", False)
     )

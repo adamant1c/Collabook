@@ -7,7 +7,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.core.database import engine, Base, SessionLocal
 from app.core.security_utils import validate_secret_key, get_cors_origins
-from app.api import users, stories, interactions, auth, quests, combat
+from app.api import users, stories, interactions, auth, quests, combat, items
 
 # Validate SECRET_KEY on startup (QA recommendation)
 validate_secret_key()
@@ -42,6 +42,7 @@ app.include_router(stories.router)
 app.include_router(interactions.router)
 app.include_router(quests.router)  # Phase 3: Quests
 app.include_router(combat.router)  # Phase 4: Combat
+app.include_router(items.router)
 
 @app.get("/")
 async def root():

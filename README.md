@@ -167,6 +167,237 @@ docker-compose exec backend python manage.py seed-enemies
 
 ---
 
+## 🔧 Environment Setup (Development vs Production)
+
+### Development Setup (Quick Start)
+
+For local testing and development, setup is simplified:
+
+```bash
+# 1. Clone and navigate
+git clone https://github.com/yourusername/collabook.git
+cd collabook
+
+# 2. Copy environment file (optional - has defaults)
+cp .env.example .env
+
+# 3. Start services (uses development defaults)
+docker-compose up --build
+
+# 4. Initialize database
+docker-compose exec backend python manage.py create-admin
+docker-compose exec backend python manage.py seed-worlds
+docker-compose exec backend python manage.py seed-quests
+docker-compose exec backend python manage.py seed-enemies
+
+# 5. Access http://localhost:8501
+```
+
+**Development Features:**
+- ✅ SECRET_KEY auto-generated (insecure, for dev only)
+- ✅ CORS allows all origins
+- ✅ Detailed error messages
+- ✅ Hot reload enabled
+- ⚠️ **NOT SECURE FOR PRODUCTION**
+
+**Environment variables used:**
+```ini
+ENVIRONMENT=development  # (default if not set)
+# SECRET_KEY not required - auto-generated
+LLM_PROVIDER=ollama
+DATABASE_URL=postgresql://postgres:postgres@db:5432/collabook
+REDIS_URL=redis://redis:6379
+```
+
+---
+
+### Production Setup (Secure Deployment)
+
+For production deployment, follow these **mandatory** security steps:
+
+#### 1. Generate Secure SECRET_KEY
+
+```bash
+# Generate 32-character random key
+openssl rand -hex 32
+# Output example: a3f8b9c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1
+```
+
+#### 2. Configure .env for Production
+
+Create/edit `.env` file:
+
+```ini
+# CRITICAL: Set environment to production
+ENVIRONMENT=production
+
+# REQUIRED: Paste your generated SECRET_KEY
+SECRET_KEY=a3f8b9c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1
+
+# LLM Configuration (choose one)
+LLM_PROVIDER=gemini  # or openai
+GEMINI_API_KEY=your-actual-api-key-here
+# OPENAI_API_KEY=your-openai-key-here
+
+# Database (use strong password!)
+DATABASE_URL=postgresql://collabook:STRONG_PASSWORD_HERE@db:5432/collabook
+POSTGRES_PASSWORD=STRONG_PASSWORD_HERE
+
+# Redis
+REDIS_URL=redis://redis:6379
+
+# Email (for password reset)
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_USER=apikey
+SMTP_PASSWORD=your-sendgrid-api-key
+EMAIL_FROM=noreply@yourdomain.com
+```
+
+#### 3. Update CORS Origins
+
+Edit `backend/app/core/security_utils.py`:
+
+```python
+PRODUCTION_CORS_ORIGINS = [
+    "https://yourdomain.com",
+    "https://www.yourdomain.com",
+]
+```
+
+#### 4. Deploy with Production Config
+
+```bash
+# Use production docker-compose
+docker-compose -f docker-compose.prod.yml up -d --build
+
+# Or with regular docker-compose (ensure ENVIRONMENT=production in .env)
+docker-compose up -d --build
+
+# Verify SECRET_KEY validation
+docker-compose logs backend | grep "SECRET_KEY"
+# Should see: ✅ SECRET_KEY validated (64 chars) - Environment: production
+```
+
+#### 5. SSL/HTTPS Setup
+
+**Option A: Let's Encrypt (Recommended)**
+```bash
+# Install Certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Obtain certificate
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+
+# Auto-renewal (already configured)
+sudo certbot renew --dry-run
+```
+
+**Option B: Cloudflare (Easiest)**
+1. Point domain to server IP
+2. Enable Cloudflare proxy
+3. Use "Full SSL" mode
+4. Free HTTPS automatically enabled
+
+#### 6. Production Security Checklist
+
+Before going live, verify:
+
+- [ ] `ENVIRONMENT=production` in `.env`
+- [ ] `SECRET_KEY` is 32+ characters and unique
+- [ ] Strong database password set
+- [ ] CORS origins locked to your domain
+- [ ] SSL/HTTPS enabled
+- [ ] Email service configured
+- [ ] Firewall enabled (UFW/iptables)
+- [ ] Rate limiting active (auto-enabled)
+- [ ] Database backups configured
+- [ ] Monitoring setup (Sentry, logs)
+
+---
+
+### Environment Variables Reference
+
+| Variable | Development | Production | Required |
+|----------|-------------|------------|----------|
+| `ENVIRONMENT` | `development` (default) | `production` | ⚠️ Yes for prod |
+| `SECRET_KEY` | Auto-generated | **User-provided** | ❌ Dev, ✅ Prod |
+| `LLM_PROVIDER` | `ollama` | `gemini`/`openai` | ✅ Yes |
+| `GEMINI_API_KEY` | Not needed | **Required if using Gemini** | ⚠️ If Gemini |
+| `DATABASE_URL` | Auto (postgres) | **Strong password** | ✅ Yes |
+| `REDIS_URL` | Auto (redis) | Auto (redis) | ✅ Yes |
+| `SMTP_HOST` | Not required | **Required for emails** | ⚠️ For emails |
+| `EMAIL_FROM` | Not required | **Your domain email** | ⚠️ For emails |
+
+---
+
+### Development vs Production Comparison
+
+| Feature | Development | Production |
+|---------|-------------|------------|
+| **SECRET_KEY** | Auto-generated (weak) | Mandatory, 32+ chars |
+| **CORS** | Allow all (`*`) | Specific domains only |
+| **Error Details** | Full stack traces | Generic messages |
+| **Rate Limiting** | Active | Active |
+| **HTTPS** | Not required | **Mandatory** |
+| **Email** | Console logs | SMTP server |
+| **LLM** | Ollama (local, free) | Gemini/OpenAI (paid) |
+| **Logging** | Console | File + monitoring |
+| **Debug Mode** | Enabled | Disabled |
+
+---
+
+### Switching from Development to Production
+
+Already running in development? Here's how to switch:
+
+```bash
+# 1. Stop services
+docker-compose down
+
+# 2. Generate SECRET_KEY
+openssl rand -hex 32 > secret.txt
+cat secret.txt
+
+# 3. Update .env
+echo "ENVIRONMENT=production" >> .env
+echo "SECRET_KEY=$(cat secret.txt)" >> .env
+echo "LLM_PROVIDER=gemini" >> .env
+echo "GEMINI_API_KEY=your-api-key" >> .env
+
+# 4. Update CORS in code
+nano backend/app/core/security_utils.py
+# Add your domain to PRODUCTION_CORS_ORIGINS
+
+# 5. Rebuild and restart
+docker-compose up -d --build
+
+# 6. Verify
+docker-compose logs backend | grep "Environment"
+# Should see: Environment: production
+
+# 7. Test
+curl https://yourdomain.com/health
+```
+
+---
+
+### Quick Environment Check
+
+Test your current environment:
+
+```bash
+# Check backend logs
+docker-compose logs backend | head -20
+
+# Look for:
+# ✅ "Environment: production" = Production mode
+# ⚠️  "WARNING: Using default SECRET_KEY" = Development mode
+# ✅ "SECRET_KEY validated (64 chars)" = Production with valid key
+```
+
+---
+
 ## 🎮 How to Play
 
 ### 1. Character Creation

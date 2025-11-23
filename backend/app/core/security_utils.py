@@ -21,24 +21,41 @@ def validate_secret_key():
     - At least 32 characters
     - Not default value
     - Contains mix of characters
+    
+    In development: Warnings only
+    In production: Strict validation
     """
     secret_key = os.getenv("SECRET_KEY", "")
+    environment = os.getenv("ENVIRONMENT", "development")
     
+    # Check if key exists
     if not secret_key or secret_key == "your-secret-key-here-change-in-production":
-        raise ValueError(
-            "❌ CRITICAL: SECRET_KEY not set or using default value!\n"
-            "Generate a secure key: openssl rand -hex 32\n"
-            "Set in .env file: SECRET_KEY=<your-generated-key>"
-        )
+        if environment == "production":
+            raise ValueError(
+                "❌ CRITICAL: SECRET_KEY not set or using default value!\n"
+                "Generate a secure key: openssl rand -hex 32\n"
+                "Set in .env file: SECRET_KEY=<your-generated-key>"
+            )
+        else:
+            # Development: use fallback
+            print("⚠️  WARNING: Using default SECRET_KEY for development")
+            print("   Generate secure key for production: openssl rand -hex 32")
+            # Use a development default
+            os.environ["SECRET_KEY"] = "dev-insecure-key-change-for-production-1234567890abc"
+            return
     
+    # Check length
     if len(secret_key) < 32:
-        raise ValueError(
-            f"❌ CRITICAL: SECRET_KEY too short ({len(secret_key)} chars)!\n"
-            "Minimum length: 32 characters\n"
-            "Generate secure key: openssl rand -hex 32"
-        )
+        if environment == "production":
+            raise ValueError(
+                f"❌ CRITICAL: SECRET_KEY too short ({len(secret_key)} chars)!\n"
+                "Minimum length: 32 characters\n"
+                "Generate secure key: openssl rand -hex 32"
+            )
+        else:
+            print(f"⚠️  WARNING: SECRET_KEY is short ({len(secret_key)} chars), recommend 32+ for production")
     
-    print(f"✅ SECRET_KEY validated ({len(secret_key)} chars)")
+    print(f"✅ SECRET_KEY validated ({len(secret_key)} chars) - Environment: {environment}")
 
 def sanitize_user_input(text: str, max_length: int = 1000) -> str:
     """

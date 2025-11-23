@@ -187,12 +187,12 @@ def show_login():
                 st.error(f"{error_prefix}: {str(e)}")
 
 def show_registration():
-    """Registration wizard with guided character creation"""
+    """Account registration - character creation happens after login"""
     lang = Language(st.session_state.get("language", "en"))
     
-    # Translated headers
-    title = "Create Your Hero" if lang == Language.EN else "Crea il Tuo Eroe"
-    subtitle = "Begin your legendary journey" if lang == Language.EN else "Inizia il tuo viaggio leggendario"
+    # Registration header
+    title = "Create Account" if lang == Language.EN else "Crea Account"
+    subtitle = "Register to begin your adventure" if lang == Language.EN else "Registrati per iniziare l'avventura"
     
     st.markdown(f"""
         <h3 style='color: #d4af37; font-family: "Cinzel", serif;
@@ -212,25 +212,13 @@ def show_registration():
     """, unsafe_allow_html=True)
     
     with st.form("registration_form"):
-        # Section headers
-        account_info = "Account Information" if lang == Language.EN else "Informazioni Account"
-        character_info = "Character Details" if lang == Language.EN else "Dettagli Personaggio"
-        
-        st.markdown(f"#### {account_info}")
-        
-        username = st.text_input(f"⚔️ {t('username', lang)}", max_chars=50)
+        username = st.text_input(f"⚔️ {t('username', lang)}", max_chars=50, 
+                                help="This will be your character name too" if lang == Language.EN else "Questo sarà anche il nome del tuo personaggio")
         email = st.text_input(f"📧 {t('email', lang)}")
         password = st.text_input(f"🔑 {t('password', lang)}", type="password")
         password_confirm = st.text_input("🔑 Confirm Password" if lang == Language.EN else "🔑 Conferma Password", type="password")
         
-        st.markdown(f"#### {character_info}")
-        
-        name = st.text_input(f"👤 {t('character_name', lang)}", max_chars=100)
-        profession = st.text_input(f"🛡️ {t('profession', lang)}", placeholder="Warrior, Mage, Rogue..." if lang == Language.EN else "Guerriero, Mago, Ladro...")
-        description = st.text_area("📜 Description (Optional)" if lang == Language.EN else "📜 Descrizione (Opzionale)", max_chars=500)
-        avatar_description = st.text_area("🎨 Avatar (Optional)" if lang == Language.EN else "🎨 Avatar (Opzionale)", max_chars=200)
-        
-        submit_text = "Begin Your Adventure" if lang == Language.EN else "Inizia la Tua Avventura"
+        submit_text = t('register', lang).upper() if lang == Language.EN else "REGISTRATI"
         submitted = st.form_submit_button(f"⚔️ {submit_text}")
         
         if submitted:
@@ -242,7 +230,7 @@ def show_registration():
             success_msg = "✓ Welcome, {name}! Your adventure begins..." if lang == Language.EN else "✓ Benvenuto, {name}! La tua avventura inizia..."
             error_prefix = "Registration failed" if lang == Language.EN else "Registrazione fallita"
             
-            if not username or not email or not password or not name:
+            if not username or not email or not password:
                 st.error(fill_all)
                 return
             
@@ -259,17 +247,18 @@ def show_registration():
                 return
             
             try:
+                # Use username as character name - character customization happens after login
                 token = CollabookAPI.register(
                     username=username,
                     email=email,
                     password=password,
-                    name=name,
-                    profession=profession if profession else None,
-                    description=description if description else None,
-                    avatar_description=avatar_description if avatar_description else None
+                    name=username,  # Character name = Username
+                    profession=None,  # Will be set after login
+                    description=None,  # Will be set after login
+                    avatar_description=None
                 )
                 st.session_state.token = token
-                success_text = f"✓ Welcome, {name}! Your adventure begins..." if lang == Language.EN else f"✓ Benvenuto, {name}! La tua avventura inizia..."
+                success_text = f"✓ Welcome, {username}! Your adventure begins..." if lang == Language.EN else f"✓ Benvenuto, {username}! La tua avventura inizia..."
                 st.success(success_text)
                 st.balloons()
                 st.rerun()

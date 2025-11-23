@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from app.core.database import get_db
 from app.core.security import verify_password, hash_password, create_access_token, verify_token, generate_reset_token
+from app.core.rpg_stats import initialize_character_stats
 from app.models.db_models import User, UserRole
 from app.models.schemas import UserRegister, UserLogin, Token, UserResponse, PasswordResetRequest, PasswordReset
 
@@ -63,8 +64,10 @@ async def register(user_data: UserRegister, db: Session = Depends(get_db)):
         profession=user_data.profession,
         description=user_data.description,
         avatar_description=user_data.avatar_description,
-        # Stats will be initialized in Phase 2
     )
+    
+    # Initialize RPG stats (random 1-10)
+    initialize_character_stats(db_user)
     
     db.add(db_user)
     db.commit()

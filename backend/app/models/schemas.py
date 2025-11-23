@@ -29,8 +29,17 @@ class UserResponse(BaseModel):
     profession: Optional[str]
     description: Optional[str]
     avatar_description: Optional[str]
-    level: int
+    
+    # RPG Stats
+    hp: int
+    max_hp: int
+    strength: int
+    magic: int
+    dexterity: int
+    defense: int
     xp: int
+    level: int
+    
     created_at: datetime
     
     class Config:

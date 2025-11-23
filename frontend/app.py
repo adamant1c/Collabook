@@ -351,12 +351,31 @@ def show_game_interface():
         st.markdown("---")
         st.subheader("📊 Your Stats")
         
-        # TODO: Phase 2 - Show actual stats
-        st.write("❤️ HP: 10/10")
-        st.write("💪 STR: 5")
-        st.write("✨ MP: 5")
-        st.write("🎯 DEX: 5")
-        st.write("🛡️ DEF: 5")
+        # Get user stats
+        user = st.session_state.user
+        
+        # HP Bar
+        hp_percentage = (user['hp'] / user['max_hp']) * 100
+        st.markdown(f"**❤️ HP:** {user['hp']}/{user['max_hp']}")
+        st.progress(hp_percentage / 100)
+        
+        # Other stats
+        st.write(f"**💪 STR:** {user['strength']}/200")
+        st.write(f"**✨ MP:** {user['magic']}/200")
+        st.write(f"**🎯 DEX:** {user['dexterity']}/200")
+        st.write(f"**🛡️ DEF:** {user['defense']}/200")
+        
+        # Level and XP
+        st.markdown("---")
+        st.write(f"**🌟 Level:** {user['level']}")
+        st.write(f"**⭐ XP:** {user['xp']}")
+        
+        # Calculate XP to next level (simplified)
+        xp_thresholds = {1: 100, 2: 300, 3: 600, 4: 1000, 5: 1500, 6: 2100, 
+                        7: 2800, 8: 3600, 9: 4500}
+        next_level_xp = xp_thresholds.get(user['level'], 4500 + (user['level'] - 9) * 1000)
+        st.progress(min(user['xp'] / next_level_xp, 1.0))
+        st.caption(f"Next level: {next_level_xp} XP")
         
         st.markdown("---")
         

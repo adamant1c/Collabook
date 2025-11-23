@@ -5,12 +5,12 @@ psycopg2-binary
 redis
 pydantic
 pydantic-settings
+email-validator
 langchain
 langchain-openai
 google-generativeai
 python-multipart
 passlib[bcrypt]
 python-jose[cryptography]
-python-multipart
 click
 emails

@@ -22,6 +22,11 @@ class QuestStatus(str, enum.Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
+class EnemyType(str, enum.Enum):
+    COMMON = "common"
+    ELITE = "elite"
+    BOSS = "boss"
+
 class User(Base):
     __tablename__ = "users"
     

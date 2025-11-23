@@ -31,12 +31,18 @@ services:
     environment:
       - DATABASE_URL=postgresql://collabook:collabook_pass@db:5432/collabook_db
       - REDIS_URL=redis://redis:6379/0
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=gemma3:latest
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - db
       - redis
     networks:
       - collabook-net
+    restart: unless-stopped
 
   frontend:
     build: ./frontend

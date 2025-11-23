@@ -9,3 +9,8 @@ langchain
 langchain-openai
 google-generativeai
 python-multipart
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+click
+emails

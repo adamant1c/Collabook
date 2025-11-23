@@ -20,7 +20,7 @@ World Context:
 {story_context.get('world_description', '')}
 
 World Rules/Metadata:
-{story_context.get('metadata', {})}
+{story_context.get('world_metadata', {})}
 
 Your task is to determine if a proposed action is consistent with the world rules. 
 Respond with ONLY 'VALID' or 'INVALID: <reason>'.

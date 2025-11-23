@@ -6,18 +6,24 @@ from app.core.redis_client import redis_client
 from app.models.schemas import StoryCreate, StoryResponse, CharacterCreate, CharacterResponse
 from app.models.db_models import Story, Character, User
 from app.agents.matchmaker import matchmaker_agent
+from app.api.auth import get_current_user, require_admin
 
 router = APIRouter(prefix="/stories", tags=["stories"])
 
 @router.post("/", response_model=StoryResponse)
-async def create_story(story: StoryCreate, db: Session = Depends(get_db)):
-    """Create a new story world"""
+async def create_story(
+    story: StoryCreate, 
+    current_user: User = Depends(require_admin),  # Only admins can create worlds!
+    db: Session = Depends(get_db)
+):
+    """Create a new story world (Admin only)"""
     db_story = Story(
         title=story.title,
         world_description=story.world_description,
         genre=story.genre,
-        metadata=story.metadata,
-        current_state="The story is beginning..."
+        world_metadata=story.world_metadata,
+        current_state="The story is beginning...",
+        created_by=current_user.id  # Track who created it
     )
     db.add(db_story)
     db.commit()
@@ -28,19 +34,28 @@ async def create_story(story: StoryCreate, db: Session = Depends(get_db)):
         "world_description": db_story.world_description,
         "genre": db_story.genre,
         "current_state": db_story.current_state,
-        "metadata": db_story.metadata
+        "world_metadata": db_story.world_metadata
     })
     
     return db_story
 
 @router.get("/", response_model=List[StoryResponse])
-async def list_stories(db: Session = Depends(get_db)):
+async def list_stories(
+    current_user: User = Depends(get_current_user),  # Must be logged in
+    db: Session = Depends(get_db)
+):
     """List all available stories"""
+    # Players see all stories (default + custom)
+    # Admins see all stories
     stories = db.query(Story).all()
     return stories
 
 @router.get("/{story_id}", response_model=StoryResponse)
-async def get_story(story_id: str, db: Session = Depends(get_db)):
+async def get_story(
+    story_id: str, 
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Get story by ID"""
     story = db.query(Story).filter(Story.id == story_id).first()
     if not story:
@@ -48,17 +63,25 @@ async def get_story(story_id: str, db: Session = Depends(get_db)):
     return story
 
 @router.post("/{story_id}/join", response_model=CharacterResponse)
-async def join_story(story_id: str, character: CharacterCreate, user_id: str, db: Session = Depends(get_db)):
+async def join_story(
+    story_id: str, 
+    character: CharacterCreate,
+    current_user: User = Depends(get_current_user),  # Auto-get user from token
+    db: Session = Depends(get_db)
+):
     """Join an existing story with a character"""
     # Verify story exists
     story = db.query(Story).filter(Story.id == story_id).first()
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
     
-    # Verify user exists
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+    # Check if user already has a character in this story
+    existing = db.query(Character).filter(
+        Character.user_id == current_user.id,
+        Character.story_id == story_id
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="You already have a character in this story")
     
     # Get story context
     story_context = redis_client.get_story_context(story_id)
@@ -67,20 +90,20 @@ async def join_story(story_id: str, character: CharacterCreate, user_id: str, db
             "world_description": story.world_description,
             "genre": story.genre,
             "current_state": story.current_state,
-            "metadata": story.metadata
+            "world_metadata": story.world_metadata
         }
     
     # Use matchmaker agent to find insertion point
     character_info = {
-        "name": user.name,
-        "profession": user.profession,
-        "description": user.description
+        "name": current_user.name,
+        "profession": current_user.profession,
+        "description": current_user.description
     }
     insertion_point = await matchmaker_agent.find_insertion_point(story_context, character_info)
     
     # Create character
     db_character = Character(
-        user_id=user_id,
+        user_id=current_user.id,
         story_id=story_id,
         insertion_point=insertion_point,
         status="active"

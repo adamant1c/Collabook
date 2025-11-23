@@ -1,29 +1,54 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import Optional, Dict, Any
 from datetime import datetime
 
-class UserCreate(BaseModel):
-    name: str
+# User schemas
+class UserRegister(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+    name: str = Field(..., min_length=1, max_length=100)
     profession: Optional[str] = None
     description: Optional[str] = None
     avatar_description: Optional[str] = None
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
 class UserResponse(BaseModel):
     id: str
+    username: str
+    email: str
+    role: str
     name: str
     profession: Optional[str]
     description: Optional[str]
     avatar_description: Optional[str]
+    level: int
+    xp: int
     created_at: datetime
     
     class Config:
         from_attributes = True
 
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordReset(BaseModel):
+    token: str
+    new_password: str = Field(..., min_length=6)
+
+# Character/Story schemas (updated)
 class StoryCreate(BaseModel):
     title: str
     world_description: str
     genre: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    world_metadata: Optional[Dict[str, Any]] = None
 
 class StoryResponse(BaseModel):
     id: str
@@ -31,7 +56,8 @@ class StoryResponse(BaseModel):
     world_description: str
     genre: Optional[str]
     current_state: Optional[str]
-    metadata: Optional[Dict[str, Any]]
+    world_metadata: Optional[Dict[str, Any]]
+    is_default: bool
     created_at: datetime
     updated_at: datetime
     

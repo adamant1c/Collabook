@@ -34,7 +34,7 @@ async def create_interaction(interaction: InteractionRequest, db: Session = Depe
             "world_description": story.world_description,
             "genre": story.genre,
             "current_state": story.current_state,
-            "metadata": story.metadata
+            "world_metadata": story.world_metadata
         }
     
     # Validate action with World Keeper

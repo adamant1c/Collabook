@@ -1,7 +1,20 @@
 import streamlit as st
 from api_client import CollabookAPI
+from ui_components import (
+    apply_custom_css, render_title, render_stat_card, 
+    render_quest_card, render_combat_log, render_enemy_card,
+    render_level_up_animation, render_dice_roll, render_hp_bar
+)
 
-st.set_page_config(page_title="Collabook RPG", page_icon="🎮", layout="wide")
+st.set_page_config(
+    page_title="Collabook RPG", 
+    page_icon="🎲", 
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Apply custom RPG theme
+apply_custom_css()
 
 # Initialize session state
 if "token" not in st.session_state:
@@ -14,6 +27,10 @@ if "story" not in st.session_state:
     st.session_state.story = None
 if "history" not in st.session_state:
     st.session_state.history = []
+if "in_combat" not in st.session_state:
+    st.session_state.in_combat = False
+if "combat_enemy" not in st.session_state:
+    st.session_state.combat_enemy = None
 
 def main():
     """Main application entry point"""
@@ -54,8 +71,16 @@ def check_backend():
 def show_auth_page():
     """Authentication page with login and registration"""
     
-    st.title("🎮 Collabook RPG")
-    st.markdown("### Epic Adventures Await!")
+    render_title("Collabook RPG", icon="⚔️")
+    st.markdown("""
+        <div style='text-align: center; font-family: "Cinzel", serif; font-size: 1.3rem; 
+                    color: var(--wood-dark); margin-bottom: 2rem;'>
+            🎲 Epic Adventures Await! 🎲<br/>
+            <span style='font-size: 1rem; color: var(--stone-gray);'>
+                Enter a world of collaborative storytelling and heroic quests
+            </span>
+        </div>
+    """, unsafe_allow_html=True)
     
     tab1, tab2, tab3 = st.tabs(["🔐 Login", "✨ Register", "🔑 Reset Password"])
     

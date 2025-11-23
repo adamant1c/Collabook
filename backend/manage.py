@@ -84,12 +84,13 @@ def list_users():
             active = "Yes" if user.is_active else "No"
             created = user.created_at.strftime("%Y-%m-%d")
             role_color = 'yellow' if user.role == UserRole.ADMIN else 'cyan'
+            role_display = click.style(user.role.value, fg=role_color)
             
             click.echo(
                 f"{user.id[:8]:<12} "
                 f"{user.username:<20} "
                 f"{user.email:<30} "
-                f"{click.style(user.role.value:<10, fg=role_color)} "
+                f"{role_display:<10} "
                 f"{active:<8} "
                 f"{created}"
             )

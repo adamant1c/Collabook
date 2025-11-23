@@ -48,20 +48,26 @@ def main():
     if st.session_state.token is None:
         show_auth_page()
     else:
-        # Verify token is still valid
-        try:
-            user = CollabookAPI.get_current_user(st.session_state.token)
-            st.session_state.user = user
-            show_game_app()
-        except:
-            # Token expired or invalid
-            st.session_state.token = None
-            st.session_state.user = None
-            st.warning("Session expired. Please login again.")
-            st.rerun()
+        # Fetch user data if not already loaded
+        if st.session_state.user is None:
+            try:
+                st.session_state.user = CollabookAPI.get_current_user(st.session_state.token)
+                st.session_state.character = st.session_state.user.get("character")
+            except Exception as e:
+                st.error(f"Failed to load user data: {str(e)}")
+                st.session_state.token = None
+                st.rerun()
+                return
+        
+        # Check if character needs customization (first login)
+        character = st.session_state.character
+        if character and not character.get("profession"):
+            show_character_creation()
+        else:
+            show_main_app()
 
-def check_backend():
-    """Check if backend is accessible"""
+def check_backend() -> bool:
+    """Check if backend is available"""
     try:
         import requests
         import os
@@ -266,6 +272,58 @@ def show_registration():
                 error_text = "Registration failed" if lang == Language.EN else "Registrazione fallita"
                 st.error(f"{error_text}: {str(e)}")
 
+def show_character_creation():
+    """Character customization screen after first login"""
+    lang = Language(st.session_state.get("language", "en"))
+    
+    title = "Create Your Hero" if lang == Language.EN else "Crea il Tuo Eroe"
+    subtitle = "Customize your character" if lang == Language.EN else "Personalizza il tuo personaggio"
+    
+    st.markdown(f"""
+        <h1 style='text-align: center; color: #d4af37; font-family: "Cinzel", serif;'>
+            ⚔️ {title} ⚔️
+        </h1>
+        <p style='text-align: center; color: #e8d4a0; font-size: 1.2rem; margin-bottom: 2rem;'>
+            {subtitle}
+        </p>
+    """, unsafe_allow_html=True)
+    
+    character = st.session_state.character
+    
+    with st.form("character_creation_form"):
+        st.markdown(f"### 👤 {character.get('name', 'Character')}")
+        
+        # Profession dropdown
+        profession_label = f"🛡️ {t('profession', lang)}"
+        professions = {
+            "en": ["Warrior", "Mage", "Rogue", "Cleric", "Ranger", "Paladin", "Bard", "Druid"],
+            "it": ["Guerriero", "Mago", "Ladro", "Chierico", "Ranger", "Paladino", "Bardo", "Druido"]
+        }
+        profession = st.selectbox(profession_label, professions[lang.value])
+        
+        # Backstory
+        backstory_label = "📜 Backstory" if lang == Language.EN else "📜 Storia"
+        backstory_help = "Describe your character's background..." if lang == Language.EN else "Descrivi il background del tuo personaggio..."
+        backstory = st.text_area(backstory_label, max_chars=500, help=backstory_help)
+        
+        submit_text = "Begin Adventure" if lang == Language.EN else "Inizia Avventura"
+        submitted = st.form_submit_button(f"⚔️ {submit_text}")
+        
+        if submitted:
+            try:
+                # Update character with profession and backstory
+                updated = CollabookAPI.update_character(
+                    st.session_state.token,
+                    character["id"],
+                    {"profession": profession, "description": backstory}
+                )
+                st.session_state.character = updated
+                st.success("✓ Character created!" if lang == Language.EN else "✓ Personaggio creato!")
+                st.balloons()
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error: {str(e)}")
+
 def show_password_reset():
     """Password reset form"""
     lang = Language(st.session_state.get("language", "en"))
@@ -340,37 +398,39 @@ def show_password_reset():
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
 
-def show_game_app():
-    """Main game interface (after authentication)"""
+def show_main_app():
+    """Main application interface"""
+    lang = Language(st.session_state.get("language", "en"))
     
-    # Sidebar with user info
+    # Sidebar navigation
     with st.sidebar:
-        st.title("🎮 Collabook")
+        st.title("⚔️ Collabook RPG")
+        
+        user = st.session_state.user
+        character = st.session_state.character
+        
+        if character:
+            st.markdown(f"### {character.get('name', 'Hero')}")
+            st.markdown(f"**Level**: {character.get('level', 1)}")
+            st.markdown(f"**XP**: {character.get('xp', 0)}/{character.get('xp_to_next_level', 100)}")
+            
+            # HP Bar
+            hp = character.get('hp', 100)
+            max_hp = character.get('max_hp', 100)
+            render_hp_bar(hp, max_hp)
+        
         st.markdown("---")
-        st.subheader(f"👤 {st.session_state.user['name']}")
-        st.caption(f"@{st.session_state.user['username']}")
         
-        if st.session_state.user.get('profession'):
-            st.write(f"**Class:** {st.session_state.user['profession']}")
-        
-        st.write(f"**Level:** {st.session_state.user.get('level', 1)}")
-        st.write(f"**XP:** {st.session_state.user.get('xp', 0)}")
-        
-        # Role badge
-        role = st.session_state.user.get('role', 'player')
-        if role == 'admin':
-            st.info("👑 **Admin**")
-        
-        st.markdown("---")
-        
-        if st.button("🚪 Logout"):
+        # Logout button
+        logout_text = "🚪 Logout" if lang == Language.EN else "🚪 Esci"
+        if st.button(logout_text, use_container_width=True):
             st.session_state.token = None
             st.session_state.user = None
             st.session_state.character = None
             st.session_state.story = None
             st.session_state.history = []
             st.rerun()
-    
+            
     # Main content area
     if st.session_state.story is None:
         show_story_selection()

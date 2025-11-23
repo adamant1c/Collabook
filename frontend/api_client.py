@@ -45,6 +45,14 @@ class CollabookAPI:
         return response.json()
     
     @staticmethod
+    def update_character(token: str, character_id: str, data: dict):
+        """Update character (profession, description,  etc.)"""
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.patch(f"{BACKEND_URL}/users/character/{character_id}", headers=headers, json=data)
+        response.raise_for_status()
+        return response.json()
+    
+    @staticmethod
     def request_password_reset(email: str) -> dict:
         """Request a password reset token"""
         response = requests.post(f"{BACKEND_URL}/auth/request-reset", json={

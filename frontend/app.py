@@ -464,6 +464,79 @@ def show_game_interface():
         
         st.markdown("---")
         
+        # Phase 5: Survival Stats
+        st.markdown("""
+            <div style='text-align: center; font-family: "Cinzel", serif; 
+                        font-size: 1.2rem; color: #d4af37; margin-bottom: 0.5rem;'>
+                🍖💧😴 Survival
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # Get character for survival stats
+        character = st.session_state.get("character")
+        if character:
+            # Hunger bar
+            hunger = character.get("hunger", 100)
+            hunger_color = "#2d5016" if hunger > 50 else "#d4af37" if hunger > 20 else "#8b0000"
+            st.markdown(f"""
+                <div style='margin-bottom: 0.5rem;'>
+                    <div style='font-size: 0.9rem; color: #5d4e37;'>🍖 Hunger: {hunger}/100</div>
+                    <div style='background: rgba(93,78,55,0.2); border-radius: 5px; height: 15px;'>
+                        <div style='background: {hunger_color}; width: {hunger}%; height: 100%; 
+                                    border-radius: 5px; transition: width 0.3s;'></div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Thirst bar
+            thirst = character.get("thirst", 100)
+            thirst_color = "#4682b4" if thirst > 50 else "#d4af37" if thirst > 20 else "#8b0000"
+            st.markdown(f"""
+                <div style='margin-bottom: 0.5rem;'>
+                    <div style='font-size: 0.9rem; color: #5d4e37;'>💧 Thirst: {thirst}/100</div>
+                    <div style='background: rgba(93,78,55,0.2); border-radius: 5px; height: 15px;'>
+                        <div style='background: {thirst_color}; width: {thirst}%; height: 100%; 
+                                    border-radius: 5px; transition: width 0.3s;'></div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Fatigue bar
+            fatigue = character.get("fatigue", 0)
+            fatigue_color = "#2d5016" if fatigue < 50 else "#d4af37" if fatigue < 80 else "#8b0000"
+            st.markdown(f"""
+                <div style='margin-bottom: 0.5rem;'>
+                    <div style='font-size: 0.9rem; color: #5d4e37;'>😴 Fatigue: {fatigue}/100</div>
+                    <div style='background: rgba(93,78,55,0.2); border-radius: 5px; height: 15px;'>
+                        <div style='background: {fatigue_color}; width: {fatigue}%; height: 100%; 
+                                    border-radius: 5px; transition: width 0.3s;'></div>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # Warnings
+            warnings = []
+            if hunger < 30:
+                warnings.append("⚠️ You are hungry!")
+            if thirst < 40:
+                warnings.append("⚠️ You are thirsty!")
+            if fatigue > 70:
+                warnings.append("⚠️ You are tired!")
+            
+            for warning in warnings:
+                st.warning(warning)
+            
+            # Inventory & Rest buttons
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🎒 Items", use_container_width=True):
+                    st.session_state.show_inventory = True
+            with col2:
+                if st.button("😴 Rest", use_container_width=True):
+                    st.session_state.show_rest = True
+        
+        st.markdown("---")
+        
         # Logout Button
         if st.button("← Leave World", use_container_width=True):
             st.session_state.story = None

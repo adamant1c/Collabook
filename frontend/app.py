@@ -367,44 +367,105 @@ def show_world_creation():
             except Exception as e:
                 st.error(f"Error: {str(e)}")
 
+def render_hp_bar(current_hp, max_hp, label="HP"):
+    hp_percentage = (current_hp / max_hp) * 100
+    st.markdown(f"""
+        <div class='stat-card'>
+            <strong>❤️ {label}</strong>
+            <div style='margin-top: 0.5rem;'>
+                <div style='background: #333; border-radius: 5px; height: 20px; position: relative;'>
+                    <div style='background: linear-gradient(90deg, #ff4d4d, #cc0000); 
+                                width: {hp_percentage}%; height: 100%; border-radius: 5px; 
+                                box-shadow: 0 0 10px rgba(255,0,0,0.5);'></div>
+                    <span style='position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
+                                 font-weight: bold; font-size: 0.85rem; color: white;'>
+                        {current_hp} / {max_hp}
+                    </span>
+                </div>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+def render_stat_card(name, value, icon=""):
+    st.markdown(f"""
+        <div class='stat-card'>
+            <strong>{icon} {name}:</strong> <span style='float: right;'>{value}</span>
+        </div>
+    """, unsafe_allow_html=True)
+
 def show_game_interface():
-    """Interactive gameplay interface"""
-    st.title(f"📖 {st.session_state.story['title']}")
+    """Main game interface with RPG theme"""
+    user = st.session_state.user
     
-    # Sidebar with character stats
+    # Sidebar - Character Sheet Style
     with st.sidebar:
+        st.markdown(f"""
+            <div style='text-align: center; padding: 1rem; background: linear-gradient(145deg, #d4af37, #ffd700); 
+                        border-radius: 10px; margin-bottom: 1rem; border: 2px solid #8b4513;'>
+                <h2 style='margin: 0; color: #2a1810; font-family: "Cinzel", serif;'>
+                    ⚔️ {user['name']} ⚔️
+                </h2>
+                <div style='font-size: 0.9rem; color: #5d4e37; margin-top: 0.5rem;'>
+                    {user.get('profession', 'Adventurer')}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # Level & Role Badge
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"""
+                <div style='text-align: center; background: #2d5016; color: #ffd700; 
+                            padding: 0.5rem; border-radius: 8px; font-weight: bold;'>
+                    📊 Level {user['level']}
+                </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            role_color = "#8b0000" if user['role'] == 'admin' else "#4682b4"
+            st.markdown(f"""
+                <div style='text-align: center; background: {role_color}; color: white; 
+                            padding: 0.5rem; border-radius: 8px; font-weight: bold;'>
+                    👑 {user['role'].upper()}
+                </div>
+            """, unsafe_allow_html=True)
+        
         st.markdown("---")
-        st.subheader("📊 Your Stats")
         
-        # Get user stats
-        user = st.session_state.user
+        # Enhanced HP Bar
+        render_hp_bar(user['hp'], user['max_hp'], label="Health Points")
         
-        # HP Bar
-        hp_percentage = (user['hp'] / user['max_hp']) * 100
-        st.markdown(f"**❤️ HP:** {user['hp']}/{user['max_hp']}")
-        st.progress(hp_percentage / 100)
+        # Stats in ornate cards
+        render_stat_card("Strength", user['strength'], icon="💪")
+        render_stat_card("Magic", user['magic'], icon="✨")
+        render_stat_card("Dexterity", user['dexterity'], icon="🎯")
+        render_stat_card("Defense", user['defense'], icon="🛡️")
         
-        # Other stats
-        st.write(f"**💪 STR:** {user['strength']}/200")
-        st.write(f"**✨ MP:** {user['magic']}/200")
-        st.write(f"**🎯 DEX:** {user['dexterity']}/200")
-        st.write(f"**🛡️ DEF:** {user['defense']}/200")
-        
-        # Level and XP
-        st.markdown("---")
-        st.write(f"**🌟 Level:** {user['level']}")
-        st.write(f"**⭐ XP:** {user['xp']}")
-        
-        # Calculate XP to next level (simplified)
+        # XP Progress
         xp_thresholds = {1: 100, 2: 300, 3: 600, 4: 1000, 5: 1500, 6: 2100, 
                         7: 2800, 8: 3600, 9: 4500}
         next_level_xp = xp_thresholds.get(user['level'], 4500 + (user['level'] - 9) * 1000)
-        st.progress(min(user['xp'] / next_level_xp, 1.0))
-        st.caption(f"Next level: {next_level_xp} XP")
+        xp_progress = min(100, (user['xp'] / next_level_xp) * 100)
+        st.markdown(f"""
+            <div class='stat-card'>
+                <strong>🌟 Experience</strong>
+                <div style='margin-top: 0.5rem;'>
+                    <div style='background: rgba(212,175,55,0.2); border-radius: 5px; height: 20px; position: relative;'>
+                        <div class='xp-progress' style='background: linear-gradient(90deg, #d4af37, #ffd700); 
+                                    width: {xp_progress}%; height: 100%; border-radius: 5px; 
+                                    box-shadow: 0 0 10px rgba(255,215,0,0.5);'></div>
+                        <span style='position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
+                                     font-weight: bold; font-size: 0.85rem; color: #2a1810;'>
+                            {user['xp']} / {next_level_xp}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
         
         st.markdown("---")
         
-        if st.button("← Leave World"):
+        # Logout Button
+        if st.button("← Leave World", use_container_width=True):
             st.session_state.story = None
             st.session_state.character = None
             st.session_state.history = []

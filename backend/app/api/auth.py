@@ -1,15 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
 from app.core.database import get_db
 from app.core.security import verify_password, hash_password, create_access_token, verify_token, generate_reset_token
 from app.core.rpg_stats import initialize_character_stats
+from app.core.security_utils import sanitize_user_input, validate_email_format
 from app.models.db_models import User, UserRole
 from app.models.schemas import UserRegister, UserLogin, Token, UserResponse, PasswordResetRequest, PasswordReset
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
     """Dependency to get current authenticated user"""
@@ -43,11 +50,20 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserRegister, db: Session = Depends(get_db)):
-    """Register a new player account"""
+@limiter.limit("3/hour")  # Max 3 registrations per hour per IP
+async def register(request: Request, user_data: UserRegister, db: Session = Depends(get_db)):
+    """Register a new player account (rate limited: 3/hour)"""
+    
+    # Sanitize inputs
+    username = sanitize_user_input(user_data.username, max_length=50)
+    name = sanitize_user_input(user_data.name, max_length=100)
+    
+    # Extra email validation
+    if not validate_email_format(user_data.email):
+        raise HTTPException(status_code=400, detail="Invalid email format")
     
     # Check if username exists
-    if db.query(User).filter(User.username == user_data.username).first():
+    if db.query(User).filter(User.username == username).first():
         raise HTTPException(status_code=400, detail="Username already registered")
     
     # Check if email exists
@@ -56,11 +72,11 @@ async def register(user_data: UserRegister, db: Session = Depends(get_db)):
     
     # Create new user
     db_user = User(
-        username=user_data.username,
+        username=username,
         email=user_data.email,
         password_hash=hash_password(user_data.password),
         role=UserRole.PLAYER,
-        name=user_data.name,
+        name=name,
         profession=user_data.profession,
         description=user_data.description,
         avatar_description=user_data.avatar_description,
@@ -79,8 +95,9 @@ async def register(user_data: UserRegister, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    """Login with username and password"""
+@limiter.limit("5/minute")  # Max 5 login attempts per minute per IP
+async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """Login with username and password (rate limited: 5/minute)"""
     
     user = db.query(User).filter(User.username == form_data.username).first()
     
@@ -109,23 +126,27 @@ async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.post("/request-reset")
-async def request_password_reset(request: PasswordResetRequest, db: Session = Depends(get_db)):
-    """Request a password reset token"""
+@limiter.limit("3/hour")  # Max 3 password reset requests per hour per IP
+async def request_password_reset(request: Request, reset_request: PasswordResetRequest, db: Session = Depends(get_db)):
+    """Request password reset (rate limited: 3/hour)"""
     
-    user = db.query(User).filter(User.email == request.email).first()
+    user = db.query(User).filter(User.email == reset_request.email).first()
     
-    # Always return success (don't reveal if email exists)
-    if user:
-        # Generate reset token
-        reset_token = generate_reset_token()
-        user.reset_token = reset_token
-        user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
-        db.commit()
-        
-        # TODO: Send email with reset link
-        # For now, just log it (in production, use email service)
-        print(f"Password reset token for {user.email}: {reset_token}")
-        print(f"Reset link: http://localhost:8501/reset-password?token={reset_token}")
+    if not user:
+        # Don't reveal if email exists (security)
+        return {"message": "If the email exists, a reset link has been sent"}
+    
+    # Generate reset token (valid for 1 hour)
+    reset_token = generate_reset_token()
+    user.reset_token = reset_token
+    user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+    
+    db.commit()
+    
+    # TODO: Send email with reset link
+    #  For now, just log it (in production, use email service)
+    print(f"Password reset token for {user.email}: {reset_token}")
+    print(f"Reset link: http://localhost:8501/reset?token={reset_token}")
     
     return {"message": "If the email exists, a reset link has been sent"}
 

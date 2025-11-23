@@ -6,6 +6,7 @@ redis
 pydantic
 pydantic-settings
 email-validator
+slowapi
 langchain
 langchain-openai
 google-generativeai

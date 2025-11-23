@@ -7,10 +7,14 @@ from slowapi.errors import RateLimitExceeded
 
 from app.core.database import engine, Base, SessionLocal
 from app.core.security_utils import validate_secret_key, get_cors_origins
+from app.core.content_filter import validate_content_filter_config
 from app.api import users, stories, interactions, auth, quests, combat, items
 
 # Validate SECRET_KEY on startup (QA recommendation)
 validate_secret_key()
+
+# Validate content filter (Phase 6)
+validate_content_filter_config()
 
 # Create database tables
 Base.metadata.create_all(bind=engine)

@@ -4,6 +4,7 @@ from app.core.database import get_db
 from app.core.redis_client import redis_client
 from app.core.context_optimizer import create_compact_context, create_optimized_prompt
 from app.core.survival import update_survival_stats, get_survival_penalties, apply_starvation_death
+from app.core.content_filter import validate_user_input, sanitize_llm_output, log_violation
 from app.core.llm_client import llm_client
 from app.api.auth import get_current_user
 from app.models.schemas import InteractionRequest, InteractionResponse
@@ -27,6 +28,17 @@ async def create_interaction(
     # Verify ownership
     if character.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your character")
+    
+    # Phase 6: Content moderation - validate user input
+    validation_result = validate_user_input(interaction.user_action)
+    if not validation_result["is_valid"]:
+        # Log violation
+        log_violation(current_user.id, list(validation_result["violations"].keys())[0], interaction.user_action)
+        
+        raise HTTPException(
+            status_code=400,
+            detail=validation_result["message"]
+        )
     
     # Get story
     story = db.query(Story).filter(Story.id == character.story_id).first()
@@ -61,6 +73,12 @@ async def create_interaction(
         system_prompt="You are a Dungeon Master. Respond in 2-3 paragraphs.",
         user_message=optimized_prompt
     )
+    
+    # Phase 6: Sanitize LLM output
+    narration, was_sanitized = sanitize_llm_output(narration)
+    if was_sanitized:
+        # Log that LLM output was filtered
+        print(f"⚠️ LLM output sanitized for character {character.id}")
     
     # Check for quest completion hints
     quest_hint = None

@@ -14,18 +14,28 @@ class CollabookAPI:
                 profession: Optional[str] = None, description: Optional[str] = None,
                 avatar_description: Optional[str] = None) -> str:
         """Register a new player account"""
-        response = requests.post(f"{BACKEND_URL}/auth/register", json={
-            "username": username,
-            "email": email,
-            "password": password,
-            "name": name,
-            "profession": profession,
-            "description": description,
-            "avatar_description": avatar_description
-        })
-        response.raise_for_status()
-        data = response.json()
-        return data["access_token"]
+        try:
+            response = requests.post(f"{BACKEND_URL}/auth/register", json={
+                "username": username,
+                "email": email,
+                "password": password,
+                "name": name,
+                "profession": profession,
+                "description": description,
+                "avatar_description": avatar_description
+            })
+            response.raise_for_status()
+            data = response.json()
+            return data["access_token"]
+        except requests.exceptions.HTTPError as e:
+            if e.response is not None:
+                try:
+                    detail = e.response.json().get("detail")
+                    if detail:
+                        raise Exception(detail)
+                except:
+                    pass
+            raise e
     
     @staticmethod
     def login(username: str, password: str) -> str:

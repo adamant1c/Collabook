@@ -1,6 +1,29 @@
 import os
 import google.generativeai as genai
 from typing import Optional
+import asyncio
+
+class MockLLMClient:
+    """
+    Mock LLM Client for testing or when no provider is configured.
+    Returns canned responses to allow the application to function.
+    """
+    def __init__(self):
+        print("⚠ Using Mock LLM Client (No valid API keys found)")
+        
+    async def generate(self, system_prompt: str, user_message: str, history: list = None) -> str:
+        """Generate a mock response"""
+        await asyncio.sleep(1) # Simulate latency
+        
+        # Simple keyword matching for context
+        if "character" in user_message.lower() or "profile" in user_message.lower():
+            return "As you step into this world, you feel a surge of potential. Your character stands ready for adventure, their destiny yet to be written."
+        elif "attack" in user_message.lower() or "fight" in user_message.lower():
+            return "You lunge forward with determination! The enemy attempts to dodge, but your strike finds its mark. The clash of steel rings out."
+        elif "look" in user_message.lower() or "examine" in user_message.lower():
+            return "You observe your surroundings carefully. The details of the world stand out—the texture of the stone, the play of light and shadow, the distant sounds of life."
+        else:
+            return f"The Dungeon Master nods at your action: '{user_message}'. The world shifts slightly in response, and you feel the weight of your choices."
 
 class LLMClient:
     """
@@ -10,6 +33,7 @@ class LLMClient:
     1. Ollama (local, 100% FREE) - if OLLAMA_BASE_URL is set
     2. Google Gemini (free tier) - if GEMINI_API_KEY is set
     3. OpenAI - if OPENAI_API_KEY is set
+    4. Mock - if no provider is configured
     """
     
     def __init__(self):
@@ -33,7 +57,7 @@ class LLMClient:
                     self.provider = "ollama"
                     print(f"✓ Using Ollama ({ollama_model}) - 100% FREE & LOCAL")
             except Exception as e:
-                print(f"⚠ Ollama not accessible at {ollama_url}: {e}")
+                print(f"ℹ Ollama not accessible at {ollama_url}: {e}")
         
         # Try Google Gemini (free tier)
         if not self.provider:
@@ -41,7 +65,8 @@ class LLMClient:
             if gemini_key:
                 try:
                     genai.configure(api_key=gemini_key)
-                    self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
+                    # Use stable flash model
+                    self.model = genai.GenerativeModel('gemini-1.5-flash')
                     self.provider = "gemini"
                     print("✓ Using Google Gemini Flash (FREE)")
                 except Exception as e:
@@ -63,8 +88,11 @@ class LLMClient:
                 except Exception as e:
                     print(f"⚠ OpenAI initialization failed: {e}")
         
+        # Fallback to Mock
         if not self.provider:
-            raise ValueError("No LLM provider configured. Set OLLAMA_BASE_URL, GEMINI_API_KEY or OPENAI_API_KEY")
+            self.model = MockLLMClient()
+            self.provider = "mock"
+            print("⚠ No LLM provider configured. Using Mock LLM for testing.")
     
     async def generate(self, system_prompt: str, user_message: str, history: list = None) -> str:
         """Generate a response from the LLM"""
@@ -75,8 +103,11 @@ class LLMClient:
             return await self._generate_gemini(system_prompt, user_message, history)
         elif self.provider == "openai":
             return await self._generate_openai(system_prompt, user_message, history)
+        elif self.provider == "mock":
+            return await self.model.generate(system_prompt, user_message, history)
         else:
-            raise ValueError("No LLM provider available")
+            # Should not happen if init logic is correct
+            return "Error: No LLM provider available."
     
     async def _generate_ollama(self, system_prompt: str, user_message: str, history: list = None) -> str:
         """Generate using Ollama (local LLM)"""
@@ -124,7 +155,7 @@ class LLMClient:
             full_prompt = f"{system_prompt}\n\nPrevious conversation:\n{history_text}\n\n{user_message}"
         
         try:
-            response = self.model.generate_content(full_prompt)
+            response = await self.model.generate_content_async(full_prompt)
             return response.text
         except Exception as e:
             print(f"Error generating with Gemini: {e}")

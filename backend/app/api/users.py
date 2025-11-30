@@ -51,16 +51,18 @@ async def get_user_profile(
         "email": current_user.email,
         "role": current_user.role.value,
         "is_active": current_user.is_active,
+        # Map User fields to "character" object for frontend compatibility
+        # The User model holds the global character stats and profile
         "character": {
-            "id": current_user.character.id,
-            "name": current_user.character.name,
-            "profession": current_user.character.profession,
-            "description": current_user.character.description,
-            "level": current_user.character.level,
-            "xp": current_user.character.xp,
-            "hp": current_user.character.hp,
-            "max_hp": current_user.character.max_hp
-        } if current_user.character else None
+            "id": current_user.id,  # Use User ID as Character ID for global profile
+            "name": current_user.name,
+            "profession": current_user.profession,
+            "description": current_user.description,
+            "level": current_user.level,
+            "xp": current_user.xp,
+            "hp": current_user.hp,
+            "max_hp": current_user.max_hp
+        }
     }
 
 @router.patch("/character/{character_id}")
@@ -70,31 +72,25 @@ async def update_character(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Update character profession and description"""
-    character = db.query(Character).filter(Character.id == character_id).first()
+    """Update user's character profile (profession, description)"""
+    # We update the User object directly as it holds the global character info
     
-    if not character:
-        raise HTTPException(status_code=404, detail="Character not found")
-    
-    if character.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not your character")
-    
-    # Update fields
+    # Update fields on User
     if update_data.profession:
-        character.profession = update_data.profession
+        current_user.profession = update_data.profession
     if update_data.description:
-        character.description = update_data.description
+        current_user.description = update_data.description
     
     db.commit()
-    db.refresh(character)
+    db.refresh(current_user)
     
     return {
-        "id": character.id,
-        "name": character.name,
-        "profession": character.profession,
-        "description": character.description,
-        "level": character.level,
-        "xp": character.xp,
-        "hp": character.hp,
-        "max_hp": character.max_hp
+        "id": current_user.id,
+        "name": current_user.name,
+        "profession": current_user.profession,
+        "description": current_user.description,
+        "level": current_user.level,
+        "xp": current_user.xp,
+        "hp": current_user.hp,
+        "max_hp": current_user.max_hp
     }

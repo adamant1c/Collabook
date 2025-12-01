@@ -119,27 +119,37 @@ label {
     letter-spacing: 1px;
 }
 
-/* Buttons */
-.stButton>button {
-    background: linear-gradient(135deg, var(--gold-dim), var(--bg-panel)) !important;
-    border: 1px solid var(--gold-primary) !important;
-    color: var(--gold-primary) !important;
+/* Buttons - Improved visibility */
+.stButton\u003ebutton,
+div.stButton \u003e button,
+button[kind="primary"],
+button[kind="secondary"] {
+    background: #9e8229 !important;
+    background-image: linear-gradient(135deg, #9e8229, #1a1612) !important;
+    border: 2px solid #e6c250 !important;
+    color: #e6c250 !important;
     font-family: 'Cinzel', serif !important;
     text-transform: uppercase;
     letter-spacing: 2px;
     padding: 0.75rem 2rem !important;
     border-radius: 4px !important;
     transition: all 0.3s ease !important;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    min-height: 44px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+    min-height: 44px !important;
+    font-weight: 600 !important;
     /* Touch target size */
 }
 
-.stButton>button:hover {
-    background: linear-gradient(135deg, var(--gold-primary), var(--gold-dim)) !important;
-    color: var(--bg-dark) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(212, 175, 55, 0.3);
+.stButton\u003ebutton:hover,
+div.stButton \u003e button:hover,
+button[kind="primary"]:hover,
+button[kind="secondary"]:hover {
+    background: #e6c250 !important;
+    background-image: linear-gradient(135deg, #e6c250, #f4d06f) !important;
+    color: #0f0c08 !important;
+    border-color: #f4d06f !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(212, 175, 55, 0.5) !important;
 }
 
 /* Sidebar */

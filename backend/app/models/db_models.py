@@ -69,6 +69,10 @@ class User(Base):
     # Relationships
     characters = relationship("Character", back_populates="user", cascade="all, delete-orphan")
 
+    @property
+    def joined_stories(self):
+        return [char.story_id for char in self.characters]
+
 class Story(Base):
     __tablename__ = "stories"
     

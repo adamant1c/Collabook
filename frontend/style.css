@@ -119,12 +119,18 @@ label {
     letter-spacing: 1px;
 }
 
-/* Buttons - Improved visibility */
-.stButton\u003ebutton,
-div.stButton \u003e button,
+/* Buttons - Comprehensive visibility fix */
+.stButton>button,
+.stFormSubmitButton>button,
+div.stButton>button,
+div.stFormSubmitButton>button,
 button[kind="primary"],
-button[kind="secondary"] {
+button[kind="secondary"],
+button[type="submit"],
+.stButton button,
+.stFormSubmitButton button {
     background: #9e8229 !important;
+    background-color: #9e8229 !important;
     background-image: linear-gradient(135deg, #9e8229, #1a1612) !important;
     border: 2px solid #e6c250 !important;
     color: #e6c250 !important;
@@ -137,14 +143,19 @@ button[kind="secondary"] {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
     min-height: 44px !important;
     font-weight: 600 !important;
-    /* Touch target size */
 }
 
-.stButton\u003ebutton:hover,
-div.stButton \u003e button:hover,
+.stButton>button:hover,
+.stFormSubmitButton>button:hover,
+div.stButton>button:hover,
+div.stFormSubmitButton>button:hover,
 button[kind="primary"]:hover,
-button[kind="secondary"]:hover {
+button[kind="secondary"]:hover,
+button[type="submit"]:hover,
+.stButton button:hover,
+.stFormSubmitButton button:hover {
     background: #e6c250 !important;
+    background-color: #e6c250 !important;
     background-image: linear-gradient(135deg, #e6c250, #f4d06f) !important;
     color: #0f0c08 !important;
     border-color: #f4d06f !important;

@@ -485,20 +485,33 @@ def show_story_card(story):
         if story.get('current_state'):
             st.markdown(f"*{story['current_state']}*")
         
+        # Check if user already has a character in this story
+        user_characters = st.session_state.user.get('characters', [])
+        existing_char = next((c for c in user_characters if c['story_id'] == story['id']), None)
+        
         col1, col2 = st.columns([3, 1])
         with col2:
-            if st.button(f"Enter World", key=f"join_{story['id']}"):
-                try:
-                    character = CollabookAPI.join_story(
-                        story['id'], 
-                        st.session_state.token
-                    )
-                    st.session_state.character = character
+            if existing_char:
+                if st.button(f"Continue Adventure", key=f"continue_{story['id']}"):
+                    st.session_state.character = existing_char
                     st.session_state.story = story
-                    st.success(f"✓ Entering '{story['title']}'...")
+                    st.success(f"✓ Resuming adventure in '{story['title']}'...")
                     st.rerun()
-                except Exception as e:
-                    st.error(f"Error: {str(e)}")
+            else:
+                if st.button(f"Enter World", key=f"join_{story['id']}"):
+                    try:
+                        character = CollabookAPI.join_story(
+                            story['id'], 
+                            st.session_state.token
+                        )
+                        # Refresh user to get the new character in the list
+                        st.session_state.user = CollabookAPI.get_current_user(st.session_state.token)
+                        st.session_state.character = character
+                        st.session_state.story = story
+                        st.success(f"✓ Entering '{story['title']}'...")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error: {str(e)}")
 
 def show_world_creation():
     """World creation form (admin only)"""

@@ -117,7 +117,7 @@ class CollabookAPI:
         """Join an existing story"""
         response = requests.post(f"{BACKEND_URL}/stories/{story_id}/join",
                                headers={"Authorization": f"Bearer {token}"},
-                               json={"story_id": story_id})
+                               json={})  # Empty body - story_id comes from URL path
         response.raise_for_status()
         return response.json()
     
@@ -126,7 +126,7 @@ class CollabookAPI:
     @staticmethod
     def interact(character_id: str, user_action: str, token: str) -> dict:
         """Send a user action and get narration"""
-        response = requests.post(f"{BACKEND_URL}/interact/",
+        response = requests.post(f"{BACKEND_URL}/interact",
                                headers={"Authorization": f"Bearer {token}"},
                                json={
                                    "character_id": character_id,

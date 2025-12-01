@@ -28,6 +28,21 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+class CharacterCreate(BaseModel):
+    story_id: Optional[str] = None  # Optional since story_id comes from URL path in join_story
+
+class CharacterResponse(BaseModel):
+    id: str
+    user_id: str
+    story_id: str
+    insertion_point: Optional[str]
+    status: str
+    gold: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
 class UserResponse(BaseModel):
     id: str
     username: str
@@ -37,6 +52,7 @@ class UserResponse(BaseModel):
     profession: Optional[str]
     description: Optional[str]
     avatar_description: Optional[str]
+    characters: List[CharacterResponse] = []
     
     # RPG Stats
     hp: int
@@ -81,20 +97,7 @@ class StoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
-class CharacterCreate(BaseModel):
-    story_id: str
 
-class CharacterResponse(BaseModel):
-    id: str
-    user_id: str
-    story_id: str
-    insertion_point: Optional[str]
-    status: str
-    gold: int
-    created_at: datetime
-    
-    class Config:
-        from_attributes = True
 
 class InteractionRequest(BaseModel):
     character_id: str

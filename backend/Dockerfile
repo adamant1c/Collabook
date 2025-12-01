@@ -7,6 +7,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # Copy requirements and install dependencies with uv
 COPY requirements.txt .
+# Increase timeout for large packages
+ENV UV_HTTP_TIMEOUT=1200
 RUN uv pip install --system --no-cache -r requirements.txt
 
 COPY . .

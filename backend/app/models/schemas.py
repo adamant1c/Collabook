@@ -170,6 +170,10 @@ class QuestComplete(BaseModel):
     character_id: str
 
 # Combat schemas (Phase 4)
+class CombatEncounterCheck(BaseModel):
+    character_id: str
+    turn_number: int = 1
+
 class CombatActionRequest(BaseModel):
     character_id: str
     action: str  # "attack", "magic", "defend", "flee"

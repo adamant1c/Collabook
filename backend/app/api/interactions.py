@@ -12,7 +12,7 @@ from app.models.db_models import Turn, Character, Story, User, PlayerQuest, Ques
 
 router = APIRouter(prefix="/interact", tags=["interactions"])
 
-@router.post("/", response_model=InteractionResponse)
+@router.post("", response_model=InteractionResponse)
 async def create_interaction(
     interaction: InteractionRequest,
     current_user: User = Depends(get_current_user),

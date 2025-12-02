@@ -13,7 +13,7 @@ from app.core.combat import (
 from app.core.rpg_stats import award_xp
 from app.api.auth import get_current_user
 from app.models.db_models import User, Enemy, Character, Turn, EnemyType
-from app.models.schemas import CombatActionRequest, CombatResult
+from app.models.schemas import CombatActionRequest, CombatResult, CombatEncounterCheck
 
 router = APIRouter(prefix="/combat", tags=["combat"])
 
@@ -22,8 +22,7 @@ active_combats = {}
 
 @router.post("/check-encounter")
 async def check_encounter(
-    character_id: str,
-    turn_number: int,
+    request: CombatEncounterCheck,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -33,16 +32,16 @@ async def check_encounter(
     """
     
     # Verify character ownership
-    character = db.query(Character).filter(Character.id == character_id).first()
+    character = db.query(Character).filter(Character.id == request.character_id).first()
     if not character or character.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your character")
     
     # Check if already in combat
-    if character_id in active_combats:
+    if request.character_id in active_combats:
         return {"encounter": False, "message": "Already in combat"}
     
     # Random encounter check (15-30% chance)
-    if should_trigger_encounter(turn_number, current_user.level):
+    if should_trigger_encounter(request.turn_number, current_user.level):
         # Select appropriate enemy (level ± 2)
         enemies = db.query(Enemy).filter(
             Enemy.story_id == character.story_id,
@@ -73,7 +72,7 @@ async def check_encounter(
         )
         
         # Store in active combats
-        active_combats[character_id] = {
+        active_combats[request.character_id] = {
             "enemy": enemy_instance,
             "round": 0
         }

@@ -312,12 +312,16 @@ def show_character_creation():
         if submitted:
             try:
                 # Update character with profession and backstory
-                updated = CollabookAPI.update_character(
+                # Note: API returns User object, not Character object, so we don't overwrite the whole state
+                CollabookAPI.update_character(
                     st.session_state.token,
                     character["id"],
                     {"profession": profession, "description": backstory}
                 )
-                st.session_state.character = updated
+                
+                # Manually update local state to reflect changes
+                st.session_state.character["profession"] = profession
+                st.session_state.character["description"] = backstory
                 st.success("✓ Character created!" if lang == Language.EN else "✓ Personaggio creato!")
                 st.balloons()
                 st.rerun()

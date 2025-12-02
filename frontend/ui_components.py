@@ -259,3 +259,24 @@ def render_hp_bar(current_hp, max_hp, label="HP"):
             </div>
         </div>
     """, unsafe_allow_html=True)
+
+# New function to render random dice roll stats
+def render_random_stats(stats: dict):
+    """Render a card showing randomly generated character stats.
+    Expected keys: hp, max_hp, magic, strength, dexterity, defense, etc.
+    """
+    # Build HTML rows for each stat
+    rows = []
+    for key, value in stats.items():
+        # Capitalize and replace underscores with spaces for display
+        label = key.replace('_', ' ').title()
+        rows.append(f"<div style='display:flex;justify-content:space-between;'><span>{label}</span><span>{value}</span></div>")
+    rows_html = "\n".join(rows)
+    st.markdown(f"""
+        <div class='stat-card' role='region' aria-label='Random Dice Roll Stats'>
+            <strong>🎲 Random Stats</strong>
+            <div style='margin-top:0.5rem;'>
+                {rows_html}
+            </div>
+        </div>
+    """, unsafe_allow_html=True)

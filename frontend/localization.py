@@ -226,6 +226,60 @@ TRANSLATIONS = {
         "en": "Loading...",
         "it": "Caricamento..."
     },
+    
+    # Game Rules
+    "game_rules": {
+        "en": "Game Rules",
+        "it": "Regole del Gioco"
+    },
+    "rules_intro": {
+        "en": "Welcome to Collabook RPG! Here are the rules of the game:",
+        "it": "Benvenuto a Collabook RPG! Ecco le regole del gioco:"
+    },
+    "rule_1_title": {
+        "en": "1. Character Creation",
+        "it": "1. Creazione del Personaggio"
+    },
+    "rule_1_desc": {
+        "en": "Create your hero by choosing a profession and writing a backstory. Your stats are rolled randomly.",
+        "it": "Crea il tuo eroe scegliendo una professione e scrivendo una storia. Le tue statistiche sono generate casualmente."
+    },
+    "rule_2_title": {
+        "en": "2. Exploration",
+        "it": "2. Esplorazione"
+    },
+    "rule_2_desc": {
+        "en": "Explore the world by typing your actions. The AI Dungeon Master will narrate the results.",
+        "it": "Esplora il mondo scrivendo le tue azioni. Il Dungeon Master AI narrerà i risultati."
+    },
+    "rule_3_title": {
+        "en": "3. Survival",
+        "it": "3. Sopravvivenza"
+    },
+    "rule_3_desc": {
+        "en": "Manage your Hunger, Thirst, and Fatigue. Rest and eat to stay alive.",
+        "it": "Gestisci Fame, Sete e Affaticamento. Riposa e mangia per restare vivo."
+    },
+    
+    # Character Creation
+    "roll_dice": {
+        "en": "Roll Dice & Reveal Stats",
+        "it": "Lancia i Dadi & Rivela Statistiche"
+    },
+    "stats_revealed": {
+        "en": "The Fates have spoken! Your stats are:",
+        "it": "Il Fato ha parlato! Le tue statistiche sono:"
+    },
+    
+    # Sidebar
+    "hp_label": {
+        "en": "Health Points (HP)",
+        "it": "Punti Salute (HP)"
+    },
+    "xp_label": {
+        "en": "Experience Points (XP)",
+        "it": "Punti Esperienza (XP)"
+    },
 }
 
 def get_language() -> Language:

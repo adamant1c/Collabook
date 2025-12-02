@@ -765,7 +765,25 @@ def show_game_interface():
                     })
                     st.rerun()
                 except Exception as e:
-                    st.error(f"Error: {str(e)}")
+                    st.session_state.interaction_error = str(e)
+                    st.rerun()
+
+    # Handle errors outside the form
+    if "interaction_error" in st.session_state and st.session_state.interaction_error:
+        error_msg = st.session_state.interaction_error
+        if "404" in error_msg:
+            st.error("⚠️ Character not found. Your session may have expired or the character was deleted.")
+            if st.button("Return to World Selection", key="error_return_btn"):
+                st.session_state.character = None
+                st.session_state.story = None
+                del st.session_state.interaction_error
+                st.rerun()
+        else:
+            st.error(f"Error: {error_msg}")
+            # Clear error on next interaction
+            if st.button("Dismiss Error"):
+                del st.session_state.interaction_error
+                st.rerun()
 
 if __name__ == "__main__":
     main()

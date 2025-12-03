@@ -1,14 +1,25 @@
 import streamlit as st
 from localization import t, Language
+from nav_bar import show_nav_bar
+from ui_components import apply_custom_css
 
 st.set_page_config(
     page_title="Game Rules - Collabook RPG",
     page_icon="📜",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
+
+# Apply custom RPG theme
+apply_custom_css()
 
 # Get language
 lang = Language(st.session_state.get("language", "en"))
+
+# Show navigation bar if authenticated
+if st.session_state.get("token"):
+    st.session_state.current_page = "rules"
+    show_nav_bar()
 
 # Title
 title = t("game_rules", lang)

@@ -1,11 +1,17 @@
 import streamlit as st
 from localization import t, Language
+from nav_bar import show_nav_bar
+from ui_components import apply_custom_css
 
 st.set_page_config(
     page_title="Character Sheet - Collabook RPG",
     page_icon="👤",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
+
+# Apply custom RPG theme
+apply_custom_css()
 
 # Get language
 lang = Language(st.session_state.get("language", "en"))
@@ -14,6 +20,10 @@ lang = Language(st.session_state.get("language", "en"))
 if "token" not in st.session_state or st.session_state.token is None:
     st.error("Please login first" if lang == Language.EN else "Effettua prima l'accesso")
     st.stop()
+
+# Show navigation bar
+st.session_state.current_page = "character"
+show_nav_bar()
 
 # Get user and character data
 user = st.session_state.get("user", {})

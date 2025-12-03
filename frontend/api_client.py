@@ -113,11 +113,11 @@ class CollabookAPI:
         return response.json()
     
     @staticmethod
-    def join_story(story_id: str, token: str) -> dict:
+    def join_story(story_id: str, token: str, language: str = "en") -> dict:
         """Join an existing story"""
         response = requests.post(f"{BACKEND_URL}/stories/{story_id}/join",
                                headers={"Authorization": f"Bearer {token}"},
-                               json={})  # Empty body - story_id comes from URL path
+                               json={"language": language})  # Pass language in body
         response.raise_for_status()
         return response.json()
     

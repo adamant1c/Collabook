@@ -41,6 +41,18 @@
     --focus-offset: 2px;
 }
 
+/* Hide Streamlit Default Header/Navbar */
+header[data-testid="stHeader"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Hide Streamlit Toolbar */
+.stDeployButton {
+    display: none !important;
+    visibility: hidden !important;
+}
+
 /* Global Reset & Typography */
 .stApp {
     background:
@@ -88,6 +100,25 @@ h1 {
     margin-bottom: 2rem;
 }
 
+/* Metrics - Force Light Text */
+.stMetric,
+[data-testid="stMetric"],
+[data-testid="stMetricLabel"],
+[data-testid="stMetricValue"],
+[data-testid="stMetricDelta"] {
+    color: var(--text-primary) !important;
+}
+
+.stMetric label,
+[data-testid="stMetricLabel"] label {
+    color: var(--gold-primary) !important;
+}
+
+.stMetric>div,
+[data-testid="stMetricValue"]>div {
+    color: var(--text-primary) !important;
+}
+
 /* Inputs & Forms */
 .stTextInput>div>div>input,
 .stTextArea>div>div>textarea,
@@ -117,6 +148,101 @@ label {
     font-family: 'Cinzel', serif !important;
     font-size: 1rem !important;
     letter-spacing: 1px;
+}
+
+/* Selectbox Dropdown - Fix White on White Text */
+.stSelectbox div[data-baseweb="select"]>div {
+    background-color: rgba(15, 12, 8, 0.9) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Dropdown menu items - High Specificity */
+div[data-baseweb="popover"] ul[role="listbox"],
+ul[role="listbox"] {
+    background-color: rgba(15, 12, 8, 0.98) !important;
+    border: 1px solid var(--gold-dim) !important;
+}
+
+div[data-baseweb="popover"] ul[role="listbox"] li,
+ul[role="listbox"] li {
+    background-color: transparent !important;
+    /* Let container bg show */
+    color: var(--text-primary) !important;
+}
+
+div[data-baseweb="popover"] ul[role="listbox"] li:hover,
+ul[role="listbox"] li:hover,
+ul[role="listbox"] li[aria-selected="true"] {
+    background-color: var(--gold-dim) !important;
+    color: var(--bg-dark) !important;
+}
+
+/* Selected option in dropdown - Enhanced specificity */
+.stSelectbox div[data-baseweb="select"] span {
+    color: var(--text-primary) !important;
+}
+
+/* Force light text on all dropdown select components */
+.stSelectbox div[data-baseweb="select"] div[role="button"] span,
+.stSelectbox div[data-baseweb="select"] div[role="button"],
+div[data-baseweb="select"] span {
+    color: var(--text-primary) !important;
+}
+
+/* Currently selected value in closed dropdown */
+.stSelectbox div[data-baseweb="select"]>div>div {
+    color: var(--text-primary) !important;
+}
+
+/* Fix for white text on white background in dropdowns */
+.stSelectbox div[data-baseweb="select"] div {
+    color: var(--text-primary) !important;
+}
+
+/* Journey Description - High Visibility */
+.journey-description {
+    background-color: rgba(20, 20, 20, 0.8);
+    border-left: 4px solid var(--gold-primary);
+    padding: 1.5rem;
+    border-radius: 0 8px 8px 0;
+    margin: 1rem 0;
+    color: var(--text-primary) !important;
+    font-family: 'Spectral', serif;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.journey-description strong {
+    color: var(--gold-primary) !important;
+    font-family: 'Cinzel', serif;
+    font-size: 1.2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* LLM Response Styling - Enhanced visibility */
+.llm-response {
+    color: var(--text-primary) !important;
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--gold-primary);
+    font-family: 'Spectral', serif;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Force light text for all content inside LLM response */
+.llm-response * {
+    color: var(--text-primary) !important;
+}
+
+/* Override any inline styles on LLM response elements */
+div.llm-response,
+div.llm-response p,
+div.llm-response span {
+    color: var(--text-primary) !important;
 }
 
 /* Buttons - Comprehensive visibility fix */

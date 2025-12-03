@@ -64,7 +64,13 @@ def main():
         if character and not character.get("profession"):
             show_character_creation()
         else:
-            show_main_app()
+            # Redirect to appropriate page based on state
+            if st.session_state.story is None:
+                # No world selected - go to worlds page
+                st.switch_page("pages/worlds.py")
+            else:
+                # World selected - go to journey page
+                st.switch_page("pages/journey.py")
 
 def check_backend() -> bool:
     """Check if backend is available"""
@@ -571,9 +577,12 @@ def show_story_card(story):
                 enter_text = t("enter_world", lang)
                 if st.button(enter_text, key=f"join_{story['id']}"):
                     try:
+                        # Get current language from session state
+                        current_lang = st.session_state.get("language", "en")
                         character = CollabookAPI.join_story(
                             story['id'], 
-                            st.session_state.token
+                            st.session_state.token,
+                            language=current_lang
                         )
                         # Refresh user to get the new character in the list
                         st.session_state.user = CollabookAPI.get_current_user(st.session_state.token)

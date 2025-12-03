@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
+from pydantic import BaseModel
 from app.core.database import get_db
 from app.core.redis_client import redis_client
 from app.models.schemas import StoryCreate, StoryResponse, CharacterCreate, CharacterResponse
@@ -62,10 +63,13 @@ async def get_story(
         raise HTTPException(status_code=404, detail="Story not found")
     return story
 
+class JoinStoryRequest(BaseModel):
+    language: str = "en"
+
 @router.post("/{story_id}/join", response_model=CharacterResponse)
 async def join_story(
     story_id: str, 
-    character: CharacterCreate,
+    request: JoinStoryRequest,
     current_user: User = Depends(get_current_user),  # Auto-get user from token
     db: Session = Depends(get_db)
 ):
@@ -99,7 +103,11 @@ async def join_story(
         "profession": current_user.profession,
         "description": current_user.description
     }
-    insertion_point = await matchmaker_agent.find_insertion_point(story_context, character_info)
+    insertion_point = await matchmaker_agent.find_insertion_point(
+        story_context, 
+        character_info,
+        language=request.language
+    )
     
     # Create character
     db_character = Character(

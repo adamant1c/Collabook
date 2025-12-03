@@ -1,12 +1,18 @@
 import streamlit as st
 from localization import t, Language
 from api_client import CollabookAPI
+from nav_bar import show_nav_bar
+from ui_components import apply_custom_css
 
 st.set_page_config(
     page_title="Your Journey - Collabook RPG",
     page_icon="🎮",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
+
+# Apply custom RPG theme
+apply_custom_css()
 
 # Get language
 lang = Language(st.session_state.get("language", "en"))
@@ -15,6 +21,10 @@ lang = Language(st.session_state.get("language", "en"))
 if "token" not in st.session_state or st.session_state.token is None:
     st.error("Please login first" if lang == Language.EN else "Effettua prima l'accesso")
     st.stop()
+
+# Show navigation bar
+st.session_state.current_page = "journey"
+show_nav_bar()
 
 # Check if world is selected
 if "story" not in st.session_state or st.session_state.story is None:
@@ -27,7 +37,12 @@ st.subheader("📜 Your Journey" if lang == Language.EN else "📜 Il Tuo Viaggi
 if not st.session_state.get("history", []):
     insertion = st.session_state.character.get('insertion_point', 'You enter the world...')
     arrival_text = "Your Arrival" if lang == Language.EN else "Il Tuo Arrivo"
-    st.info(f"**{arrival_text}:** {insertion}")
+    st.markdown(f"""
+        <div class="journey-description">
+            <strong>{arrival_text}</strong>
+            {insertion}
+        </div>
+    """, unsafe_allow_html=True)
 else:
     for i, turn in enumerate(st.session_state.history):
         with st.container():
@@ -37,7 +52,7 @@ else:
             st.markdown(f"**Turn {i+1} • {action_label}:**")
             st.markdown(f"> _{turn['action']}_")
             st.markdown(f"**{response_label}:**")
-            st.markdown(turn['narration'])
+            st.markdown(f'<div class="llm-response">{turn["narration"]}</div>', unsafe_allow_html=True)
             st.divider()
 
 # User action input

@@ -12,6 +12,16 @@ class UserRegister(BaseModel):
     description: Optional[str] = None
     avatar_description: Optional[str] = None
 
+class CharacterUpdate(BaseModel):
+    profession: Optional[str] = None
+    description: Optional[str] = None
+    strength: Optional[int] = None
+    magic: Optional[int] = None
+    dexterity: Optional[int] = None
+    defense: Optional[int] = None
+    hp: Optional[int] = None
+    max_hp: Optional[int] = None
+
 class UserLogin(BaseModel):
     username: str
     password: str
@@ -102,6 +112,7 @@ class StoryResponse(BaseModel):
 class InteractionRequest(BaseModel):
     character_id: str
     user_action: str
+    language: Optional[str] = "en"
 
 class InteractionResponse(BaseModel):
     turn_id: str

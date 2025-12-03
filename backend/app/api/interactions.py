@@ -68,9 +68,14 @@ async def create_interaction(
     # Create optimized prompt
     optimized_prompt = create_optimized_prompt(compact_context, interaction.user_action)
     
+    # Determine system prompt based on language
+    system_prompt = "You are a Dungeon Master. Respond in 2-3 paragraphs."
+    if interaction.language and interaction.language.lower() == "it":
+        system_prompt = "Sei un Dungeon Master. Rispondi in 2-3 paragrafi in Italiano."
+    
     # Generate narration with minimal tokens
     narration = await llm_client.generate(
-        system_prompt="You are a Dungeon Master. Respond in 2-3 paragraphs.",
+        system_prompt=system_prompt,
         user_message=optimized_prompt
     )
     

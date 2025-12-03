@@ -6,16 +6,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.api.auth import get_current_user
-from app.models.schemas import UserCreate, UserResponse
+from app.models.schemas import UserCreate, UserResponse, CharacterUpdate
 from app.models.db_models import User, Character
 from pydantic import BaseModel
 from typing import Optional
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-class CharacterUpdate(BaseModel):
-    profession: Optional[str] = None
-    description: Optional[str] = None
 
 @router.post("/", response_model=UserResponse)
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -61,7 +57,11 @@ async def get_user_profile(
             "level": current_user.level,
             "xp": current_user.xp,
             "hp": current_user.hp,
-            "max_hp": current_user.max_hp
+            "max_hp": current_user.max_hp,
+            "strength": current_user.strength,
+            "magic": current_user.magic,
+            "dexterity": current_user.dexterity,
+            "defense": current_user.defense
         }
     }
 
@@ -72,14 +72,28 @@ async def update_character(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Update user's character profile (profession, description)"""
+    """Update user's character profile (profession, description, stats)"""
     # We update the User object directly as it holds the global character info
     
     # Update fields on User
-    if update_data.profession:
+    if update_data.profession is not None:
         current_user.profession = update_data.profession
-    if update_data.description:
+    if update_data.description is not None:
         current_user.description = update_data.description
+    
+    # Update stats if provided
+    if update_data.strength is not None:
+        current_user.strength = update_data.strength
+    if update_data.magic is not None:
+        current_user.magic = update_data.magic
+    if update_data.dexterity is not None:
+        current_user.dexterity = update_data.dexterity
+    if update_data.defense is not None:
+        current_user.defense = update_data.defense
+    if update_data.hp is not None:
+        current_user.hp = update_data.hp
+    if update_data.max_hp is not None:
+        current_user.max_hp = update_data.max_hp
     
     db.commit()
     db.refresh(current_user)
@@ -92,5 +106,9 @@ async def update_character(
         "level": current_user.level,
         "xp": current_user.xp,
         "hp": current_user.hp,
-        "max_hp": current_user.max_hp
+        "max_hp": current_user.max_hp,
+        "strength": current_user.strength,
+        "magic": current_user.magic,
+        "dexterity": current_user.dexterity,
+        "defense": current_user.defense
     }

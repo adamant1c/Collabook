@@ -177,12 +177,22 @@ button[type="submit"]:hover,
 
 /* Custom Components Classes */
 .stat-card {
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
     padding: 1.25rem;
     margin-bottom: 1rem;
     transition: transform 0.3s ease;
+    color: var(--text-primary) !important;
+    /* Force light text */
+}
+
+.stat-card strong {
+    color: var(--gold-primary) !important;
+}
+
+.stat-card span {
+    color: var(--text-primary) !important;
 }
 
 .stat-card:hover {

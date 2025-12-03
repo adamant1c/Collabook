@@ -124,13 +124,14 @@ class CollabookAPI:
     # ==================== Interactions ====================
     
     @staticmethod
-    def interact(character_id: str, user_action: str, token: str) -> dict:
+    def interact(character_id: str, user_action: str, token: str, language: str = "en") -> dict:
         """Send a user action and get narration"""
         response = requests.post(f"{BACKEND_URL}/interact",
                                headers={"Authorization": f"Bearer {token}"},
                                json={
                                    "character_id": character_id,
-                                   "user_action": user_action
+                                   "user_action": user_action,
+                                   "language": language
                                })
         response.raise_for_status()
         return response.json()

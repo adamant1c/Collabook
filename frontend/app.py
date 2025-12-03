@@ -290,6 +290,41 @@ def show_character_creation():
     
     character = st.session_state.character
     
+    # Initialize stats in session state if not present
+    if "rolled_stats" not in st.session_state:
+        st.session_state.rolled_stats = None
+    
+    # Dice roll button (outside form)
+    roll_button_text = t("roll_dice_button", lang)
+    if st.button(roll_button_text, use_container_width=True):
+        import random
+        # Roll stats: 3d6 for each stat (range 3-18)
+        st.session_state.rolled_stats = {
+            "strength": random.randint(3, 18),
+            "magic": random.randint(3, 18),
+            "dexterity": random.randint(3, 18),
+            "defense": random.randint(3, 18),
+            "hp": random.randint(50, 100),
+            "max_hp": random.randint(100, 200)
+        }
+        st.rerun()
+    
+    # Display rolled stats if available
+    if st.session_state.rolled_stats:
+        stats_title = t("stats_generated", lang)
+        st.success(f"✨ {stats_title}")
+        
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric(f"💪 {t('strength', lang)}", st.session_state.rolled_stats["strength"])
+            st.metric(f"✨ {t('magic', lang)}", st.session_state.rolled_stats["magic"])
+        with col2:
+            st.metric(f"🎯 {t('dexterity', lang)}", st.session_state.rolled_stats["dexterity"])
+            st.metric(f"🛡️ {t('defense', lang)}", st.session_state.rolled_stats["defense"])
+        with col3:
+            st.metric("❤️ HP", st.session_state.rolled_stats["hp"])
+            st.metric("❤️ Max HP", st.session_state.rolled_stats["max_hp"])
+    
     with st.form("character_creation_form"):
         st.markdown(f"### 👤 {character.get('name', 'Character')}")
         
@@ -311,22 +346,38 @@ def show_character_creation():
         
         if submitted:
             try:
-                # Update character with profession and backstory
-                # Note: API returns User object, not Character object, so we don't overwrite the whole state
+                # Prepare update data
+                update_data = {
+                    "profession": profession,
+                    "description": backstory
+                }
+                
+                # Add stats if rolled
+                if st.session_state.rolled_stats:
+                    update_data.update(st.session_state.rolled_stats)
+                
+                # Update character with profession, backstory, and stats
                 CollabookAPI.update_character(
                     st.session_state.token,
                     character["id"],
-                    {"profession": profession, "description": backstory}
+                    update_data
                 )
                 
                 # Manually update local state to reflect changes
                 st.session_state.character["profession"] = profession
                 st.session_state.character["description"] = backstory
+                if st.session_state.rolled_stats:
+                    st.session_state.character.update(st.session_state.rolled_stats)
+                
+                # Clear rolled stats
+                st.session_state.rolled_stats = None
+                
                 st.success("✓ Character created!" if lang == Language.EN else "✓ Personaggio creato!")
                 st.balloons()
                 st.rerun()
             except Exception as e:
                 st.error(f"Error: {str(e)}")
+
 
 def show_password_reset():
     """Password reset form"""
@@ -425,6 +476,11 @@ def show_main_app():
         
         st.markdown("---")
         
+        # Game Rules link
+        rules_text = "📜 Game Rules" if lang == Language.EN else "📜 Regole del Gioco"
+        if st.button(rules_text, use_container_width=True):
+            st.switch_page("pages/rules.py")
+        
         # Logout button
         logout_text = "🚪 Logout" if lang == Language.EN else "🚪 Esci"
         if st.button(logout_text, use_container_width=True):
@@ -443,48 +499,56 @@ def show_main_app():
 
 def show_story_selection():
     """Select or create a story world"""
-    st.title("Choose Your World")
+    lang = Language(st.session_state.get("language", "en"))
+    
+    st.title(t("choose_your_world", lang))
     
     # Show admin option to create worlds
     if st.session_state.user.get('role') == 'admin':
-        st.info("👑 As an admin, you can create new worlds!")
+        st.info(t("admin_create_worlds", lang))
     
-    tab1, tab2 = st.tabs(["🌍 Available Worlds", "➕ Create World (Admin)"])
+    tab1_text = t("available_worlds", lang)
+    tab2_text = t("create_world_admin", lang)
+    tab1, tab2 = st.tabs([tab1_text, tab2_text])
     
     with tab1:
         try:
             stories = CollabookAPI.list_stories(st.session_state.token)
             
             if not stories:
-                st.warning("No worlds available yet.")
+                st.warning(t("no_worlds_available", lang))
             else:
                 # Separate default and custom worlds
                 default_worlds = [s for s in stories if s.get('is_default', False)]
                 custom_worlds = [s for s in stories if not s.get('is_default', False)]
                 
                 if default_worlds:
-                    st.subheader("🎭 Classic Worlds")
+                    st.subheader(t("classic_worlds", lang))
                     for story in default_worlds:
                         show_story_card(story)
                 
                 if custom_worlds:
-                    st.subheader("🌟 Custom Worlds")
+                    st.subheader(t("custom_worlds", lang))
                     for story in custom_worlds:
                         show_story_card(story)
         except Exception as e:
-            st.error(f"Error loading worlds: {str(e)}")
+            error_msg = t("error_loading_worlds", lang)
+            st.error(f"{error_msg}: {str(e)}")
     
     with tab2:
         if st.session_state.user.get('role') != 'admin':
-            st.warning("🔒 Only administrators can create new worlds.")
-            st.info("Custom worlds will be available after admin approval.")
+            st.warning(t("only_admin_create", lang))
+            st.info(t("custom_worlds_approval", lang))
         else:
             show_world_creation()
 
 def show_story_card(story):
     """Display a story card with join button"""
+    lang = Language(st.session_state.get("language", "en"))
+    
     with st.expander(f"📚 {story['title']} • {story.get('genre', 'Adventure')}"):
-        st.markdown(f"**World:** {story['world_description']}")
+        world_label = "World" if lang == Language.EN else "Mondo"
+        st.markdown(f"**{world_label}:** {story['world_description']}")
         
         if story.get('current_state'):
             st.markdown(f"*{story['current_state']}*")
@@ -496,13 +560,16 @@ def show_story_card(story):
         col1, col2 = st.columns([3, 1])
         with col2:
             if existing_char:
-                if st.button(f"Continue Adventure", key=f"continue_{story['id']}"):
+                continue_text = t("continue_adventure", lang)
+                if st.button(continue_text, key=f"continue_{story['id']}"):
                     st.session_state.character = existing_char
                     st.session_state.story = story
-                    st.success(f"✓ Resuming adventure in '{story['title']}'...")
+                    success_msg = f"✓ Resuming adventure in '{story['title']}'..." if lang == Language.EN else f"✓ Riprendendo l'avventura in '{story['title']}'..."
+                    st.success(success_msg)
                     st.rerun()
             else:
-                if st.button(f"Enter World", key=f"join_{story['id']}"):
+                enter_text = t("enter_world", lang)
+                if st.button(enter_text, key=f"join_{story['id']}"):
                     try:
                         character = CollabookAPI.join_story(
                             story['id'], 
@@ -512,10 +579,12 @@ def show_story_card(story):
                         st.session_state.user = CollabookAPI.get_current_user(st.session_state.token)
                         st.session_state.character = character
                         st.session_state.story = story
-                        st.success(f"✓ Entering '{story['title']}'...")
+                        success_msg = f"✓ Entering '{story['title']}'..." if lang == Language.EN else f"✓ Entrando in '{story['title']}'..."
+                        st.success(success_msg)
                         st.rerun()
                     except Exception as e:
-                        st.error(f"Error: {str(e)}")
+                        error_text = "Error" if lang == Language.EN else "Errore"
+                        st.error(f"{error_text}: {str(e)}")
 
 def show_world_creation():
     """World creation form (admin only)"""
@@ -616,14 +685,25 @@ def show_game_interface():
         
         st.markdown("---")
         
-        # Enhanced HP Bar
-        render_hp_bar(user['hp'], user['max_hp'], label="Health Points")
+        # Get language for labels
+        lang = Language(st.session_state.get("language", "en"))
         
-        # Stats in ornate cards
-        render_stat_card("Strength", user['strength'], icon="💪")
-        render_stat_card("Magic", user['magic'], icon="✨")
-        render_stat_card("Dexterity", user['dexterity'], icon="🎯")
-        render_stat_card("Defense", user['defense'], icon="🛡️")
+        # HP Bar (consolidated - only one)
+        hp_label = t("hp_label", lang)
+        render_hp_bar(user['hp'], user['max_hp'], label=hp_label)
+        
+        # Stats in ornate cards with descriptions
+        strength_desc = t("strength_desc", lang)
+        render_stat_card(f"{t('strength', lang)} ({strength_desc})", user['strength'], icon="💪")
+        
+        magic_desc = t("magic_desc", lang)
+        render_stat_card(f"{t('magic', lang)} ({magic_desc})", user['magic'], icon="✨")
+        
+        dexterity_desc = t("dexterity_desc", lang)
+        render_stat_card(f"{t('dexterity', lang)} ({dexterity_desc})", user['dexterity'], icon="🎯")
+        
+        defense_desc = t("defense_desc", lang)
+        render_stat_card(f"{t('defense', lang)} ({defense_desc})", user['defense'], icon="🛡️")
         
         # XP Progress
         xp_thresholds = {1: 100, 2: 300, 3: 600, 4: 1000, 5: 1500, 6: 2100, 
@@ -758,10 +838,14 @@ def show_game_interface():
         if submitted and user_action:
             with st.spinner("🎲 The dungeon master considers..."):
                 try:
+                    # Get current language
+                    lang = st.session_state.get("language", "en")
+                    
                     response = CollabookAPI.interact(
                         st.session_state.character['id'], 
                         user_action,
-                        st.session_state.token
+                        st.session_state.token,
+                        language=lang
                     )
                     st.session_state.history.append({
                         "action": user_action,

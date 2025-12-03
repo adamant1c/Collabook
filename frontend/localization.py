@@ -90,6 +90,22 @@ TRANSLATIONS = {
         "en": "Experience",
         "it": "Esperienza"
     },
+    "strength_desc": {
+        "en": "Physical Power",
+        "it": "Potenza Fisica"
+    },
+    "magic_desc": {
+        "en": "Magical Ability",
+        "it": "Abilità Magica"
+    },
+    "dexterity_desc": {
+        "en": "Agility & Speed",
+        "it": "Agilità & Velocità"
+    },
+    "defense_desc": {
+        "en": "Damage Resistance",
+        "it": "Resistenza Danni"
+    },
     
     # Survival
     "survival": {
@@ -270,6 +286,14 @@ TRANSLATIONS = {
         "en": "The Fates have spoken! Your stats are:",
         "it": "Il Fato ha parlato! Le tue statistiche sono:"
     },
+    "roll_dice_button": {
+        "en": "🎲 Roll for Stats",
+        "it": "🎲 Lancia i Dadi"
+    },
+    "stats_generated": {
+        "en": "Stats Generated!",
+        "it": "Statistiche Generate!"
+    },
     
     # Sidebar
     "hp_label": {
@@ -279,6 +303,56 @@ TRANSLATIONS = {
     "xp_label": {
         "en": "Experience Points (XP)",
         "it": "Punti Esperienza (XP)"
+    },
+    
+    # World Selection
+    "choose_your_world": {
+        "en": "Choose Your World",
+        "it": "Scegli il Tuo Mondo"
+    },
+    "available_worlds": {
+        "en": "🌍 Available Worlds",
+        "it": "🌍 Mondi Disponibili"
+    },
+    "create_world_admin": {
+        "en": "➕ Create World (Admin)",
+        "it": "➕ Crea Mondo (Admin)"
+    },
+    "admin_create_worlds": {
+        "en": "👑 As an admin, you can create new worlds!",
+        "it": "👑 Come admin, puoi creare nuovi mondi!"
+    },
+    "no_worlds_available": {
+        "en": "No worlds available yet.",
+        "it": "Nessun mondo disponibile ancora."
+    },
+    "classic_worlds": {
+        "en": "🎭 Classic Worlds",
+        "it": "🎭 Mondi Classici"
+    },
+    "custom_worlds": {
+        "en": "🌟 Custom Worlds",
+        "it": "🌟 Mondi Personalizzati"
+    },
+    "only_admin_create": {
+        "en": "🔒 Only administrators can create new worlds.",
+        "it": "🔒 Solo gli amministratori possono creare nuovi mondi."
+    },
+    "custom_worlds_approval": {
+        "en": "Custom worlds will be available after admin approval.",
+        "it": "I mondi personalizzati saranno disponibili dopo l'approvazione dell'admin."
+    },
+    "continue_adventure": {
+        "en": "Continue Adventure",
+        "it": "Continua Avventura"
+    },
+    "enter_world": {
+        "en": "Enter World",
+        "it": "Entra nel Mondo"
+    },
+    "error_loading_worlds": {
+        "en": "Error loading worlds",
+        "it": "Errore nel caricamento dei mondi"
     },
 }
 

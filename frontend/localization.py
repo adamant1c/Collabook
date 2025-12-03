@@ -354,6 +354,20 @@ TRANSLATIONS = {
         "en": "Error loading worlds",
         "it": "Errore nel caricamento dei mondi"
     },
+    
+    # Navigation
+    "your_journey": {
+        "en": "🎮 Your Journey",
+        "it": "🎮 Il Tuo Viaggio"
+    },
+    "character_sheet": {
+        "en": "👤 Character Sheet",
+        "it": "👤 Scheda Personaggio"
+    },
+    "world_selection": {
+        "en": "🌍 Select World",
+        "it": "🌍 Scegli Mondo"
+    },
 }
 
 def get_language() -> Language:

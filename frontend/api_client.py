@@ -30,12 +30,14 @@ class CollabookAPI:
         except requests.exceptions.HTTPError as e:
             if e.response is not None:
                 try:
-                    detail = e.response.json().get("detail")
+                    error_data = e.response.json()
+                    detail = error_data.get("detail", "")
                     if detail:
                         raise Exception(detail)
-                except:
+                except (ValueError, KeyError):
+                    # If JSON parsing fails, use status code
                     pass
-            raise e
+            raise Exception(f"{e.response.status_code} Client Error: {e.response.reason}")
     
     @staticmethod
     def login(username: str, password: str) -> str:

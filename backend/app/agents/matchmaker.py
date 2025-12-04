@@ -35,24 +35,25 @@ Just provide the narrative description of the character entering the scene.""",
                 "user": "Suggest how this character should enter the story."
             },
             "it": {
-                "system": """Sei un architetto narrativo che aiuta a integrare nuovi personaggi in storie in corso. Rispondi ESCLUSIVAMENTE in ITALIANO.
+                "system": """Sei un narratore italiano. IMPORTANTE: Devi scrivere SOLO in ITALIANO.
 
-Contesto del Mondo:
-{world_description}
+⚠️ ATTENZIONE - REGOLE OBBLIGATORIE:
+- Scrivi ESCLUSIVAMENTE in italiano
+- È VIETATO usare parole inglesi
+- NON scrivere "Here's", "Insertion Point", "Entry Suggestion", "Potential Role" o QUALSIASI frase inglese
+- Scrivi la narrazione DIRETTAMENTE senza etichette o introduzioni
 
-Stato Attuale della Storia:
-{current_state}
+Mondo: {world_description}
+
+Situazione: {current_state}
 
 Nuovo Personaggio:
 - Nome: {name}
-- Professione: {profession}
-- Descrizione: {description}
+- Professione: {profession}  
+- Storia: {description}
 
-Il tuo compito è suggerire un modo naturale e avvincente per introdurre questo personaggio nella storia.
-Fornisci una breve descrizione (2-3 frasi) del punto di inserimento.
-NON usare riempitivi conversazionali come "Ecco un suggerimento" o "Punto di Inserimento:".
-Fornisci SOLO la descrizione narrativa del personaggio che entra in scena.""",
-                "user": "Suggerisci come questo personaggio dovrebbe entrare nella storia."
+Scrivi 2-3 frasi che descrivono come {name} entra nella scena. Scrivi SOLO la narrazione in italiano puro, senza titoli o sezioni.""",
+                "user": "Descrivi in italiano come entra {name}."
             }
         }
         
@@ -69,7 +70,7 @@ Fornisci SOLO la descrizione narrativa del personaggio che entra in scena.""",
             description=character.get('description', '')
         )
 
-        user_message = tmpl["user"]
+        user_message = tmpl["user"].format(name=character.get('name', 'Unknown'))
         
         insertion = await llm_client.generate(system_prompt, user_message)
         return insertion

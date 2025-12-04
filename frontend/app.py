@@ -1,6 +1,6 @@
 import streamlit as st
 from api_client import CollabookAPI
-from localization import t, Language
+from localization import t, Language, t_world
 from ui_components import (
     apply_custom_css, render_title, render_stat_card, 
     render_quest_card, render_combat_log, render_enemy_card,
@@ -275,8 +275,24 @@ def show_registration():
                 st.balloons()
                 st.rerun()
             except Exception as e:
-                error_text = "Registration failed" if lang == Language.EN else "Registrazione fallita"
-                st.error(f"{error_text}: {str(e)}")
+                error_str = str(e)
+                # Translate common error messages to Italian
+                if lang == Language.IT:
+                    if "Username already registered" in error_str:
+                        error_str = "Nome utente già registrato"
+                    elif "Email already registered" in error_str:
+                        error_str = "Email già registrata"
+                    elif "Invalid email format" in error_str:
+                        error_str = "Formato email non valido"
+                    elif "400 Client Error: Bad Request" in error_str:
+                        error_str = "Richiesta non valida. Verifica che tutti i campi siano compilati correttamente."
+                    elif "429 Client Error: Too Many Requests" in error_str:
+                        error_str = "Troppi tentativi. Riprova tra un'ora."
+                
+                error_prefix = "Registration failed" if lang == Language.EN else "Registrazione fallita"
+                st.error(f"{error_prefix}: {error_str}")
+
+
 
 def show_character_creation():
     """Character customization screen after first login"""
@@ -461,47 +477,104 @@ def show_password_reset():
 
 def show_main_app():
     """Main application interface"""
-    lang = Language(st.session_state.get("language", "en"))
+    user = st.session_state.user
     
-    # Sidebar navigation
+    # Sidebar - Character Sheet Style
     with st.sidebar:
-        st.title("⚔️ Collabook RPG")
+        st.markdown(f"""
+            <div style='text-align: center; padding: 1rem; background: linear-gradient(145deg, #d4af37, #ffd700); 
+                        border-radius: 10px; margin-bottom: 1rem; border: 2px solid #8b4513;'>
+                <h2 style='margin: 0; color: #2a1810; font-family: "Cinzel", serif;'>
+                    ⚔️ {user['name']} ⚔️
+                </h2>
+                <div style='font-size: 0.9rem; color: #5d4e37; margin-top: 0.5rem;'>
+                    {user.get('profession', 'Adventurer')}
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
         
-        user = st.session_state.user
-        character = st.session_state.character
-        
-        if character:
-            st.markdown(f"### {character.get('name', 'Hero')}")
-            st.markdown(f"**Level**: {character.get('level', 1)}")
-            st.markdown(f"**XP**: {character.get('xp', 0)}/{character.get('xp_to_next_level', 100)}")
-            
-            # HP Bar
-            hp = character.get('hp', 100)
-            max_hp = character.get('max_hp', 100)
-            render_hp_bar(hp, max_hp)
+        # Level & Role Badge
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"""
+                <div style='text-align: center; background: #2d5016; color: #ffd700; 
+                            padding: 0.5rem; border-radius: 8px; font-weight: bold;'>
+                    📊 Level {user['level']}
+                </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            role_color = "#8b0000" if user['role'] == 'admin' else "#4682b4"
+            st.markdown(f"""
+                <div style='text-align: center; background: {role_color}; color: white; 
+                            padding: 0.5rem; border-radius: 8px; font-weight: bold;'>
+                    👑 {user['role'].upper()}
+                </div>
+            """, unsafe_allow_html=True)
         
         st.markdown("---")
         
-        # Game Rules link
-        rules_text = "📜 Game Rules" if lang == Language.EN else "📜 Regole del Gioco"
-        if st.button(rules_text, use_container_width=True):
-            st.switch_page("pages/rules.py")
+        # Get language for labels
+        lang = Language(st.session_state.get("language", "en"))
         
-        # Logout button
-        logout_text = "🚪 Logout" if lang == Language.EN else "🚪 Esci"
-        if st.button(logout_text, use_container_width=True):
-            st.session_state.token = None
-            st.session_state.user = None
-            st.session_state.character = None
-            st.session_state.story = None
-            st.session_state.history = []
-            st.rerun()
-            
-    # Main content area
-    if st.session_state.story is None:
-        show_story_selection()
-    else:
-        show_game_interface()
+        # HP Bar (consolidated - only one)
+        hp_label = t("hp_label", lang)
+        render_hp_bar(user['hp'], user['max_hp'], label=hp_label)
+        
+        # Stats in ornate cards with descriptions
+        strength_desc = t("strength_desc", lang)
+        render_stat_card(f"{t('strength', lang)} ({strength_desc})", user['strength'], icon="💪")
+        
+        magic_desc = t("magic_desc", lang)
+        render_stat_card(f"{t('magic', lang)} ({magic_desc})", user['magic'], icon="✨")
+        
+        dexterity_desc = t("dexterity_desc", lang)
+        render_stat_card(f"{t('dexterity', lang)} ({dexterity_desc})", user['dexterity'], icon="🎯")
+        
+        defense_desc = t("defense_desc", lang)
+        render_stat_card(f"{t('defense', lang)} ({defense_desc})", user['defense'], icon="🛡️")
+        
+        # XP Progress
+        xp_thresholds = {1: 100, 2: 300, 3: 600, 4: 1000, 5: 1500, 6: 2100, 
+                        7: 2800, 8: 3600, 9: 4500}
+        next_level_xp = xp_thresholds.get(user['level'], 4500 + (user['level'] - 9) * 1000)
+        xp_progress = min(100, (user['xp'] / next_level_xp) * 100)
+        st.markdown(f"""
+            <div class='stat-card'>
+                <strong>🌟 Experience</strong>
+                <div style='margin-top: 0.5rem;'>
+                    <div style='background: rgba(212,175,55,0.2); border-radius: 5px; height: 20px; position: relative;'>
+                        <div class='xp-progress' style='background: linear-gradient(90deg, #d4af37, #ffd700); 
+                                    width: {xp_progress}%; height: 100%; border-radius: 5px; 
+                                    box-shadow: 0 0 10px rgba(255,215,0,0.5);'></div>
+                        <span style='position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
+                                     font-weight: bold; font-size: 0.85rem; color: #2a1810;'>
+                            {user['xp']} / {next_level_xp}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # Phase 5: Survival Stats
+        st.markdown("""
+            <div style='text-align: center; font-family: "Cinzel", serif; 
+                        font-size: 1.2rem; color: #d4af37; margin-bottom: 0.5rem;'>
+                🍖💧😴 Survival
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # Get character for survival stats
+        character = st.session_state.get("character")
+        if character:
+            # Hunger bar
+            hunger = character.get("hunger", 100)
+            hunger_color = "#2d5016" if hunger > 50 else "#d4af37" if hunger > 20 else "#8b0000"
+            st.markdown(f"""
+                <div style='margin-bottom: 0.5rem;'>
+                    <div style='font-size: 0.9rem; color: #5d4e37;'>🍖 Hunger: {hunger}/100</div>
+""", unsafe_allow_html=True)
 
 def show_story_selection():
     """Select or create a story world"""
@@ -552,9 +625,13 @@ def show_story_card(story):
     """Display a story card with join button"""
     lang = Language(st.session_state.get("language", "en"))
     
-    with st.expander(f"📚 {story['title']} • {story.get('genre', 'Adventure')}"):
+    # Translate title and description if available
+    display_title = t_world(story['title'], 'title', lang) or story['title']
+    display_desc = t_world(story['title'], 'description', lang) or story['world_description']
+    
+    with st.expander(f"📚 {display_title} • {story.get('genre', 'Adventure')}"):
         world_label = "World" if lang == Language.EN else "Mondo"
-        st.markdown(f"**{world_label}:** {story['world_description']}")
+        st.markdown(f"**{world_label}:** {display_desc}")
         
         if story.get('current_state'):
             st.markdown(f"*{story['current_state']}*")

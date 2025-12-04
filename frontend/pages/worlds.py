@@ -1,5 +1,5 @@
 import streamlit as st
-from localization import t, Language
+from localization import t, Language, t_world
 from api_client import CollabookAPI
 from nav_bar import show_nav_bar
 from ui_components import apply_custom_css
@@ -29,9 +29,13 @@ show_nav_bar()
 # Define functions first
 def display_story_card(story, current_lang):
     """Display a story card with join button"""
-    with st.expander(f"📚 {story['title']} • {story.get('genre', 'Adventure')}"):
+    # Translate title and description if available
+    display_title = t_world(story['title'], 'title', current_lang) or story['title']
+    display_desc = t_world(story['title'], 'description', current_lang) or story['world_description']
+    
+    with st.expander(f"📚 {display_title} • {story.get('genre', 'Adventure')}"):
         world_label = "World" if current_lang == Language.EN else "Mondo"
-        st.markdown(f"**{world_label}:** {story['world_description']}")
+        st.markdown(f"**{world_label}:** {display_desc}")
         
         if story.get('current_state'):
             st.markdown(f"*{story['current_state']}*")
@@ -65,10 +69,19 @@ def display_story_card(story, current_lang):
                         st.session_state.story = story
                         success_msg = f"✓ Entering '{story['title']}'..." if current_lang == Language.EN else f"✓ Entrando in '{story['title']}'..."
                         st.success(success_msg)
-                        st.rerun()
+                        st.switch_page("pages/journey.py")  # Go directly to journey page
                     except Exception as e:
-                        error_text = "Error" if current_lang == Language.EN else "Errore"
-                        st.error(f"{error_text}: {str(e)}")
+                        error_str = str(e)
+                        # Check if error is about already having a character
+                        if "already have a character" in error_str.lower() or "400" in error_str:
+                            # Refresh user data to get the existing character
+                            st.session_state.user = CollabookAPI.get_current_user(st.session_state.token)
+                            info_msg = "You already have a character in this world. Refreshing..." if current_lang == Language.EN else "Hai già un personaggio in questo mondo. Aggiornamento..."
+                            st.info(info_msg)
+                            st.rerun()
+                        else:
+                            error_text = "Error" if current_lang == Language.EN else "Errore"
+                            st.error(f"{error_text}: {error_str}")
 
 def show_world_creation_form(current_lang):
     """World creation form (admin only)"""

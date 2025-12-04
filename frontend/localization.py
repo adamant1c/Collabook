@@ -370,6 +370,40 @@ TRANSLATIONS = {
     },
 }
 
+# World Translations (Keyed by English Title)
+WORLD_TRANSLATIONS = {
+    "Echoes of the Past": {
+        "title": {
+            "en": "Echoes of the Past",
+            "it": "Echi del Passato"
+        },
+        "description": {
+            "en": "A historically-inspired world set in medieval Europe during the height of the Renaissance. Great kingdoms rise and fall, knights defend their honor, and scholars unlock ancient secrets. Navigate political intrigue,  participate in grand tournaments, or explore forgotten ruins.",
+            "it": "Un mondo di ispirazione storica ambientato nell'Europa medievale durante l'apice del Rinascimento. Grandi regni sorgono e cadono, i cavalieri difendono il loro onore e gli studiosi svelano antichi segreti. Naviga intrighi politici, partecipa a grandi tornei o esplora rovine dimenticate."
+        }
+    },
+    "Realm of Eternal Magic": {
+        "title": {
+            "en": "Realm of Eternal Magic",
+            "it": "Regno della Magia Eterna"
+        },
+        "description": {
+            "en": "A high-fantasy realm where magic flows through every living thing. Ancient dragons soar the skies, elven kingdoms hide in enchanted forests, and dwarven cities delve deep into mystical mountains. Dark forces stir in forgotten places, and heroes are called to face legendary quests.",
+            "it": "Un regno high-fantasy dove la magia scorre attraverso ogni essere vivente. Antichi draghi solcano i cieli, regni elfici si nascondono in foreste incantate e città naniche scavano nelle profondità di montagne mistiche. Forze oscure si agitano in luoghi dimenticati e gli eroi sono chiamati ad affrontare missioni leggendarie."
+        }
+    },
+    "Horizon Beyond Stars": {
+        "title": {
+            "en": "Horizon Beyond Stars",
+            "it": "Orizzonte Oltre le Stelle"
+        },
+        "description": {
+            "en": "The year is 2347. Humanity has colonized the solar system and made first contact with alien civilizations. Advanced AI, cybernetic augmentations, and faster-than-light travel are commonplace. Navigate space politics, explore alien worlds, uncover corporate conspiracies, or fight in the ongoing conflict between Earth Alliance and the Outer Colonies.",
+            "it": "L'anno è il 2347. L'umanità ha colonizzato il sistema solare e ha stabilito il primo contatto con civiltà aliene. IA avanzate, potenziamenti cibernetici e viaggi più veloci della luce sono all'ordine del giorno. Naviga nella politica spaziale, esplora mondi alieni, svela cospirazioni aziendali o combatti nel conflitto in corso tra l'Alleanza Terrestre e le Colonie Esterne."
+        }
+    }
+}
+
 def get_language() -> Language:
     """Get current language from environment or default"""
     lang = os.getenv("LANGUAGE", "en").lower()
@@ -409,3 +443,20 @@ def t_en(key: str) -> str:
 def t_it(key: str) -> str:
     """Translate to Italian"""
     return t(key, Language.IT)
+
+def t_world(title: str, field: str, lang: Language = None) -> str:
+    """
+    Translate world title or description
+    
+    Args:
+        title: English title of the world (used as key)
+        field: 'title' or 'description'
+        lang: Language (default: from env)
+    """
+    if lang is None:
+        lang = get_language()
+        
+    if title not in WORLD_TRANSLATIONS:
+        return title if field == 'title' else ""
+        
+    return WORLD_TRANSLATIONS[title][field].get(lang.value, WORLD_TRANSLATIONS[title][field].get("en", ""))

@@ -71,7 +71,15 @@ async def create_interaction(
     # Determine system prompt based on language
     system_prompt = "You are a Dungeon Master. Respond in 2-3 paragraphs."
     if interaction.language and interaction.language.lower() == "it":
-        system_prompt = "Sei un Dungeon Master. Rispondi in 2-3 paragrafi in Italiano."
+        system_prompt = """Sei un Dungeon Master italiano. IMPORTANTE: Devi scrivere SOLO in ITALIANO.
+
+⚠️ ATTENZIONE - REGOLE OBBLIGATORIE:
+- Scrivi ESCLUSIVAMENTE in italiano
+- È VIETATO usare parole inglesi
+- NON scrivere "Here's", "The", "You", "Your" o QUALSIASI parola inglese
+- Scrivi la narrazione DIRETTAMENTE in italiano puro
+
+Rispondi in 2-3 paragrafi in italiano. Usa "tu" per il giocatore."""
     
     # Generate narration with minimal tokens
     narration = await llm_client.generate(

@@ -65,8 +65,8 @@ class LLMClient:
             if gemini_key:
                 try:
                     genai.configure(api_key=gemini_key)
-                    # Use stable flash model
-                    self.model = genai.GenerativeModel('gemini-1.5-flash')
+                    # Use Gemini 2.5 Flash (latest stable version)
+                    self.model = genai.GenerativeModel('models/gemini-2.5-flash')
                     self.provider = "gemini"
                     print("✓ Using Google Gemini Flash (FREE)")
                 except Exception as e:

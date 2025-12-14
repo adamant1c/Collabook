@@ -68,9 +68,27 @@ class LLMClient:
                     # Use Gemini 2.5 Flash (latest stable version)
                     self.model = genai.GenerativeModel('models/gemini-2.5-flash')
                     self.provider = "gemini"
-                    print("✓ Using Google Gemini Flash (FREE)")
+                    print("✓ Using Google Gemini Flash")
                 except Exception as e:
                     print(f"⚠ Gemini initialization failed: {e}")
+
+        # Initialize Groq (can be primary or fallback)
+        self.groq_client = None
+        self.groq_model = "llama-3.3-70b-versatile" # Excellent free model
+        groq_key = os.getenv("GROQ_API_KEY")
+        
+        if groq_key:
+            try:
+                from groq import Groq
+                self.groq_client = Groq(api_key=groq_key)
+                print(f"✓ Groq initialized (Model: {self.groq_model})")
+                
+                # If no other provider is set, use Groq as primary
+                if not self.provider:
+                    self.provider = "groq"
+                    print("✓ Using Groq as PRIMARY provider")
+            except Exception as e:
+                print(f"⚠ Groq initialization failed: {e}")
         
         # Fallback to OpenAI
         if not self.provider:
@@ -95,19 +113,31 @@ class LLMClient:
             print("⚠ No LLM provider configured. Using Mock LLM for testing.")
     
     async def generate(self, system_prompt: str, user_message: str, history: list = None) -> str:
-        """Generate a response from the LLM"""
+        """Generate a response from the LLM with fallback support"""
         
-        if self.provider == "ollama":
-            return await self._generate_ollama(system_prompt, user_message, history)
-        elif self.provider == "gemini":
-            return await self._generate_gemini(system_prompt, user_message, history)
-        elif self.provider == "openai":
-            return await self._generate_openai(system_prompt, user_message, history)
-        elif self.provider == "mock":
-            return await self.model.generate(system_prompt, user_message, history)
-        else:
-            # Should not happen if init logic is correct
-            return "Error: No LLM provider available."
+        try:
+            if self.provider == "ollama":
+                return await self._generate_ollama(system_prompt, user_message, history)
+            elif self.provider == "gemini":
+                try:
+                    return await self._generate_gemini(system_prompt, user_message, history)
+                except Exception as e:
+                    # If Gemini fails (e.g. quota exceeded) and Groq is available, try Groq
+                    if self.groq_client:
+                        print(f"⚠️ Gemini failed ({str(e)}). Falling back to Groq...")
+                        return await self._generate_groq(system_prompt, user_message, history)
+                    raise e # Re-raise if no fallback
+            elif self.provider == "groq":
+                return await self._generate_groq(system_prompt, user_message, history)
+            elif self.provider == "openai":
+                return await self._generate_openai(system_prompt, user_message, history)
+            elif self.provider == "mock":
+                return await self.model.generate(system_prompt, user_message, history)
+            else:
+                return "Error: No LLM provider available."
+        except Exception as e:
+            print(f"❌ All LLM providers failed: {e}")
+            raise e
     
     async def _generate_ollama(self, system_prompt: str, user_message: str, history: list = None) -> str:
         """Generate using Ollama (local LLM)"""
@@ -168,9 +198,8 @@ class LLMClient:
                     return response.text
                 except exceptions.ResourceExhausted as e:
                     if attempt == max_retries - 1:
-                        print(f"❌ Gemini Quota Exceeded after {max_retries} attempts: {e}")
-                        # Return a graceful fallback message instead of crashing
-                        return "⚠️ (System) The AI is currently overloaded (Quota Exceeded). Please wait a minute and try again. Your action has been saved."
+                        print(f"❌ Gemini Quota Exceeded after {max_retries} attempts.")
+                        raise e # Raise to trigger fallback to Groq
                     
                     # Exponential backoff with jitter
                     delay = (base_delay * (2 ** attempt)) + random.uniform(0, 1)
@@ -179,10 +208,36 @@ class LLMClient:
                     
         except Exception as e:
             print(f"Error generating with Gemini: {e}")
-            # Fallback for other errors
-            return f"⚠️ (System) Error generating response: {str(e)}. Please try again."
-            # raise  <-- Removed raise to prevent 500 Internal Server Error
-    
+            raise
+            
+    async def _generate_groq(self, system_prompt: str, user_message: str, history: list = None) -> str:
+        """Generate using Groq API"""
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        if history:
+            for turn in history:
+                messages.append({"role": "user", "content": turn.get("user", "")})
+                messages.append({"role": "assistant", "content": turn.get("ai", "")})
+        
+        messages.append({"role": "user", "content": user_message})
+        
+        try:
+            # Run sync Groq client in thread pool to not block async loop
+            loop = asyncio.get_event_loop()
+            completion = await loop.run_in_executor(
+                None,
+                lambda: self.groq_client.chat.completions.create(
+                    messages=messages,
+                    model=self.groq_model,
+                    temperature=0.7,
+                    max_tokens=1024,
+                )
+            )
+            return completion.choices[0].message.content
+        except Exception as e:
+            print(f"Error generating with Groq: {e}")
+            raise
+
     async def _generate_openai(self, system_prompt: str, user_message: str, history: list = None) -> str:
         """Generate using OpenAI"""
         from langchain.schema import HumanMessage, SystemMessage, AIMessage

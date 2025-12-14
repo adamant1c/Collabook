@@ -155,11 +155,33 @@ class LLMClient:
             full_prompt = f"{system_prompt}\n\nPrevious conversation:\n{history_text}\n\n{user_message}"
         
         try:
-            response = await self.model.generate_content_async(full_prompt)
-            return response.text
+            # Add retry logic for ResourceExhausted (429) errors
+            from google.api_core import exceptions
+            import random
+            
+            max_retries = 3
+            base_delay = 2
+            
+            for attempt in range(max_retries):
+                try:
+                    response = await self.model.generate_content_async(full_prompt)
+                    return response.text
+                except exceptions.ResourceExhausted as e:
+                    if attempt == max_retries - 1:
+                        print(f"❌ Gemini Quota Exceeded after {max_retries} attempts: {e}")
+                        # Return a graceful fallback message instead of crashing
+                        return "⚠️ (System) The AI is currently overloaded (Quota Exceeded). Please wait a minute and try again. Your action has been saved."
+                    
+                    # Exponential backoff with jitter
+                    delay = (base_delay * (2 ** attempt)) + random.uniform(0, 1)
+                    print(f"⏳ Gemini Quota Exceeded. Retrying in {delay:.2f}s... (Attempt {attempt+1}/{max_retries})")
+                    await asyncio.sleep(delay)
+                    
         except Exception as e:
             print(f"Error generating with Gemini: {e}")
-            raise
+            # Fallback for other errors
+            return f"⚠️ (System) Error generating response: {str(e)}. Please try again."
+            # raise  <-- Removed raise to prevent 500 Internal Server Error
     
     async def _generate_openai(self, system_prompt: str, user_message: str, history: list = None) -> str:
         """Generate using OpenAI"""

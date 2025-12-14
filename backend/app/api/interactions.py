@@ -82,10 +82,14 @@ async def create_interaction(
 Rispondi in 2-3 paragrafi in italiano. Usa "tu" per il giocatore."""
     
     # Generate narration with minimal tokens
-    narration = await llm_client.generate(
-        system_prompt=system_prompt,
-        user_message=optimized_prompt
-    )
+    try:
+        narration = await llm_client.generate(
+            system_prompt=system_prompt,
+            user_message=optimized_prompt
+        )
+    except Exception as e:
+        print(f"❌ Critical LLM Error: {e}")
+        narration = "⚠️ (System) The Dungeon Master is temporarily unavailable. Please try your action again in a moment."
     
     # Phase 6: Sanitize LLM output
     narration, was_sanitized = sanitize_llm_output(narration)

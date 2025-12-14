@@ -236,15 +236,22 @@ def show_registration():
         </style>
     """, unsafe_allow_html=True)
     
+    # Prepare strings OUTSIDE the form
+    username_label = f"⚔️ {t('username', lang)}"
+    username_help = "This will be your character name too" if lang == Language.EN else "Questo sarà anche il nome del tuo personaggio"
+    email_label = f"📧 {t('email', lang)}"
+    password_label = f"🔑 {t('password', lang)}"
+    confirm_label = "🔑 Confirm Password" if lang == Language.EN else "🔑 Conferma Password"
+    submit_text = t('register', lang).upper() if lang == Language.EN else "REGISTRATI"
+    button_label = f"⚔️ {submit_text}"
+
     with st.form("registration_form"):
-        username = st.text_input(f"⚔️ {t('username', lang)}", max_chars=50, 
-                                help="This will be your character name too" if lang == Language.EN else "Questo sarà anche il nome del tuo personaggio")
-        email = st.text_input(f"📧 {t('email', lang)}")
-        password = st.text_input(f"🔑 {t('password', lang)}", type="password")
-        password_confirm = st.text_input("🔑 Confirm Password" if lang == Language.EN else "🔑 Conferma Password", type="password")
+        username = st.text_input(username_label, max_chars=50, help=username_help)
+        email = st.text_input(email_label)
+        password = st.text_input(password_label, type="password")
+        password_confirm = st.text_input(confirm_label, type="password")
         
-        submit_text = t('register', lang).upper() if lang == Language.EN else "REGISTRATI"
-        submitted = st.form_submit_button(f"⚔️ {submit_text}")
+        submitted = st.form_submit_button(button_label)
         
         if submitted:
             # Validation messages
@@ -439,11 +446,12 @@ def show_password_reset():
     reset_step = st.radio(step_label, [request_text, enter_code], horizontal=True)
     
     if reset_step == request_text:
+        # Prepare strings OUTSIDE
+        email_label = f"📧 {t('email', lang)}" if lang == Language.EN else "📧 Email"
+        button_text = "Send Reset Link" if lang == Language.EN else "Invia Link Reset"
+        
         with st.form("request_reset_form"):
-            email_label = f"📧 {t('email', lang)}" if lang == Language.EN else "📧 Email"
             email = st.text_input(email_label)
-            
-            button_text = "Send Reset Link" if lang == Language.EN else "Invia Link Reset"
             submitted = st.form_submit_button(button_text)
             
             if submitted and email:
@@ -455,17 +463,18 @@ def show_password_reset():
                     error = "Error" if lang == Language.EN else "Errore"
                     st.error(f"{error}: {str(e)}")
     else:
+        # Prepare strings OUTSIDE
+        token_label = "Reset Token" if lang == Language.EN else "Token Reset"
+        token_help = "Check your email or console logs" if lang == Language.EN else "Controlla la tua email o i log della console"
+        new_pass = "New Password" if lang == Language.EN else "Nuova Password"
+        confirm_pass = "Confirm New Password" if lang == Language.EN else "Conferma Nuova Password"
+        button_text = "Reset Password" if lang == Language.EN else "Reimposta Password"
+
         with st.form("reset_password_form"):
-            token_label = "Reset Token" if lang == Language.EN else "Token Reset"
-            token_help = "Check your email or console logs" if lang == Language.EN else "Controlla la tua email o i log della console"
-            new_pass = "New Password" if lang == Language.EN else "Nuova Password"
-            confirm_pass = "Confirm New Password" if lang == Language.EN else "Conferma Nuova Password"
-            
             token = st.text_input(token_label, help=token_help)
             new_password = st.text_input(new_pass, type="password")
             confirm_password = st.text_input(confirm_pass, type="password")
             
-            button_text = "Reset Password" if lang == Language.EN else "Reimposta Password"
             submitted = st.form_submit_button(button_text)
             
             if submitted:

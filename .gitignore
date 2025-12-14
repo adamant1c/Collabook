@@ -211,3 +211,5 @@ test.dm
 test.db
 *.db
 test.db
+
+certbot/

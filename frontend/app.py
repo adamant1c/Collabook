@@ -367,24 +367,28 @@ def show_character_creation():
             st.metric("❤️ HP", st.session_state.rolled_stats["hp"])
             st.metric("❤️ Max HP", st.session_state.rolled_stats["max_hp"])
     
+    # Prepare strings OUTSIDE the form
+    char_name_header = f"### 👤 {character.get('name', 'Character')}"
+    profession_label = f"🛡️ {t('profession', lang)}"
+    professions = {
+        "en": ["Warrior", "Mage", "Rogue", "Cleric", "Ranger", "Paladin", "Bard", "Druid"],
+        "it": ["Guerriero", "Mago", "Ladro", "Chierico", "Ranger", "Paladino", "Bardo", "Druido"]
+    }
+    backstory_label = "📜 Backstory" if lang == Language.EN else "📜 Storia"
+    backstory_help = "Describe your character's background..." if lang == Language.EN else "Descrivi il background del tuo personaggio..."
+    submit_text = "Begin Adventure" if lang == Language.EN else "Inizia Avventura"
+    button_label = f"⚔️ {submit_text}"
+
     with st.form("character_creation_form"):
-        st.markdown(f"### 👤 {character.get('name', 'Character')}")
+        st.markdown(char_name_header)
         
         # Profession dropdown
-        profession_label = f"🛡️ {t('profession', lang)}"
-        professions = {
-            "en": ["Warrior", "Mage", "Rogue", "Cleric", "Ranger", "Paladin", "Bard", "Druid"],
-            "it": ["Guerriero", "Mago", "Ladro", "Chierico", "Ranger", "Paladino", "Bardo", "Druido"]
-        }
         profession = st.selectbox(profession_label, professions[lang.value])
         
         # Backstory
-        backstory_label = "📜 Backstory" if lang == Language.EN else "📜 Storia"
-        backstory_help = "Describe your character's background..." if lang == Language.EN else "Descrivi il background del tuo personaggio..."
         backstory = st.text_area(backstory_label, max_chars=500, help=backstory_help)
         
-        submit_text = "Begin Adventure" if lang == Language.EN else "Inizia Avventura"
-        submitted = st.form_submit_button(f"⚔️ {submit_text}")
+        submitted = st.form_submit_button(button_label)
         
         if submitted:
             try:
@@ -702,9 +706,17 @@ def show_world_creation():
     """World creation form (admin only)"""
     st.subheader("Create a New World")
     
+    # Prepare strings OUTSIDE
+    title_label = "World Title"
+    title_placeholder = "e.g., The Shattered Realms"
+    genre_label = "Genre"
+    desc_label = "World Description"
+    desc_placeholder = "Describe the setting, rules, atmosphere, and key features of this world..."
+    button_label = "🌍 Create World"
+
     with st.form("world_form"):
-        title = st.text_input("World Title", placeholder="e.g., The Shattered Realms")
-        genre = st.selectbox("Genre", [
+        title = st.text_input(title_label, placeholder=title_placeholder)
+        genre = st.selectbox(genre_label, [
             "Fantasy",
             "Science Fiction",
             "Horror",
@@ -714,11 +726,11 @@ def show_world_creation():
             "Post-Apocalyptic",
             "Steampunk"
         ])
-        world_description = st.text_area("World Description", 
-                                         placeholder="Describe the setting, rules, atmosphere, and key features of this world...",
+        world_description = st.text_area(desc_label, 
+                                         placeholder=desc_placeholder,
                                          height=200)
         
-        submitted = st.form_submit_button("🌍 Create World")
+        submitted = st.form_submit_button(button_label)
         
         if submitted and title and world_description:
             try:

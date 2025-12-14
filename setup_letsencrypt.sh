@@ -38,7 +38,7 @@ docker compose -f docker-compose.prod.yml stop nginx
 echo -e "${YELLOW}Requesting certificate from Let's Encrypt...${NC}"
 echo "This may take a minute."
 
-docker compose -f docker-compose.prod.yml run --rm certbot certonly \
+docker compose -f docker-compose.prod.yml run --rm --entrypoint certbot -p 80:80 certbot certonly \
     --standalone \
     -d "$DOMAIN" \
     --email "$EMAIL" \

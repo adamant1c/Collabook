@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from datetime import datetime
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.redis_client import redis_client
@@ -118,6 +119,18 @@ Rispondi in 2-3 paragrafi in italiano. Usa "tu" per il giocatore."""
     
     # Update survival stats (Phase 5)
     survival_result = update_survival_stats(character, turns_elapsed=1)
+    
+    # Survival Mode: Day Counter Logic
+    today = datetime.utcnow().date()
+    if character.last_played_date is None or character.last_played_date.date() != today:
+        character.days_survived += 1
+        character.last_played_date = datetime.utcnow()
+        # Add a notification about the new day
+        if character.days_survived == 1:
+            quest_hint = f"Day 1/100. Survive!"
+        else:
+            day_msg = f"Day {character.days_survived}/100"
+            quest_hint = f"{quest_hint} | {day_msg}" if quest_hint else day_msg
     
     # Apply HP drain if any
     if survival_result["penalties"]["hp_drain"] > 0:

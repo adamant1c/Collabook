@@ -4,7 +4,8 @@ from localization import t, Language, t_world
 from ui_components import (
     apply_custom_css, render_title, render_stat_card, 
     render_quest_card, render_combat_log, render_enemy_card,
-    render_level_up_animation, render_dice_roll, render_hp_bar
+    render_level_up_animation, render_dice_roll, render_hp_bar,
+    render_survival_counter
 )
 
 st.set_page_config(
@@ -144,59 +145,64 @@ def show_login():
     """Login form"""
     lang = Language(st.session_state.get("language", "en"))
     
-    # Translated headers
-    title = "Login to Your Account" if lang == Language.EN else "Accedi al Tuo Account"
-    subtitle = "Continue your epic adventure" if lang == Language.EN else "Continua la tua avventura epica"
-    
-    st.markdown(f"""
-        <h3 style='color: #d4af37; font-family: "Cinzel", serif; 
-                   text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
-            🔐 {title}
-        </h3>
-        <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
-            {subtitle}
-        </p>
-        <style>
-            /* Login form styling */
-            .stTextInput label {{
-                color: #d4af37 !important;
-                font-weight: 600;
-                font-size: 1.05rem;
-            }}
-            .stTextInput > div > div > input {{
-                background-color: rgba(245, 235, 210, 0.95) !important;
-                color: #3d2f1f !important;
-                border: 2px solid #8b7355 !important;
-            }}
-            .stTextInput > div > div > input:focus {{
-                border-color: #d4af37 !important;
-                box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
-            }}
-        </style>
-    """, unsafe_allow_html=True)
-    
-    with st.form("login_form"):
-        username = st.text_input(f"⚔️ {t('username', lang)}")
-        password = st.text_input(f"🔑 {t('password', lang)}", type="password")
-        submit_text = t('login', lang).upper() if lang == Language.EN else "ACCEDI"
-        submitted = st.form_submit_button(f"🎮 {submit_text}")
+    try:
+        # Translated headers
+        title = "Login to Your Account" if lang == Language.EN else "Accedi al Tuo Account"
+        subtitle = "Continue your epic adventure" if lang == Language.EN else "Continua la tua avventura epica"
         
-        if submitted:
-            error_msg = "Please fill in all fields" if lang == Language.EN else "Compila tutti i campi"
-            success_msg = "✓ Login successful!" if lang == Language.EN else "✓ Accesso riuscito!"
-            error_prefix = "Login failed" if lang == Language.EN else "Accesso fallito"
+        st.markdown(f"""
+            <h3 style='color: #d4af37; font-family: "Cinzel", serif; 
+                       text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
+                🔐 {title}
+            </h3>
+            <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
+                {subtitle}
+            </p>
+            <style>
+                /* Login form styling */
+                .stTextInput label {{
+                    color: #d4af37 !important;
+                    font-weight: 600;
+                    font-size: 1.05rem;
+                }}
+                .stTextInput > div > div > input {{
+                    background-color: rgba(245, 235, 210, 0.95) !important;
+                    color: #3d2f1f !important;
+                    border: 2px solid #8b7355 !important;
+                }}
+                .stTextInput > div > div > input:focus {{
+                    border-color: #d4af37 !important;
+                    box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+                }}
+            </style>
+        """, unsafe_allow_html=True)
+        
+        with st.form("login_form"):
+            username = st.text_input(f"⚔️ {t('username', lang)}")
+            password = st.text_input(f"🔑 {t('password', lang)}", type="password")
+            submit_text = t('login', lang).upper() if lang == Language.EN else "ACCEDI"
+            submitted = st.form_submit_button(f"🎮 {submit_text}")
             
-            if not username or not password:
-                st.error(error_msg)
-                return
-            
-            try:
-                token = CollabookAPI.login(username, password)
-                st.session_state.token = token
-                st.success(success_msg)
-                st.rerun()
-            except Exception as e:
-                st.error(f"{error_prefix}: {str(e)}")
+            if submitted:
+                error_msg = "Please fill in all fields" if lang == Language.EN else "Compila tutti i campi"
+                success_msg = "✓ Login successful!" if lang == Language.EN else "✓ Accesso riuscito!"
+                error_prefix = "Login failed" if lang == Language.EN else "Accesso fallito"
+                
+                if not username or not password:
+                    st.error(error_msg)
+                    return
+                
+                try:
+                    token = CollabookAPI.login(username, password)
+                    st.session_state.token = token
+                    st.success(success_msg)
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"{error_prefix}: {str(e)}")
+    except Exception as e:
+        st.error(f"Error rendering login form: {str(e)}")
+        import traceback
+        st.code(traceback.format_exc())
 
 def show_registration():
     """Account registration - character creation happens after login"""
@@ -575,6 +581,10 @@ def show_main_app():
                 <div style='margin-bottom: 0.5rem;'>
                     <div style='font-size: 0.9rem; color: #5d4e37;'>🍖 Hunger: {hunger}/100</div>
 """, unsafe_allow_html=True)
+            
+            # Days Survived Counter
+            days_survived = character.get("days_survived", 0)
+            render_survival_counter(days_survived)
 
 def show_story_selection():
     """Select or create a story world"""

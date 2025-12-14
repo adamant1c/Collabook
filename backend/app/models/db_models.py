@@ -110,6 +110,10 @@ class Character(Base):
     thirst = Column(Integer, default=100)
     fatigue = Column(Integer, default=0)
     
+    # Survival Mode (New)
+    days_survived = Column(Integer, default=0)
+    last_played_date = Column(DateTime, nullable=True)
+    
     # Death tracking (Phase 4 - Combat)
     deaths = Column(Integer, default=0)
     can_resurrect = Column(Boolean, default=True)

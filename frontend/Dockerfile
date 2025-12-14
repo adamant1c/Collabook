@@ -9,6 +9,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 COPY requirements.txt .
 # Increase timeout for large packages like pyarrow
 ENV UV_HTTP_TIMEOUT=1200
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 RUN uv pip install --system --no-cache -r requirements.txt
 
 COPY . .

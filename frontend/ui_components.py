@@ -280,3 +280,35 @@ def render_random_stats(stats: dict):
             </div>
         </div>
     """, unsafe_allow_html=True)
+
+def render_survival_counter(days, target=100):
+    """Render survival day counter"""
+    percentage = min(100, (days / target) * 100)
+    
+    st.markdown(f"""
+        <div class="stat-card" role="region" aria-label="Days Survived: {days} out of {target}">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                <strong><span aria-hidden="true">📅</span> Days Survived</strong>
+                <span style="color: var(--gold-primary); font-weight: bold;">{days}/{target}</span>
+            </div>
+            <div role="progressbar" 
+                 aria-valuenow="{days}" 
+                 aria-valuemin="0" 
+                 aria-valuemax="{target}" 
+                 aria-label="Survival Progress"
+                 style="background: rgba(255,255,255,0.1); 
+                        border-radius: 8px; 
+                        height: 12px; 
+                        position: relative;
+                        overflow: hidden;">
+                <div style="background: linear-gradient(90deg, var(--gold-primary), var(--success)); 
+                            width: {percentage}%; 
+                            height: 100%; 
+                            border-radius: 8px; 
+                            box-shadow: 0 0 10px rgba(212,175,55,0.4);"></div>
+            </div>
+            <div style="text-align: center; font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">
+                Survive {target} days to win!
+            </div>
+        </div>
+    """, unsafe_allow_html=True)

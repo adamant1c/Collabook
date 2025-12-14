@@ -32,13 +32,13 @@ echo ""
 
 # 2. Stop Nginx to free up port 80
 echo -e "${YELLOW}Stopping Nginx...${NC}"
-docker-compose -f docker-compose.prod.yml stop nginx
+docker compose -f docker-compose.prod.yml stop nginx
 
 # 3. Run Certbot
 echo -e "${YELLOW}Requesting certificate from Let's Encrypt...${NC}"
 echo "This may take a minute."
 
-docker-compose -f docker-compose.prod.yml run --rm certbot certonly \
+docker compose -f docker-compose.prod.yml run --rm certbot certonly \
     --standalone \
     -d "$DOMAIN" \
     --email "$EMAIL" \
@@ -50,7 +50,7 @@ if [ $? -ne 0 ]; then
     echo -e "${RED}Certbot failed to obtain a certificate.${NC}"
     echo "Please check your domain DNS settings and try again."
     echo "Restarting Nginx..."
-    docker-compose -f docker-compose.prod.yml start nginx
+    docker compose -f docker-compose.prod.yml start nginx
     exit 1
 fi
 
@@ -77,7 +77,7 @@ sed -i "s|# ssl_certificate_key /etc/letsencrypt/live/DOMAIN/privkey.pem;|ssl_ce
 
 # 5. Restart Nginx
 echo -e "${YELLOW}Restarting Nginx...${NC}"
-docker-compose -f docker-compose.prod.yml start nginx
+docker compose -f docker-compose.prod.yml start nginx
 
 echo ""
 echo -e "${GREEN}=== Setup Complete! ===${NC}"

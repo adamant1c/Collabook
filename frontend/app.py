@@ -177,11 +177,18 @@ def show_login():
             </style>
         """, unsafe_allow_html=True)
         
+        # Prepare strings OUTSIDE the form to prevent errors inside
+        username_label = f"⚔️ {t('username', lang)}"
+        password_label = f"🔑 {t('password', lang)}"
+        submit_label = t('login', lang).upper() if lang == Language.EN else "ACCEDI"
+        button_label = f"🎮 {submit_label}"
+        
         with st.form("login_form"):
-            username = st.text_input(f"⚔️ {t('username', lang)}")
-            password = st.text_input(f"🔑 {t('password', lang)}", type="password")
-            submit_text = t('login', lang).upper() if lang == Language.EN else "ACCEDI"
-            submitted = st.form_submit_button(f"🎮 {submit_text}")
+            username = st.text_input(username_label)
+            password = st.text_input(password_label, type="password")
+            
+            # Button must be rendered!
+            submitted = st.form_submit_button(button_label)
             
             if submitted:
                 error_msg = "Please fill in all fields" if lang == Language.EN else "Compila tutti i campi"

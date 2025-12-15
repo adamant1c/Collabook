@@ -508,46 +508,7 @@ def show_password_reset():
                     except Exception as e:
                         st.error(f"{error_prefix}: {str(e)}")
 
-    st.title(t("choose_your_world", lang))
-    
-    # Show admin option to create worlds
-    if st.session_state.user.get('role') == 'admin':
-        st.info(t("admin_create_worlds", lang))
-    
-    tab1_text = t("available_worlds", lang)
-    tab2_text = t("create_world_admin", lang)
-    tab1, tab2 = st.tabs([tab1_text, tab2_text])
-    
-    with tab1:
-        try:
-            stories = CollabookAPI.list_stories(st.session_state.token)
-            
-            if not stories:
-                st.warning(t("no_worlds_available", lang))
-            else:
-                # Separate default and custom worlds
-                default_worlds = [s for s in stories if s.get('is_default', False)]
-                custom_worlds = [s for s in stories if not s.get('is_default', False)]
-                
-                if default_worlds:
-                    st.subheader(t("classic_worlds", lang))
-                    for story in default_worlds:
-                        show_story_card(story)
-                
-                if custom_worlds:
-                    st.subheader(t("custom_worlds", lang))
-                    for story in custom_worlds:
-                        show_story_card(story)
-        except Exception as e:
-            error_msg = t("error_loading_worlds", lang)
-            st.error(f"{error_msg}: {str(e)}")
-    
-    with tab2:
-        if st.session_state.user.get('role') != 'admin':
-            st.warning(t("only_admin_create", lang))
-            st.info(t("custom_worlds_approval", lang))
-        else:
-            show_world_creation()
+
 
 
 

@@ -50,7 +50,7 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-@limiter.limit("3/hour")  # Max 3 registrations per hour per IP
+@limiter.limit("50/hour")  # Max 50 registrations per hour per IP
 async def register(request: Request, user_data: UserRegister, db: Session = Depends(get_db)):
     """Register a new player account (rate limited: 3/hour)"""
     
@@ -95,7 +95,7 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/login", response_model=Token)
-@limiter.limit("5/minute")  # Max 5 login attempts per minute per IP
+@limiter.limit("100/minute")  # Max 100 login attempts per minute per IP
 async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     """Login with username and password (rate limited: 5/minute)"""
     
@@ -126,7 +126,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.post("/request-reset")
-@limiter.limit("3/hour")  # Max 3 password reset requests per hour per IP
+@limiter.limit("50/hour")  # Max 50 password reset requests per hour per IP
 async def request_password_reset(request: Request, reset_request: PasswordResetRequest, db: Session = Depends(get_db)):
     """Request password reset (rate limited: 3/hour)"""
     

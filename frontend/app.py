@@ -68,11 +68,9 @@ def main():
             # Redirect to appropriate page based on state
             if st.session_state.story is None:
                 # No world selected - go to worlds page
-                st.write("Redirecting to worlds page...")
                 st.switch_page("pages/worlds.py")
             else:
                 # World selected - go to journey page
-                st.write("Redirecting to journey page...")
                 st.switch_page("pages/journey.py")
 
 def check_backend() -> bool:

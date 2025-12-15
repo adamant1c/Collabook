@@ -145,60 +145,61 @@ def show_login():
     """Login form"""
     lang = Language(st.session_state.get("language", "en"))
     
-    try:
-        # Translated headers
-        title = "Login to Your Account" if lang == Language.EN else "Accedi al Tuo Account"
-        subtitle = "Continue your epic adventure" if lang == Language.EN else "Continua la tua avventura epica"
-        
-        st.markdown(f"""
-            <h3 style='color: #d4af37; font-family: "Cinzel", serif; 
-                       text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
-                🔐 {title}
-            </h3>
-            <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
-                {subtitle}
-            </p>
-            <style>
-                /* Login form styling */
-                .stTextInput label {{
-                    color: #d4af37 !important;
-                    font-weight: 600;
-                    font-size: 1.05rem;
-                }}
-                .stTextInput > div > div > input {{
-                    background-color: rgba(245, 235, 210, 0.95) !important;
-                    color: #3d2f1f !important;
-                    border: 2px solid #8b7355 !important;
-                }}
-                .stTextInput > div > div > input:focus {{
-                    border-color: #d4af37 !important;
-                    box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
-                }}
-            </style>
-        """, unsafe_allow_html=True)
-        
-        # Prepare strings OUTSIDE the form to prevent errors inside
-        username_label = f"⚔️ {t('username', lang)}"
-        password_label = f"🔑 {t('password', lang)}"
-        submit_label = t('login', lang).upper() if lang == Language.EN else "ACCEDI"
-        button_label = f"🎮 {submit_label}"
-        
-        with st.form("login_form"):
-            username = st.text_input(username_label)
-            password = st.text_input(password_label, type="password")
-            
-            # Button must be rendered!
-            submitted = st.form_submit_button(button_label)
-            
-            if submitted:
-                error_msg = "Please fill in all fields" if lang == Language.EN else "Compila tutti i campi"
-                success_msg = "✓ Login successful!" if lang == Language.EN else "✓ Accesso riuscito!"
-                error_prefix = "Login failed" if lang == Language.EN else "Accesso fallito"
-                
-                if not username or not password:
-                    st.error(error_msg)
-                    return
-                
+    # Translated headers
+    title = "Login to Your Account" if lang == Language.EN else "Accedi al Tuo Account"
+    subtitle = "Continue your epic adventure" if lang == Language.EN else "Continua la tua avventura epica"
+    
+    st.markdown(f"""
+        <h3 style='color: #d4af37; font-family: "Cinzel", serif; 
+                   text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
+            🔐 {title}
+        </h3>
+        <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
+            {subtitle}
+        </p>
+        <style>
+            /* Login form styling */
+            .stTextInput label {{
+                color: #d4af37 !important;
+                font-weight: 600;
+                font-size: 1.05rem;
+            }}
+            .stTextInput > div > div > input {{
+                background-color: rgba(245, 235, 210, 0.95) !important;
+                color: #3d2f1f !important;
+                border: 2px solid #8b7355 !important;
+            }}
+            .stTextInput > div > div > input:focus {{
+                border-color: #d4af37 !important;
+                box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+            }}
+        </style>
+    """, unsafe_allow_html=True)
+    
+    # Prepare strings OUTSIDE the form to prevent errors inside
+    username_label = f"⚔️ {t('username', lang)}"
+    password_label = f"🔑 {t('password', lang)}"
+    submit_label = t('login', lang).upper() if lang == Language.EN else "ACCEDI"
+    button_label = f"🎮 {submit_label}"
+
+    with st.form("login_form"):
+        username = st.text_input(username_label)
+        password = st.text_input(password_label, type="password")
+
+        submitted = st.form_submit_button(button_label)
+
+        if submitted:
+            error_msg = "Please fill in all fields" if lang == Language.EN else "Compila tutti i campi"
+            success_msg = "✓ Login successful!" if lang == Language.EN else "✓ Accesso riuscito!"
+            error_prefix = "Login failed" if lang == Language.EN else "Accesso fallito"
+
+            has_error = False
+
+            if not username or not password:
+                st.error(error_msg)
+                has_error = True
+
+            if not has_error:
                 try:
                     token = CollabookAPI.login(username, password)
                     st.session_state.token = token
@@ -206,15 +207,17 @@ def show_login():
                     st.rerun()
                 except Exception as e:
                     st.error(f"{error_prefix}: {str(e)}")
-    except Exception as e:
-        st.error(f"Error rendering login form: {str(e)}")
-        import traceback
-        st.code(traceback.format_exc())
 
 def show_registration():
     """Account registration - character creation happens after login"""
     lang = Language(st.session_state.get("language", "en"))
-    
+
+    fill_all = "Please fill all fields" if lang == Language.EN else "Compila tutti i campi"
+    password_match = "Passwords do not match" if lang == Language.EN else "Le password non corrispondono"
+    password_len = "Password must be at least 6 characters" if lang == Language.EN else "Password troppo corta"
+    username_len = "Username must be at least 3 characters" if lang == Language.EN else "Username troppo corto"
+    error_prefix = "Registration failed" if lang == Language.EN else "Registrazione fallita"
+    success_text = "✓ Welcome, your adventure begins!"
     # Registration header
     title = "Create Account" if lang == Language.EN else "Crea Account"
     subtitle = "Register to begin your adventure" if lang == Language.EN else "Registrati per iniziare l'avventura"
@@ -259,58 +262,59 @@ def show_registration():
             password_match = "Passwords do not match" if lang == Language.EN else "Le password non corrispondono"
             password_len = "Password must be at least 6 characters" if lang == Language.EN else "La password deve essere di almeno 6 caratteri"
             username_len = "Username must be at least 3 characters" if lang == Language.EN else "Il nome utente deve essere di almeno 3 caratteri"
-            success_msg = "✓ Welcome, {name}! Your adventure begins..." if lang == Language.EN else "✓ Benvenuto, {name}! La tua avventura inizia..."
-            error_prefix = "Registration failed" if lang == Language.EN else "Registrazione fallita"
             
+            has_error = False
+
             if not username or not email or not password:
                 st.error(fill_all)
-                return
-            
+                has_error = True
+
             if password != password_confirm:
                 st.error(password_match)
-                return
-            
+                has_error = True
+
             if len(password) < 6:
                 st.error(password_len)
-                return
-            
+                has_error = True
+
             if len(username) < 3:
                 st.error(username_len)
-                return
-            
-            try:
-                # Use username as character name - character customization happens after login
-                token = CollabookAPI.register(
-                    username=username,
-                    email=email,
-                    password=password,
-                    name=username,  # Character name = Username
-                    profession=None,  # Will be set after login
-                    description=None,  # Will be set after login
-                    avatar_description=None
-                )
-                st.session_state.token = token
-                success_text = f"✓ Welcome, {username}! Your adventure begins..." if lang == Language.EN else f"✓ Benvenuto, {username}! La tua avventura inizia..."
-                st.success(success_text)
-                st.balloons()
-                st.rerun()
-            except Exception as e:
-                error_str = str(e)
-                # Translate common error messages to Italian
-                if lang == Language.IT:
-                    if "Username already registered" in error_str:
-                        error_str = "Nome utente già registrato"
-                    elif "Email already registered" in error_str:
-                        error_str = "Email già registrata"
-                    elif "Invalid email format" in error_str:
-                        error_str = "Formato email non valido"
-                    elif "400 Client Error: Bad Request" in error_str:
-                        error_str = "Richiesta non valida. Verifica che tutti i campi siano compilati correttamente."
-                    elif "429 Client Error: Too Many Requests" in error_str:
-                        error_str = "Troppi tentativi. Riprova tra un'ora."
-                
-                error_prefix = "Registration failed" if lang == Language.EN else "Registrazione fallita"
-                st.error(f"{error_prefix}: {error_str}")
+                has_error = True
+
+            if not has_error:
+                try:
+                    # Use username as character name - character customization happens after login
+                    token = CollabookAPI.register(
+                        username=username,
+                        email=email,
+                        password=password,
+                        name=username,  # Character name = Username
+                        profession=None,  # Will be set after login
+                        description=None,  # Will be set after login
+                        avatar_description=None
+                    )
+                    st.session_state.token = token
+                    success_text = f"✓ Welcome, {username}! Your adventure begins..." if lang == Language.EN else f"✓ Benvenuto, {username}! La tua avventura inizia..."
+                    st.success(success_text)
+                    st.balloons()
+                    st.rerun()
+                except Exception as e:
+                    error_str = str(e)
+                    # Translate common error messages to Italian
+                    if lang == Language.IT:
+                        if "Username already registered" in error_str:
+                            error_str = "Nome utente già registrato"
+                        elif "Email already registered" in error_str:
+                            error_str = "Email già registrata"
+                        elif "Invalid email format" in error_str:
+                            error_str = "Formato email non valido"
+                        elif "400 Client Error: Bad Request" in error_str:
+                            error_str = "Richiesta non valida. Verifica che tutti i campi siano compilati correttamente."
+                        elif "429 Client Error: Too Many Requests" in error_str:
+                            error_str = "Troppi tentativi. Riprova tra un'ora."
+                    
+                    error_prefix = "Registration failed" if lang == Language.EN else "Registrazione fallita"
+                    st.error(f"{error_prefix}: {error_str}")
 
 
 
@@ -487,129 +491,23 @@ def show_password_reset():
                 success_reset = "✓ Password reset successful! You can now login." if lang == Language.EN else "✓ Password reimpostata con successo! Ora puoi accedere."
                 error_prefix = "Error" if lang == Language.EN else "Errore"
 
+                has_error = False
+
                 if new_password != confirm_password:
                     st.error(password_match)
-                    return
-                
+                    has_error = True
+
                 if len(new_password) < 6:
-                    st.error("Password must be at least 6 characters")
-                    return
-                
-                try:
-                    CollabookAPI.reset_password(token, new_password)
-                    st.success("✓ Password reset successful! You can now login.")
-                except Exception as e:
-                    st.error(f"Error: {str(e)}")
+                    st.error(password_len)
+                    has_error = True
 
-def show_main_app():
-    """Main application interface"""
-    user = st.session_state.user
-    
-    # Sidebar - Character Sheet Style
-    with st.sidebar:
-        st.markdown(f"""
-            <div style='text-align: center; padding: 1rem; background: linear-gradient(145deg, #d4af37, #ffd700); 
-                        border-radius: 10px; margin-bottom: 1rem; border: 2px solid #8b4513;'>
-                <h2 style='margin: 0; color: #2a1810; font-family: "Cinzel", serif;'>
-                    ⚔️ {user['name']} ⚔️
-                </h2>
-                <div style='font-size: 0.9rem; color: #5d4e37; margin-top: 0.5rem;'>
-                    {user.get('profession', 'Adventurer')}
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Level & Role Badge
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown(f"""
-                <div style='text-align: center; background: #2d5016; color: #ffd700; 
-                            padding: 0.5rem; border-radius: 8px; font-weight: bold;'>
-                    📊 Level {user['level']}
-                </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            role_color = "#8b0000" if user['role'] == 'admin' else "#4682b4"
-            st.markdown(f"""
-                <div style='text-align: center; background: {role_color}; color: white; 
-                            padding: 0.5rem; border-radius: 8px; font-weight: bold;'>
-                    👑 {user['role'].upper()}
-                </div>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Get language for labels
-        lang = Language(st.session_state.get("language", "en"))
-        
-        # HP Bar (consolidated - only one)
-        hp_label = t("hp_label", lang)
-        render_hp_bar(user['hp'], user['max_hp'], label=hp_label)
-        
-        # Stats in ornate cards with descriptions
-        strength_desc = t("strength_desc", lang)
-        render_stat_card(f"{t('strength', lang)} ({strength_desc})", user['strength'], icon="💪")
-        
-        magic_desc = t("magic_desc", lang)
-        render_stat_card(f"{t('magic', lang)} ({magic_desc})", user['magic'], icon="✨")
-        
-        dexterity_desc = t("dexterity_desc", lang)
-        render_stat_card(f"{t('dexterity', lang)} ({dexterity_desc})", user['dexterity'], icon="🎯")
-        
-        defense_desc = t("defense_desc", lang)
-        render_stat_card(f"{t('defense', lang)} ({defense_desc})", user['defense'], icon="🛡️")
-        
-        # XP Progress
-        xp_thresholds = {1: 100, 2: 300, 3: 600, 4: 1000, 5: 1500, 6: 2100, 
-                        7: 2800, 8: 3600, 9: 4500}
-        next_level_xp = xp_thresholds.get(user['level'], 4500 + (user['level'] - 9) * 1000)
-        xp_progress = min(100, (user['xp'] / next_level_xp) * 100)
-        st.markdown(f"""
-            <div class='stat-card'>
-                <strong>🌟 Experience</strong>
-                <div style='margin-top: 0.5rem;'>
-                    <div style='background: rgba(212,175,55,0.2); border-radius: 5px; height: 20px; position: relative;'>
-                        <div class='xp-progress' style='background: linear-gradient(90deg, #d4af37, #ffd700); 
-                                    width: {xp_progress}%; height: 100%; border-radius: 5px; 
-                                    box-shadow: 0 0 10px rgba(255,215,0,0.5);'></div>
-                        <span style='position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
-                                     font-weight: bold; font-size: 0.85rem; color: #2a1810;'>
-                            {user['xp']} / {next_level_xp}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Phase 5: Survival Stats
-        st.markdown("""
-            <div style='text-align: center; font-family: "Cinzel", serif; 
-                        font-size: 1.2rem; color: #d4af37; margin-bottom: 0.5rem;'>
-                🍖💧😴 Survival
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Get character for survival stats
-        character = st.session_state.get("character")
-        if character:
-            # Hunger bar
-            hunger = character.get("hunger", 100)
-            hunger_color = "#2d5016" if hunger > 50 else "#d4af37" if hunger > 20 else "#8b0000"
-            st.markdown(f"""
-                <div style='margin-bottom: 0.5rem;'>
-                    <div style='font-size: 0.9rem; color: #5d4e37;'>🍖 Hunger: {hunger}/100</div>
-""", unsafe_allow_html=True)
-            
-            # Days Survived Counter
-            days_survived = character.get("days_survived", 0)
-            render_survival_counter(days_survived)
+                if not has_error:
+                    try:
+                        CollabookAPI.reset_password(token, new_password)
+                        st.success(success_reset)
+                    except Exception as e:
+                        st.error(f"{error_prefix}: {str(e)}")
 
-def show_story_selection():
-    """Select or create a story world"""
-    lang = Language(st.session_state.get("language", "en"))
-    
     st.title(t("choose_your_world", lang))
     
     # Show admin option to create worlds
@@ -651,351 +549,7 @@ def show_story_selection():
         else:
             show_world_creation()
 
-def show_story_card(story):
-    """Display a story card with join button"""
-    lang = Language(st.session_state.get("language", "en"))
-    
-    # Translate title and description if available
-    display_title = t_world(story['title'], 'title', lang) or story['title']
-    display_desc = t_world(story['title'], 'description', lang) or story['world_description']
-    
-    with st.expander(f"📚 {display_title} • {story.get('genre', 'Adventure')}"):
-        world_label = "World" if lang == Language.EN else "Mondo"
-        st.markdown(f"**{world_label}:** {display_desc}")
-        
-        if story.get('current_state'):
-            st.markdown(f"*{story['current_state']}*")
-        
-        # Check if user already has a character in this story
-        user_characters = st.session_state.user.get('characters', [])
-        existing_char = next((c for c in user_characters if c['story_id'] == story['id']), None)
-        
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if existing_char:
-                continue_text = t("continue_adventure", lang)
-                if st.button(continue_text, key=f"continue_{story['id']}"):
-                    st.session_state.character = existing_char
-                    st.session_state.story = story
-                    success_msg = f"✓ Resuming adventure in '{story['title']}'..." if lang == Language.EN else f"✓ Riprendendo l'avventura in '{story['title']}'..."
-                    st.success(success_msg)
-                    st.rerun()
-            else:
-                enter_text = t("enter_world", lang)
-                if st.button(enter_text, key=f"join_{story['id']}"):
-                    try:
-                        # Get current language from session state
-                        current_lang = st.session_state.get("language", "en")
-                        character = CollabookAPI.join_story(
-                            story['id'], 
-                            st.session_state.token,
-                            language=current_lang
-                        )
-                        # Refresh user to get the new character in the list
-                        st.session_state.user = CollabookAPI.get_current_user(st.session_state.token)
-                        st.session_state.character = character
-                        st.session_state.story = story
-                        success_msg = f"✓ Entering '{story['title']}'..." if lang == Language.EN else f"✓ Entrando in '{story['title']}'..."
-                        st.success(success_msg)
-                        st.rerun()
-                    except Exception as e:
-                        error_text = "Error" if lang == Language.EN else "Errore"
-                        st.error(f"{error_text}: {str(e)}")
 
-def show_world_creation():
-    """World creation form (admin only)"""
-    st.subheader("Create a New World")
-    
-    # Prepare strings OUTSIDE
-    title_label = "World Title"
-    title_placeholder = "e.g., The Shattered Realms"
-    genre_label = "Genre"
-    desc_label = "World Description"
-    desc_placeholder = "Describe the setting, rules, atmosphere, and key features of this world..."
-    button_label = "🌍 Create World"
-
-    with st.form("world_form"):
-        title = st.text_input(title_label, placeholder=title_placeholder)
-        genre = st.selectbox(genre_label, [
-            "Fantasy",
-            "Science Fiction",
-            "Horror",
-            "Mystery",
-            "Historical",
-            "Cyberpunk",
-            "Post-Apocalyptic",
-            "Steampunk"
-        ])
-        world_description = st.text_area(desc_label, 
-                                         placeholder=desc_placeholder,
-                                         height=200)
-        
-        submitted = st.form_submit_button(button_label)
-        
-        if submitted and title and world_description:
-            try:
-                story = CollabookAPI.create_story_admin(
-                    title=title,
-                    world_description=world_description,
-                    genre=genre,
-                    token=st.session_state.token
-                )
-                st.success(f"✓ World '{title}' created!")
-                st.rerun()
-            except Exception as e:
-                st.error(f"Error: {str(e)}")
-
-def render_hp_bar(current_hp, max_hp, label="HP"):
-    hp_percentage = (current_hp / max_hp) * 100
-    st.markdown(f"""
-        <div class='stat-card'>
-            <strong>❤️ {label}</strong>
-            <div style='margin-top: 0.5rem;'>
-                <div style='background: #333; border-radius: 5px; height: 20px; position: relative;'>
-                    <div style='background: linear-gradient(90deg, #ff4d4d, #cc0000); 
-                                width: {hp_percentage}%; height: 100%; border-radius: 5px; 
-                                box-shadow: 0 0 10px rgba(255,0,0,0.5);'></div>
-                    <span style='position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
-                                 font-weight: bold; font-size: 0.85rem; color: white;'>
-                        {current_hp} / {max_hp}
-                    </span>
-                </div>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
-
-def render_stat_card(name, value, icon=""):
-    st.markdown(f"""
-        <div class='stat-card'>
-            <strong>{icon} {name}:</strong> <span style='float: right;'>{value}</span>
-        </div>
-    """, unsafe_allow_html=True)
-
-def show_game_interface():
-    """Main game interface with RPG theme"""
-    user = st.session_state.user
-    
-    # Sidebar - Character Sheet Style
-    with st.sidebar:
-        st.markdown(f"""
-            <div style='text-align: center; padding: 1rem; background: linear-gradient(145deg, #d4af37, #ffd700); 
-                        border-radius: 10px; margin-bottom: 1rem; border: 2px solid #8b4513;'>
-                <h2 style='margin: 0; color: #2a1810; font-family: "Cinzel", serif;'>
-                    ⚔️ {user['name']} ⚔️
-                </h2>
-                <div style='font-size: 0.9rem; color: #5d4e37; margin-top: 0.5rem;'>
-                    {user.get('profession', 'Adventurer')}
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Level & Role Badge
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown(f"""
-                <div style='text-align: center; background: #2d5016; color: #ffd700; 
-                            padding: 0.5rem; border-radius: 8px; font-weight: bold;'>
-                    📊 Level {user['level']}
-                </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            role_color = "#8b0000" if user['role'] == 'admin' else "#4682b4"
-            st.markdown(f"""
-                <div style='text-align: center; background: {role_color}; color: white; 
-                            padding: 0.5rem; border-radius: 8px; font-weight: bold;'>
-                    👑 {user['role'].upper()}
-                </div>
-            """, unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Get language for labels
-        lang = Language(st.session_state.get("language", "en"))
-        
-        # HP Bar (consolidated - only one)
-        hp_label = t("hp_label", lang)
-        render_hp_bar(user['hp'], user['max_hp'], label=hp_label)
-        
-        # Stats in ornate cards with descriptions
-        strength_desc = t("strength_desc", lang)
-        render_stat_card(f"{t('strength', lang)} ({strength_desc})", user['strength'], icon="💪")
-        
-        magic_desc = t("magic_desc", lang)
-        render_stat_card(f"{t('magic', lang)} ({magic_desc})", user['magic'], icon="✨")
-        
-        dexterity_desc = t("dexterity_desc", lang)
-        render_stat_card(f"{t('dexterity', lang)} ({dexterity_desc})", user['dexterity'], icon="🎯")
-        
-        defense_desc = t("defense_desc", lang)
-        render_stat_card(f"{t('defense', lang)} ({defense_desc})", user['defense'], icon="🛡️")
-        
-        # XP Progress
-        xp_thresholds = {1: 100, 2: 300, 3: 600, 4: 1000, 5: 1500, 6: 2100, 
-                        7: 2800, 8: 3600, 9: 4500}
-        next_level_xp = xp_thresholds.get(user['level'], 4500 + (user['level'] - 9) * 1000)
-        xp_progress = min(100, (user['xp'] / next_level_xp) * 100)
-        st.markdown(f"""
-            <div class='stat-card'>
-                <strong>🌟 Experience</strong>
-                <div style='margin-top: 0.5rem;'>
-                    <div style='background: rgba(212,175,55,0.2); border-radius: 5px; height: 20px; position: relative;'>
-                        <div class='xp-progress' style='background: linear-gradient(90deg, #d4af37, #ffd700); 
-                                    width: {xp_progress}%; height: 100%; border-radius: 5px; 
-                                    box-shadow: 0 0 10px rgba(255,215,0,0.5);'></div>
-                        <span style='position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); 
-                                     font-weight: bold; font-size: 0.85rem; color: #2a1810;'>
-                            {user['xp']} / {next_level_xp}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("---")
-        
-        # Phase 5: Survival Stats
-        st.markdown("""
-            <div style='text-align: center; font-family: "Cinzel", serif; 
-                        font-size: 1.2rem; color: #d4af37; margin-bottom: 0.5rem;'>
-                🍖💧😴 Survival
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # Get character for survival stats
-        character = st.session_state.get("character")
-        if character:
-            # Hunger bar
-            hunger = character.get("hunger", 100)
-            hunger_color = "#2d5016" if hunger > 50 else "#d4af37" if hunger > 20 else "#8b0000"
-            st.markdown(f"""
-                <div style='margin-bottom: 0.5rem;'>
-                    <div style='font-size: 0.9rem; color: #5d4e37;'>🍖 Hunger: {hunger}/100</div>
-                    <div style='background: rgba(93,78,55,0.2); border-radius: 5px; height: 15px;'>
-                        <div style='background: {hunger_color}; width: {hunger}%; height: 100%; 
-                                    border-radius: 5px; transition: width 0.3s;'></div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Thirst bar
-            thirst = character.get("thirst", 100)
-            thirst_color = "#4682b4" if thirst > 50 else "#d4af37" if thirst > 20 else "#8b0000"
-            st.markdown(f"""
-                <div style='margin-bottom: 0.5rem;'>
-                    <div style='font-size: 0.9rem; color: #5d4e37;'>💧 Thirst: {thirst}/100</div>
-                    <div style='background: rgba(93,78,55,0.2); border-radius: 5px; height: 15px;'>
-                        <div style='background: {thirst_color}; width: {thirst}%; height: 100%; 
-                                    border-radius: 5px; transition: width 0.3s;'></div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Fatigue bar
-            fatigue = character.get("fatigue", 0)
-            fatigue_color = "#2d5016" if fatigue < 50 else "#d4af37" if fatigue < 80 else "#8b0000"
-            st.markdown(f"""
-                <div style='margin-bottom: 0.5rem;'>
-                    <div style='font-size: 0.9rem; color: #5d4e37;'>😴 Fatigue: {fatigue}/100</div>
-                    <div style='background: rgba(93,78,55,0.2); border-radius: 5px; height: 15px;'>
-                        <div style='background: {fatigue_color}; width: {fatigue}%; height: 100%; 
-                                    border-radius: 5px; transition: width 0.3s;'></div>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Warnings
-            warnings = []
-            if hunger < 30:
-                warnings.append("⚠️ You are hungry!")
-            if thirst < 40:
-                warnings.append("⚠️ You are thirsty!")
-            if fatigue > 70:
-                warnings.append("⚠️ You are tired!")
-            
-            for warning in warnings:
-                st.warning(warning)
-            
-            # Inventory & Rest buttons
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("🎒 Items", use_container_width=True):
-                    st.session_state.show_inventory = True
-            with col2:
-                if st.button("😴 Rest", use_container_width=True):
-                    st.session_state.show_rest = True
-        
-        st.markdown("---")
-        
-        # Logout Button
-        if st.button("← Leave World", use_container_width=True):
-            st.session_state.story = None
-            st.session_state.character = None
-            st.session_state.history = []
-            st.rerun()
-    
-    # Story history
-    st.subheader("📜 Your Journey")
-    
-    if not st.session_state.history:
-        insertion = st.session_state.character.get('insertion_point', 'You enter the world...')
-        st.info(f"**Your Arrival:** {insertion}")
-    else:
-        for i, turn in enumerate(st.session_state.history):
-            with st.container():
-                st.markdown(f"**Turn {i+1} • Your Action:**")
-                st.markdown(f"> _{turn['action']}_")
-                st.markdown(f"**The World Responds:**")
-                st.markdown(turn['narration'])
-                st.divider()
-    
-    # User action input
-    st.subheader("✨ What do you do?")
-    
-    with st.form("action_form", clear_on_submit=True):
-        user_action = st.text_area("Describe your action", 
-                                   placeholder="e.g., I cautiously approach the ancient door, examining it for traps...",
-                                   height=100,
-                                   help="Be descriptive! The AI responds to your creativity.")
-        
-        submitted = st.form_submit_button("🎭 Take Action", use_container_width=True)
-        
-        if submitted and user_action:
-            with st.spinner("🎲 The dungeon master considers..."):
-                try:
-                    # Get current language
-                    lang = st.session_state.get("language", "en")
-                    
-                    response = CollabookAPI.interact(
-                        st.session_state.character['id'], 
-                        user_action,
-                        st.session_state.token,
-                        language=lang
-                    )
-                    st.session_state.history.append({
-                        "action": user_action,
-                        "narration": response['narration']
-                    })
-                    st.rerun()
-                except Exception as e:
-                    st.session_state.interaction_error = str(e)
-                    st.rerun()
-
-    # Handle errors outside the form
-    if "interaction_error" in st.session_state and st.session_state.interaction_error:
-        error_msg = st.session_state.interaction_error
-        if "404" in error_msg:
-            st.error("⚠️ Character not found. Your session may have expired or the character was deleted.")
-            if st.button("Return to World Selection", key="error_return_btn"):
-                st.session_state.character = None
-                st.session_state.story = None
-                del st.session_state.interaction_error
-                st.rerun()
-        else:
-            st.error(f"Error: {error_msg}")
-            # Clear error on next interaction
-            if st.button("Dismiss Error"):
-                del st.session_state.interaction_error
-                st.rerun()
 
 if __name__ == "__main__":
     main()

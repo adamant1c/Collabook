@@ -7,7 +7,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=collabook
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-collabook_pass}
       - POSTGRES_DB=collabook_db
     networks:
       - collabook-net
@@ -20,7 +20,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD:-redis_pass}
     networks:
       - collabook-net
     restart: unless-stopped
@@ -36,8 +36,8 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - DATABASE_URL=postgresql://collabook:${DB_PASSWORD}@db:5432/collabook_db
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - DATABASE_URL=postgresql://collabook:${DB_PASSWORD:-collabook_pass}@db:5432/collabook_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_pass}@redis:6379/0
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
     depends_on:

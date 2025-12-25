@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Select World" %} - Collabook RPG{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 style='text-align: center; color: #d4af37; font-family: "Cinzel", serif;'>
+        🌍 {% trans "Choose Your World" %}
+    </h1>
+
+    {% if is_admin %}
+    <div class="alert alert-info">
+        {% trans "Admin Mode: You can create new worlds." %}
+        <!-- TODO: Add world creation form for admin -->
+    </div>
+    {% endif %}
+
+    {% if default_worlds %}
+    <h2 style="margin-top: 2rem;">{% trans "Classic Worlds" %}</h2>
+    {% for story in default_worlds %}
+    <div class="quest-card">
+        <h3>📚 {{ story.title }} <small style="font-size: 0.6em; color: var(--text-muted);">• {{ story.genre }}</small>
+        </h3>
+        <p><strong>{% trans "World" %}:</strong> {{ story.world_description }}</p>
+        {% if story.current_state %}
+        <p><em>{{ story.current_state }}</em></p>
+        {% endif %}
+
+        <form method="post" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <input type="hidden" name="story_id" value="{{ story.id }}">
+            {% if story.existing_char %}
+            <button type="submit" name="action" value="continue" class="btn-primary">
+                {% trans "Continue Adventure" %}
+            </button>
+            {% else %}
+            <button type="submit" name="action" value="join" class="btn-primary">
+                {% trans "Enter World" %}
+            </button>
+            {% endif %}
+        </form>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if custom_worlds %}
+    <h2 style="margin-top: 2rem;">{% trans "Custom Worlds" %}</h2>
+    {% for story in custom_worlds %}
+    <div class="quest-card">
+        <h3>📚 {{ story.title }} <small style="font-size: 0.6em; color: var(--text-muted);">• {{ story.genre }}</small>
+        </h3>
+        <p><strong>{% trans "World" %}:</strong> {{ story.world_description }}</p>
+
+        <form method="post" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <input type="hidden" name="story_id" value="{{ story.id }}">
+            {% if story.existing_char %}
+            <button type="submit" name="action" value="continue" class="btn-primary">
+                {% trans "Continue Adventure" %}
+            </button>
+            {% else %}
+            <button type="submit" name="action" value="join" class="btn-primary">
+                {% trans "Enter World" %}
+            </button>
+            {% endif %}
+        </form>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if not default_worlds and not custom_worlds %}
+    <div class="alert alert-warning">
+        {% trans "No worlds available at the moment." %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

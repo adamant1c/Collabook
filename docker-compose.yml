@@ -45,12 +45,14 @@ services:
     restart: no
 
   frontend:
-    build: ./frontend
-    command: streamlit run app.py --server.port 8501 --server.address 0.0.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./frontend:/app
+      - .:/app
     ports:
-      - "8501:8501"
+      - "3000:8000"
     environment:
       - BACKEND_URL=http://backend:8000
     depends_on:

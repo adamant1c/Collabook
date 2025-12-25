@@ -1,0 +1,218 @@
+/*
+ * Collabook RPG - Modern Fantasy Theme
+ * Designed for a premium, immersive experience
+ * Accessibility: WCAG 2.1 AA Compliant
+ */
+
+/* Import fantasy fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=MedievalSharp&family=Spectral:wght@400;600&family=Inter:wght@300;400;600&display=swap');
+
+:root {
+    /* Primary Palette - Deep & Rich */
+    --bg-dark: #0f0c08;
+    --bg-panel: #1a1612;
+    --bg-overlay: rgba(26, 22, 18, 0.95);
+    /* Increased opacity for better text contrast */
+
+    /* Accents - Gold & Magic */
+    --gold-primary: #e6c250;
+    /* Lightened for better contrast on dark bg */
+    --gold-hover: #f4d06f;
+    --gold-dim: #9e8229;
+
+    /* Status Colors - Adjusted for contrast */
+    --success: #66bb6a;
+    --danger: #ef5350;
+    --magic: #ab47bc;
+    --info: #42a5f5;
+
+    /* Text - High Contrast */
+    --text-primary: #f5f5f5;
+    /* Almost white */
+    --text-secondary: #e0e0e0;
+    --text-muted: #bdbdbd;
+
+    /* Effects */
+    --glass-border: 1px solid rgba(230, 194, 80, 0.3);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+
+    /* Focus Indicators */
+    --focus-ring: 2px solid #42a5f5;
+    --focus-offset: 2px;
+}
+
+/* Global Reset & Typography */
+body {
+    background:
+        linear-gradient(rgba(15, 12, 8, 0.92), rgba(15, 12, 8, 0.95)),
+        url('https://images.unsplash.com/photo-1519074069444-1ba4fff66d16?q=80&w=2544&auto=format&fit=crop');
+    background-size: cover;
+    background-attachment: fixed;
+    font-family: 'Spectral', serif;
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin: 0;
+    min-height: 100vh;
+}
+
+/* Main Container - Glassmorphism */
+.main-container {
+    background: rgba(26, 22, 18, 0.85);
+    /* Darker for contrast */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--glass-border);
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: var(--glass-shadow);
+    max-width: 1200px;
+    margin: 2rem auto;
+    width: 90%;
+}
+
+/* Headers */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Cinzel', serif !important;
+    color: var(--gold-primary) !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    border-bottom: none !important;
+}
+
+h1 {
+    font-size: 3rem !important;
+    background: linear-gradient(to right, transparent, rgba(212, 175, 55, 0.1), transparent);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* Inputs & Forms */
+input,
+textarea,
+select,
+.form-control {
+    background: rgba(15, 12, 8, 0.8) !important;
+    border: 1px solid var(--gold-dim) !important;
+    color: var(--text-primary) !important;
+    border-radius: 8px !important;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.3s ease;
+    font-size: 1rem !important;
+    padding: 0.5rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus,
+.form-control:focus {
+    border-color: var(--info) !important;
+    box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.3) !important;
+    outline: none !important;
+}
+
+label {
+    color: var(--gold-primary) !important;
+    font-family: 'Cinzel', serif !important;
+    font-size: 1rem !important;
+    letter-spacing: 1px;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+/* Buttons */
+.btn-primary,
+button[type="submit"] {
+    background: #9e8229 !important;
+    background-color: #9e8229 !important;
+    background-image: linear-gradient(135deg, #9e8229, #1a1612) !important;
+    border: 2px solid #e6c250 !important;
+    color: #e6c250 !important;
+    font-family: 'Cinzel', serif !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 0.75rem 2rem !important;
+    border-radius: 4px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+    min-height: 44px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-primary:hover,
+button[type="submit"]:hover {
+    background: #e6c250 !important;
+    background-color: #e6c250 !important;
+    background-image: linear-gradient(135deg, #e6c250, #f4d06f) !important;
+    color: #0f0c08 !important;
+    border-color: #f4d06f !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(212, 175, 55, 0.5) !important;
+}
+
+/* Alerts/Messages */
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background-color: rgba(102, 187, 106, 0.2);
+    border-color: var(--success);
+    color: var(--text-primary);
+}
+
+.alert-error,
+.alert-danger {
+    background-color: rgba(239, 83, 80, 0.2);
+    border-color: var(--danger);
+    color: var(--text-primary);
+}
+
+.alert-info {
+    background-color: rgba(66, 165, 245, 0.2);
+    border-color: var(--info);
+    color: var(--text-primary);
+}
+
+/* Language Toggle */
+.lang-toggle {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.lang-btn {
+    background: transparent;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+}
+
+.lang-btn:hover,
+.lang-btn.active {
+    background: var(--gold-dim);
+    color: var(--bg-dark);
+}

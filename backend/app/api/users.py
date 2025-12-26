@@ -27,13 +27,6 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
 
-@router.get("/{user_id}", response_model=UserResponse)
-async def get_user(user_id: str, db: Session = Depends(get_db)):
-    """Get user by ID"""
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return user
 
 @router.get("/me")
 async def get_user_profile(
@@ -64,6 +57,14 @@ async def get_user_profile(
             "defense": current_user.defense
         }
     }
+
+@router.get("/{user_id}", response_model=UserResponse)
+async def get_user(user_id: str, db: Session = Depends(get_db)):
+    """Get user by ID"""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 @router.patch("/character/{character_id}")
 async def update_character(

@@ -1,0 +1,64 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-26 17:50+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Login"
+msgstr "Accedi"
+
+msgid "Logout"
+msgstr "Esci"
+
+msgid "Register"
+msgstr "Registrati"
+
+msgid "Reset"
+msgstr "Resetta"
+
+msgid "Welcome Back"
+msgstr "Bentornato"
+
+msgid "Continue your epic adventure"
+msgstr "Continua la tua epica avventura"
+
+msgid "Home"
+msgstr "Home"
+
+msgid "Create Your Hero"
+msgstr "Crea il Tuo Eroe"
+
+msgid "Begin Adventure"
+msgstr "Inizia l'Avventura"
+
+msgid "Roll Dice"
+msgstr "Tira i Dadi"
+
+msgid "Roll Your Destiny"
+msgstr "Tira il Tuo Destino"
+
+msgid "Customize your character"
+msgstr "Personalizza il tuo personaggio"
+
+msgid "Profession"
+msgstr "Professione"
+
+msgid "Backstory"
+msgstr "Biografia"
+
+msgid "Entering world..."
+msgstr "Entrando nel mondo..."
+
+msgid "Resuming adventure..."
+msgstr "Riprendendo l'avventura..."
+
+msgid "You have been logged out."
+msgstr "Sei uscito con successo."

@@ -40,6 +40,19 @@ async def get_user_profile(
         "email": current_user.email,
         "role": current_user.role.value,
         "is_active": current_user.is_active,
+        # List of characters in specific stories
+        "characters": [
+            {
+                "id": c.id,
+                "story_id": c.story_id,
+                "status": c.status,
+                "insertion_point": c.insertion_point,
+                "name": current_user.name,  # Users act through character identities
+                "level": current_user.level,
+                "hp": current_user.hp,
+                "max_hp": current_user.max_hp
+            } for c in current_user.characters
+        ],
         # Map User fields to "character" object for frontend compatibility
         # The User model holds the global character stats and profile
         "character": {

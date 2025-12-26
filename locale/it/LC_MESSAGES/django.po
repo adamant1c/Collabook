@@ -62,3 +62,33 @@ msgstr "Riprendendo l'avventura..."
 
 msgid "You have been logged out."
 msgstr "Sei uscito con successo."
+
+msgid "Worlds"
+msgstr "Mondi"
+
+msgid "Character"
+msgstr "Personaggio"
+
+msgid "Rules"
+msgstr "Regole"
+
+msgid "Game Rules"
+msgstr "Regole di Gioco"
+
+msgid "Character Sheet"
+msgstr "Scheda Personaggio"
+
+msgid "Select World"
+msgstr "Seleziona Mondo"
+
+msgid "Change World"
+msgstr "Cambia Mondo"
+
+msgid "Basic Stats"
+msgstr "Statistiche Base"
+
+msgid "Hero's Backstory"
+msgstr "Biografia dell'Eroe"
+
+msgid "How to Play"
+msgstr "Come Giocare"

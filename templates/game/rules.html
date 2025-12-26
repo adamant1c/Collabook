@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Game Rules" %} - Collabook RPG{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card bg-dark border-secondary shadow-lg">
+            <div class="card-body p-5">
+                <header class="text-center mb-5">
+                    <h1 style="font-family: 'Cinzel', serif; color: #d4af37;">📜 {% trans "Game Rules" %}</h1>
+                    <div class="border-bottom border-warning w-25 mx-auto mt-3"></div>
+                </header>
+
+                <section class="mb-5">
+                    <h3 class="text-warning mb-3">⚔️ {% trans "How to Play" %}</h3>
+                    <p class="lead">{% trans "Collabook is a collaborative RPG where you write your own destiny.
+                        Describe your actions, and the world will respond through our advanced AI Dungeon Master." %}
+                    </p>
+                </section>
+
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6">
+                        <div class="p-4 border border-secondary rounded h-100 bg-black bg-opacity-25">
+                            <h5 class="text-gold">🎲 {% trans "Rolling Dice" %}</h5>
+                            <p class="small text-secondary">{% trans "During character creation, you must roll your
+                                attributes. These stats influence how successful your actions will be in the world." %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4 border border-secondary rounded h-100 bg-black bg-opacity-25">
+                            <h5 class="text-gold">🎭 {% trans "Taking Action" %}</h5>
+                            <p class="small text-secondary">{% trans "Be descriptive! The more detail you provide about
+                                your intent, the more creatively the world will react." %}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <section>
+                    <h4 class="text-warning mb-3">🛡️ {% trans "Character Stats" %}</h4>
+                    <ul class="list-group list-group-flush bg-transparent">
+                        <li class="list-group-item bg-transparent text-secondary border-secondary">
+                            <strong class="text-white">{% trans "Strength" %}:</strong> {% trans "Physical power and
+                            combat prowess." %}
+                        </li>
+                        <li class="list-group-item bg-transparent text-secondary border-secondary">
+                            <strong class="text-white">{% trans "Magic" %}:</strong> {% trans "Affinity for the mystical
+                            arts and ancient spells." %}
+                        </li>
+                        <li class="list-group-item bg-transparent text-secondary border-secondary">
+                            <strong class="text-white">{% trans "Dexterity" %}:</strong> {% trans "Agility, speed, and
+                            precision in movement." %}
+                        </li>
+                        <li class="list-group-item bg-transparent text-secondary border-secondary">
+                            <strong class="text-white">{% trans "Defense" %}:</strong> {% trans "Ability to withstand
+                            hits and avoid damage." %}
+                        </li>
+                    </ul>
+                </section>
+
+                <div class="text-center mt-5">
+                    <a href="{% url 'world:selection' %}" class="btn btn-gold btn-lg shadow">⚔️ {% trans "Return to
+                        Worlds" %}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-gold {
+        color: #d4af37;
+        font-family: 'Cinzel', serif;
+    }
+</style>
+{% endblock %}

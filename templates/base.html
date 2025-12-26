@@ -61,13 +61,26 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark border-bottom border-secondary mb-4">
         <div class="container">
-            <a class="navbar-brand" href="/">⚔️ COLLABOOK</a>
+            <a class="navbar-brand"
+                href="{% if request.session.token %}{% url 'world:selection' %}{% else %}{% url 'accounts:login' %}{% endif %}">
+                ⚔️ COLLABOOK
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <!-- Home removed as requested (Pagina iniziale) -->
+                    {% if request.session.token %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'world:selection' %}">🏰 {% trans "Worlds" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'character:sheet' %}">👤 {% trans "Character" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'game:rules' %}">📜 {% trans "Rules" %}</a>
+                    </li>
+                    {% endif %}
                 </ul>
                 <div class="d-flex align-items-center">
                     <div class="me-3 d-flex border rounded border-secondary p-1">

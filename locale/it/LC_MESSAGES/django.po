@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 18:48+0000\n"
+"POT-Creation-Date: 2025-12-26 18:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -315,8 +315,8 @@ msgstr "Biografia dell'Eroe"
 msgid "Select World"
 msgstr "Seleziona Mondo"
 
-#: templates/character/sheet.html:159 templates/world/selection.html:87
-#: templates/world/selection.html:126
+#: templates/character/sheet.html:159 templates/world/selection.html:71
+#: templates/world/selection.html:110
 msgid "Continue Adventure"
 msgstr "Continua Avventura"
 
@@ -391,47 +391,59 @@ msgstr "Capacità di resistere ai colpi ed evitare danni."
 msgid "Return to Worlds"
 msgstr "Torna ai Mondi"
 
-#: templates/world/journey.html:5 templates/world/journey.html:14
+#: templates/world/journey.html:5 templates/world/journey.html:31
 msgid "Your Journey"
 msgstr "Il Tuo Viaggio"
 
-#: templates/world/journey.html:17
+#: templates/world/journey.html:19
+msgid "The Weaver is spinning your tale..."
+msgstr "Il Tessitore sta intrecciando la tua storia..."
+
+#: templates/world/journey.html:22
+msgid "Please wait while the world responds to your actions."
+msgstr "Attendi mentre il mondo risponde alle tue azioni."
+
+#: templates/world/journey.html:34
 msgid "Change World"
 msgstr "Cambia Mondo"
 
-#: templates/world/journey.html:25
+#: templates/world/journey.html:42
 msgid "Your Arrival"
 msgstr "Il Tuo Arrivo"
 
-#: templates/world/journey.html:31
+#: templates/world/journey.html:48
 #, fuzzy
 #| msgid "Entering world..."
 msgid "You enter the world..."
 msgstr "Entrando nel mondo..."
 
-#: templates/world/journey.html:40
+#: templates/world/journey.html:57
 msgid "Your Action"
 msgstr "La Tua Azione"
 
-#: templates/world/journey.html:49
+#: templates/world/journey.html:66
 msgid "The World Responds"
 msgstr "Il Mondo Risponde"
 
-#: templates/world/journey.html:65
+#: templates/world/journey.html:82
 msgid "What do you do?"
 msgstr "Cosa fai?"
 
-#: templates/world/journey.html:72
+#: templates/world/journey.html:89
 msgid "Describe your action"
 msgstr "Descrivi la tua azione"
 
-#: templates/world/journey.html:75
+#: templates/world/journey.html:92
 msgid "e.g., I cautiously approach the ancient door..."
 msgstr "es: Mi avvicino con cautela alla porta antica..."
 
-#: templates/world/journey.html:80
+#: templates/world/journey.html:97
 msgid "Take Action"
 msgstr "Agisci"
+
+#: templates/world/journey.html:115
+msgid "Summoning response..."
+msgstr "Evocando la risposta..."
 
 #: templates/world/selection.html:11
 msgid "Echoes of the Past"
@@ -457,17 +469,21 @@ msgstr "Fantasy Epico"
 msgid "Science Fiction"
 msgstr "Fantascienza"
 
-#: templates/world/selection.html:27 templates/world/selection.html:68
+#: templates/world/selection.html:27
 msgid "The kingdom prepares for the annual Tournament of Champions..."
 msgstr "Il regno si prepara per l'annuale Torneo dei Campioni..."
 
-#: templates/world/selection.html:28 templates/world/selection.html:71
+#: templates/world/selection.html:28
 msgid "The Council of Mages senses a disturbance in the magical ley lines..."
-msgstr "Il Consiglio dei Maghi percepisce una perturbazione nelle linee energetiche magiche..."
+msgstr ""
+"Il Consiglio dei Maghi percepisce una perturbazione nelle linee energetiche "
+"magiche..."
 
-#: templates/world/selection.html:29 templates/world/selection.html:73
+#: templates/world/selection.html:29
 msgid "Your ship approaches the neutral trading station orbiting Jupiter..."
-msgstr "La tua nave si avvicina alla stazione commerciale neutrale in orbita attorno a Giove..."
+msgstr ""
+"La tua nave si avvicina alla stazione commerciale neutrale in orbita attorno "
+"a Giove..."
 
 #: templates/world/selection.html:34
 msgid "Choose Your World"
@@ -481,19 +497,19 @@ msgstr "Modalità Admin: Puoi creare nuovi mondi."
 msgid "Classic Worlds"
 msgstr "Mondi Classici"
 
-#: templates/world/selection.html:59 templates/world/selection.html:115
+#: templates/world/selection.html:59 templates/world/selection.html:99
 msgid "World"
 msgstr "Mondo"
 
-#: templates/world/selection.html:91 templates/world/selection.html:130
+#: templates/world/selection.html:75 templates/world/selection.html:114
 msgid "Enter World"
 msgstr "Entra nel Mondo"
 
-#: templates/world/selection.html:101
+#: templates/world/selection.html:85
 msgid "Custom Worlds"
 msgstr "Mondi Personalizzati"
 
-#: templates/world/selection.html:140
+#: templates/world/selection.html:124
 msgid "No worlds available at the moment."
 msgstr "Nessun mondo disponibile al momento."
 
@@ -518,14 +534,40 @@ msgstr ""
 #~ msgid "Home"
 #~ msgstr "Home"
 
-#: templates/world/selection.html:17
-msgid "A historically-inspired world set in medieval Europe during the height of the Renaissance. Great kingdoms rise and fall, knights defend their honor, and scholars unlock ancient secrets. Navigate political intrigue, participate in grand tournaments, or explore forgotten ruins."
-msgstr "Un mondo d'ispirazione storica ambientato nell'Europa medievale durante l'apice del Rinascimento. Grandi regni sorgono e cadono, i cavalieri difendono il proprio onore e gli studiosi svelano antichi segreti. Naviga tra intrighi politici, partecipa a grandi tornei o esplora rovine dimenticate."
+#~ msgid ""
+#~ "A historically-inspired world set in medieval Europe during the height of "
+#~ "the Renaissance. Great kingdoms rise and fall, knights defend their "
+#~ "honor, and scholars unlock ancient secrets. Navigate political intrigue, "
+#~ "participate in grand tournaments, or explore forgotten ruins."
+#~ msgstr ""
+#~ "Un mondo d'ispirazione storica ambientato nell'Europa medievale durante "
+#~ "l'apice del Rinascimento. Grandi regni sorgono e cadono, i cavalieri "
+#~ "difendono il proprio onore e gli studiosi svelano antichi segreti. Naviga "
+#~ "tra intrighi politici, partecipa a grandi tornei o esplora rovine "
+#~ "dimenticate."
 
-#: templates/world/selection.html:20
-msgid "A high-fantasy realm where magic flows through every living thing. Ancient dragons soar the skies, elven kingdoms hide in enchanted forests, and dwarven cities delve deep into mystical mountains. Dark forces stir in forgotten places, and heroes are called to face legendary quests."
-msgstr "Un regno high-fantasy dove la magia scorre in ogni essere vivente. Antichi draghi solcano i cieli, regni elfici si nascondono in foreste incantate e città naniche scavano nelle profondità di montagne mistiche. Forze oscure si muovono in luoghi dimenticati e gli eroi sono chiamati ad affrontare missioni leggendarie."
+#~ msgid ""
+#~ "A high-fantasy realm where magic flows through every living thing. "
+#~ "Ancient dragons soar the skies, elven kingdoms hide in enchanted forests, "
+#~ "and dwarven cities delve deep into mystical mountains. Dark forces stir "
+#~ "in forgotten places, and heroes are called to face legendary quests."
+#~ msgstr ""
+#~ "Un regno high-fantasy dove la magia scorre in ogni essere vivente. "
+#~ "Antichi draghi solcano i cieli, regni elfici si nascondono in foreste "
+#~ "incantate e città naniche scavano nelle profondità di montagne mistiche. "
+#~ "Forze oscure si muovono in luoghi dimenticati e gli eroi sono chiamati ad "
+#~ "affrontare missioni leggendarie."
 
-#: templates/world/selection.html:23
-msgid "The year is 2347. Humanity has colonized the solar system and made first contact with alien civilizations. Advanced AI, cybernetic augmentations, and faster-than-light travel are commonplace. Navigate space politics, explore alien worlds, uncover corporate conspiracies, or fight in the ongoing conflict between Earth Alliance and the Outer Colonies."
-msgstr "L'anno è il 2347. L'umanità ha colonizzato il sistema solare e ha stabilito il primo contatto con civiltà aliene. IA avanzate, potenziamenti cibernetici e viaggi più veloci della luce sono all'ordine del giorno. Naviga tra la politica spaziale, esplora mondi alieni, svela cospirazioni aziendali o combatti nel conflitto in corso tra l'Alleanza Terrestre e le Colonie Esterne."
+#~ msgid ""
+#~ "The year is 2347. Humanity has colonized the solar system and made first "
+#~ "contact with alien civilizations. Advanced AI, cybernetic augmentations, "
+#~ "and faster-than-light travel are commonplace. Navigate space politics, "
+#~ "explore alien worlds, uncover corporate conspiracies, or fight in the "
+#~ "ongoing conflict between Earth Alliance and the Outer Colonies."
+#~ msgstr ""
+#~ "L'anno è il 2347. L'umanità ha colonizzato il sistema solare e ha "
+#~ "stabilito il primo contatto con civiltà aliene. IA avanzate, "
+#~ "potenziamenti cibernetici e viaggi più veloci della luce sono all'ordine "
+#~ "del giorno. Naviga tra la politica spaziale, esplora mondi alieni, svela "
+#~ "cospirazioni aziendali o combatti nel conflitto in corso tra l'Alleanza "
+#~ "Terrestre e le Colonie Esterne."

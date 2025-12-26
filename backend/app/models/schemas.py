@@ -121,6 +121,7 @@ class InteractionResponse(BaseModel):
     quest_hint: Optional[str] = None
     survival_warnings: List[str] = []
     critical_condition: bool = False
+    detected_entities: List[Dict[str, Any]] = []
     # Phase 3: LLM can suggest quest completion
     
     class Config:

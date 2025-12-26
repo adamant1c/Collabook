@@ -128,7 +128,8 @@ class JourneyView(View):
             history = request.session.get('history', [])
             history.append({
                 'action': user_action,
-                'narration': response['narration']
+                'narration': response['narration'],
+                'entities': response.get('detected_entities', [])
             })
             request.session['history'] = history
             

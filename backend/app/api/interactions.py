@@ -9,7 +9,7 @@ from app.core.content_filter import validate_user_input, sanitize_llm_output, lo
 from app.core.llm_client import llm_client
 from app.api.auth import get_current_user
 from app.models.schemas import InteractionRequest, InteractionResponse
-from app.models.db_models import Turn, Character, Story, User, PlayerQuest, QuestStatus
+from app.models.db_models import Turn, Character, Story, User, PlayerQuest, QuestStatus, Enemy, NPC
 
 router = APIRouter(prefix="/interact", tags=["interactions"])
 
@@ -154,11 +154,33 @@ Rispondi direttamente in 2-3 paragrafi."""
     db.commit()
     db.refresh(db_turn)
     
+    # Phase 7: Entity detection in narration
+    detected_entities = []
+    
+    # Check for Enemies
+    for enemy in story.enemies:
+        if enemy.name.lower() in narration.lower():
+            detected_entities.append({
+                "type": "enemy",
+                "name": enemy.name,
+                "image_url": enemy.image_url
+            })
+            
+    # Check for NPCs
+    for npc in story.npcs:
+        if npc.name.lower() in narration.lower():
+            detected_entities.append({
+                "type": "npc",
+                "name": npc.name,
+                "image_url": npc.image_url
+            })
+    
     return InteractionResponse(
         turn_id=db_turn.id,
         narration=narration,
         turn_number=turn_number,
         quest_hint=quest_hint,
         survival_warnings=survival_result.get("warnings", []),
-        critical_condition=survival_result.get("critical", False)
+        critical_condition=survival_result.get("critical", False),
+        detected_entities=detected_entities
     )

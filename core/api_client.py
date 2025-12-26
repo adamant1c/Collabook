@@ -52,8 +52,8 @@ class CollabookAPI:
     
     @staticmethod
     def get_current_user(token: str) -> dict:
-        """Get current user information"""
-        response = requests.get(f"{BACKEND_URL}/auth/me",
+        """Get current user information (including character data)"""
+        response = requests.get(f"{BACKEND_URL}/users/me",
                               headers={"Authorization": f"Bearer {token}"})
         response.raise_for_status()
         return response.json()

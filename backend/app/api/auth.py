@@ -120,11 +120,6 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
     
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=UserResponse)
-async def get_me(current_user: User = Depends(get_current_user)):
-    """Get current user information"""
-    return current_user
-
 @router.post("/request-reset")
 @limiter.limit("50/hour")  # Max 50 password reset requests per hour per IP
 async def request_password_reset(request: Request, reset_request: PasswordResetRequest, db: Session = Depends(get_db)):

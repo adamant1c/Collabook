@@ -97,22 +97,23 @@ class Turn(models.Model):
 
 class Quest(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
-    story = models.ForeignKey(Story, db_column='story_id', on_delete=models.DO_NOTHING)
-    title = models.CharField(max_length=255)
-    description = models.TextField()
+    story = models.ForeignKey(Story, db_column='story_id', on_delete=models.DO_NOTHING, help_text="La storia a cui appartiene questa missione")
+    title = models.CharField(max_length=255, help_text="Il titolo della missione")
+    description = models.TextField(help_text="Descrizione dettagliata della missione")
     quest_type = models.CharField(
         max_length=50, 
         choices=[('MAIN', 'Main Quest'), ('SIDE', 'Side Quest')],
-        default='MAIN'
+        default='MAIN',
+        help_text="Tipo di missione: Principale o Secondaria"
     )
-    objectives = models.JSONField(default=list)
-    xp_reward = models.IntegerField(default=0)
-    gold_reward = models.IntegerField(default=0)
-    item_rewards = models.JSONField(default=list, null=True, blank=True)
-    quest_giver = models.CharField(max_length=255, null=True, blank=True)
-    quest_giver_description = models.TextField(null=True, blank=True)
-    is_repeatable = models.BooleanField(default=False)
-    required_level = models.IntegerField(default=1)
+    objectives = models.JSONField(default=list, help_text="Lista degli obiettivi (formato JSON)")
+    xp_reward = models.IntegerField(default=100, help_text="Punti Esperienza (XP) guadagnati al completamento")
+    gold_reward = models.IntegerField(default=50, help_text="Oro guadagnato al completamento")
+    item_rewards = models.JSONField(default=list, null=True, blank=True, help_text="Oggetti ottenuti come ricompensa (formato JSON)")
+    quest_giver = models.CharField(max_length=255, null=True, blank=True, help_text="Nome dell'NPC che assegna la missione")
+    quest_giver_description = models.TextField(null=True, blank=True, help_text="Descrizione dell'NPC che assegna la missione")
+    is_repeatable = models.BooleanField(default=False, help_text="Se la missione può essere completata più volte")
+    required_level = models.IntegerField(default=1, help_text="Livello minimo richiesto per attivare la missione")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -124,24 +125,25 @@ class Quest(models.Model):
 
 class Enemy(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
-    story = models.ForeignKey(Story, db_column='story_id', on_delete=models.DO_NOTHING)
-    name = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
+    story = models.ForeignKey(Story, db_column='story_id', on_delete=models.DO_NOTHING, help_text="La storia a cui appartiene questo nemico")
+    name = models.CharField(max_length=255, help_text="Il nome del nemico")
+    description = models.TextField(null=True, blank=True, help_text="Descrizione fisica e comportamentale")
     enemy_type = models.CharField(
         max_length=50, 
         choices=[('COMMON', 'Common'), ('ELITE', 'Elite'), ('BOSS', 'Boss')],
-        default='COMMON'
+        default='COMMON',
+        help_text="Grado di pericolosità del nemico"
     )
-    level = models.IntegerField(default=1)
-    hp = models.IntegerField()
-    max_hp = models.IntegerField()
-    attack = models.IntegerField()
-    defense = models.IntegerField()
-    xp_reward = models.IntegerField(default=0)
-    gold_min = models.IntegerField(default=0)
-    gold_max = models.IntegerField(default=0)
-    loot_table = models.JSONField(default=list, null=True, blank=True)
-    image_url = models.TextField(null=True, blank=True)
+    level = models.IntegerField(default=1, help_text="Livello di difficoltà")
+    hp = models.IntegerField(default=50, help_text="Punti Vita iniziali")
+    max_hp = models.IntegerField(default=50, help_text="Punti Vita massimi")
+    attack = models.IntegerField(default=5, help_text="Potenza d'attacco")
+    defense = models.IntegerField(default=5, help_text="Valore di difesa")
+    xp_reward = models.IntegerField(default=20, help_text="XP guadagnati sconfiggendolo")
+    gold_min = models.IntegerField(default=5, help_text="Oro minimo rilasciato")
+    gold_max = models.IntegerField(default=15, help_text="Oro massimo rilasciato")
+    loot_table = models.JSONField(default=list, null=True, blank=True, help_text="Lista degli oggetti droppabili (formato JSON)")
+    image_url = models.TextField(null=True, blank=True, help_text="Nome del file immagine in static/images")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -154,10 +156,10 @@ class Enemy(models.Model):
 
 class NPC(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
-    story = models.ForeignKey(Story, related_name='npcs', db_column='story_id', on_delete=models.DO_NOTHING)
-    name = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
-    image_url = models.TextField(null=True, blank=True)
+    story = models.ForeignKey(Story, related_name='npcs', db_column='story_id', on_delete=models.DO_NOTHING, help_text="La storia a cui appartiene questo NPC")
+    name = models.CharField(max_length=255, help_text="Il nome dell'NPC")
+    description = models.TextField(null=True, blank=True, help_text="Descrizione e ruolo dell'NPC nel mondo")
+    image_url = models.TextField(null=True, blank=True, help_text="Nome del file immagine in static/images")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

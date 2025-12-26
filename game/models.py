@@ -106,10 +106,10 @@ class Quest(models.Model):
         default='MAIN',
         help_text="Tipo di missione: Principale o Secondaria"
     )
-    objectives = models.JSONField(default=list, help_text="Lista degli obiettivi (formato JSON)")
+    objectives = models.TextField(default="[]", help_text="Lista degli obiettivi (formato JSON)")
     xp_reward = models.IntegerField(default=100, help_text="Punti Esperienza (XP) guadagnati al completamento")
     gold_reward = models.IntegerField(default=50, help_text="Oro guadagnato al completamento")
-    item_rewards = models.JSONField(default=list, null=True, blank=True, help_text="Oggetti ottenuti come ricompensa (formato JSON)")
+    item_rewards = models.TextField(default="[]", null=True, blank=True, help_text="Oggetti ottenuti come ricompensa (formato JSON)")
     quest_giver = models.CharField(max_length=255, null=True, blank=True, help_text="Nome dell'NPC che assegna la missione")
     quest_giver_description = models.TextField(null=True, blank=True, help_text="Descrizione dell'NPC che assegna la missione")
     is_repeatable = models.BooleanField(default=False, help_text="Se la missione può essere completata più volte")
@@ -142,7 +142,7 @@ class Enemy(models.Model):
     xp_reward = models.IntegerField(default=20, help_text="XP guadagnati sconfiggendolo")
     gold_min = models.IntegerField(default=5, help_text="Oro minimo rilasciato")
     gold_max = models.IntegerField(default=15, help_text="Oro massimo rilasciato")
-    loot_table = models.JSONField(default=list, null=True, blank=True, help_text="Lista degli oggetti droppabili (formato JSON)")
+    loot_table = models.TextField(default="[]", null=True, blank=True, help_text="Lista degli oggetti droppabili (formato JSON)")
     image_url = models.TextField(null=True, blank=True, help_text="Nome del file immagine in static/images")
     created_at = models.DateTimeField(auto_now_add=True)
 

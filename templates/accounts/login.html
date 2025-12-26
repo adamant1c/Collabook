@@ -4,39 +4,57 @@
 {% block title %}{% trans "Login" %} - Collabook RPG{% endblock %}
 
 {% block content %}
-<div class="auth-container" style="max-width: 400px; margin: 0 auto;">
-    <h3
-        style='color: #d4af37; font-family: "Cinzel", serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center;'>
-        🔐 {% trans "Login to Your Account" %}
-    </h3>
-    <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
-        {% trans "Continue your epic adventure" %}
-    </p>
+<div class="auth-container" style="max-width: 450px; margin: 0 auto;">
+    <h1
+        style='text-align: center; color: #d4af37; font-family: "Cinzel", serif; font-size: 2.5rem; margin-bottom: 0.5rem;'>
+        COLLABOOK
+    </h1>
 
-    <form method="post">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="form-group">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.errors %}
-            <div class="alert alert-danger">
-                {{ field.errors }}
+    <div class="tabs"
+        style="margin-bottom: 2rem; border-bottom: 1px solid var(--gold-dim); display: flex; justify-content: center; gap: 0.5rem; flex-wrap: wrap;">
+        <a href="{% url 'accounts:login' %}" class="tab-btn active"
+            style="text-decoration: none; color: var(--gold-primary); padding: 0.75rem 1rem; font-family: 'Cinzel', serif; border-bottom: 2px solid var(--gold-primary);">
+            🔐 {% trans "Login" %}
+        </a>
+        <a href="{% url 'accounts:register' %}" class="tab-btn"
+            style="text-decoration: none; color: var(--text-secondary); padding: 0.75rem 1rem; font-family: 'Cinzel', serif;">
+            ✨ {% trans "Register" %}
+        </a>
+        <a href="{% url 'accounts:password_reset' %}" class="tab-btn"
+            style="text-decoration: none; color: var(--text-secondary); padding: 0.75rem 1rem; font-family: 'Cinzel', serif;">
+            🔑 {% trans "Reset" %}
+        </a>
+    </div>
+
+    <div class="auth-box"
+        style="background: rgba(0,0,0,0.3); padding: 2rem; border-radius: 8px; border: 1px solid rgba(212, 175, 55, 0.2);">
+        <h3
+            style='color: #d4af37; font-family: "Cinzel", serif; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); text-align: center; margin-top: 0;'>
+            {% trans "Welcome Back" %}
+        </h3>
+        <p style='color: #e8d4a0; text-align: center; margin-bottom: 1.5rem;'>
+            {% trans "Continue your epic adventure" %}
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                <div class="alert alert-danger">
+                    {{ field.errors }}
+                </div>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
-        {% endfor %}
+            {% endfor %}
 
-        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-            🎮 {% trans "LOGIN" %}
-        </button>
-    </form>
-
-    <div style="text-align: center; margin-top: 1rem;">
-        <a href="{% url 'accounts:register' %}" style="color: var(--gold-primary);">{% trans "Create an Account" %}</a>
-        <br>
-        <a href="{% url 'accounts:password_reset' %}" style="color: var(--text-muted); font-size: 0.9rem;">{% trans
-            "Forgot Password?" %}</a>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
+                🎮 {% trans "LOGIN" %}
+            </button>
+        </form>
     </div>
 </div>
+
 {% endblock %}

@@ -25,54 +25,52 @@ def create_compact_context(
     """Create ultra-compact context for LLM
     
     Returns JSON-serializable dict with minimal tokens.
-    Typical token count: 150-300 tokens (vs 1000+ with full context)
+    Typical token count: 200-400 tokens (vs 1000+ with full context)
     """
     
-    # Character essentials (20-30 tokens)
+    # Character essentials
     char_context = {
         "name": user.name,
         "class": user.profession or "Adventurer",
         "lvl": user.level,
-        "hp": f"{user.hp}/{user.max_hp}",
-        "stats": {
-            "str": user.strength,
-            "mag": user.magic,
-            "dex": user.dexterity,
-            "def": user.defense
-        }
+        "hp": f"{user.hp}/{user.max_hp}"
     }
     
-    # World essentials (30-50 tokens)
+    # World essentials
     world_context = {
         "world": story.title,
         "genre": story.genre,
         "scene": story.current_state or "Beginning of adventure"
     }
     
-    # Recent history summary (50-100 tokens for 3 turns)
+    # Available Entities (NEW)
+    entities = {}
+    if story.npcs:
+        entities["npcs"] = [{"name": n.name, "desc": n.description[:100]} for n in story.npcs]
+    if story.enemies:
+        entities["enemies"] = [{"name": e.name, "lvl": e.level} for e in story.enemies]
+    
+    # Recent history summary
     history_summary = []
     for turn in recent_turns[-max_turns:]:
         history_summary.append({
-            "action": turn.user_action[:100],  # Max 100 chars
-            "result": turn.narration[:150]      # Max 150 chars
+            "action": turn.user_action[:80],
+            "result": turn.narration[:120]
         })
     
-    # Active quests (30-80 tokens)
+    # Active quests
     quest_context = []
     for pq in active_quests:
         if pq.status == QuestStatus.IN_PROGRESS:
             quest = pq.quest
-            # Only incomplete objectives
             incomplete = [
                 obj for obj in quest.objectives 
                 if obj.get('id') not in pq.objectives_completed
             ]
             
             quest_context.append({
-                "quest": quest.title,
-                "type": "MAIN" if quest.quest_type.value == "main" else "SIDE",
-                "objectives": [obj.get('description', '')[:80] for obj in incomplete[:2]],  # Max 2 objectives
-                "progress": f"{len(pq.objectives_completed)}/{len(quest.objectives)}"
+                "title": quest.title,
+                "objs": [obj.get('description', '')[:50] for obj in incomplete[:2]]
             })
     
     # Compact final context
@@ -80,6 +78,7 @@ def create_compact_context(
         "char": char_context,
         "world": world_context,
         "history": history_summary,
+        "entities": entities if entities else None,
         "quests": quest_context if quest_context else None
     }
     

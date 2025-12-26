@@ -4,7 +4,7 @@ from typing import Optional
 
 # Use environment variable or default to localhost
 # In Docker, this should be http://backend:8000
-BACKEND_URL = os.getenv("BACKEND_URL", "http://backend:8000")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 class CollabookAPI:
     """API client for Collabook backend"""

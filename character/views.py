@@ -25,7 +25,8 @@ class CharacterCreationView(View):
 
         form = CharacterCreationForm()
         stats = request.session.get('rolled_stats')
-        return render(request, self.template_name, {'form': form, 'stats': stats, 'character_name': character.get('name')})
+        character_name = character.get('name') if character else user.get('username', 'Hero')
+        return render(request, self.template_name, {'form': form, 'stats': stats, 'character_name': character_name})
 
     def post(self, request):
         if 'token' not in request.session:
@@ -54,6 +55,9 @@ class CharacterCreationView(View):
             try:
                 user = CollabookAPI.get_current_user(request.session['token'])
                 character = user.get('character')
+                if not character:
+                    messages.error(request, _("Character record not found. Please contact support."))
+                    return redirect('character:create')
                 
                 update_data = {
                     "profession": form.cleaned_data['profession'],

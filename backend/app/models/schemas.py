@@ -196,6 +196,7 @@ class EnemyInfo(BaseModel):
     hp: int
     max_hp: int
     type: str  # "common", "elite", "boss"
+    image_url: Optional[str] = None
 
 class CombatResult(BaseModel):
     success: bool
@@ -224,6 +225,23 @@ class CombatResult(BaseModel):
     resurrected: bool = False
     permanent_death: bool = False
     penalty: Optional[str] = None
+
+# NPC schemas
+class NPCBase(BaseModel):
+    name: str
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+
+class NPCCreate(NPCBase):
+    story_id: str
+
+class NPCResponse(NPCBase):
+    id: str
+    story_id: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
 
 # Item schemas (Phase 5)
 class ItemCreate(BaseModel):

@@ -6,3 +6,8 @@ asgiref
 sqlparse
 django-crispy-forms
 crispy-bootstrap5
+whitenoise[brotli]
+dj-database-url
+psycopg2-binary
+
+

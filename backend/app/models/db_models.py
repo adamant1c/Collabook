@@ -9,29 +9,29 @@ def generate_uuid():
     return str(uuid.uuid4())
 
 class UserRole(str, enum.Enum):
-    ADMIN = "admin"
-    PLAYER = "player"
+    ADMIN = "ADMIN"
+    PLAYER = "PLAYER"
 
 class QuestType(str, enum.Enum):
-    MAIN = "main"
-    SIDE = "side"
+    MAIN = "MAIN"
+    SIDE = "SIDE"
 
 class QuestStatus(str, enum.Enum):
-    NOT_STARTED = "not_started"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    FAILED = "failed"
+    NOT_STARTED = "NOT_STARTED"
+    IN_PROGRESS = "IN_PROGRESS"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
 
 class EnemyType(str, enum.Enum):
-    COMMON = "common"
-    ELITE = "elite"
-    BOSS = "boss"
+    COMMON = "COMMON"
+    ELITE = "ELITE"
+    BOSS = "BOSS"
 
 class ItemType(str, enum.Enum):
-    FOOD = "food"
-    WATER = "water"
-    POTION = "potion"
-    MISC = "misc"
+    FOOD = "FOOD"
+    WATER = "WATER"
+    POTION = "POTION"
+    MISC = "MISC"
 
 class User(Base):
     __tablename__ = "users"
@@ -95,6 +95,7 @@ class Story(Base):
     turns = relationship("Turn", back_populates="story", cascade="all, delete-orphan")
     quests = relationship("Quest", back_populates="story", cascade="all, delete-orphan")
     enemies = relationship("Enemy", back_populates="story", cascade="all, delete-orphan")
+    npcs = relationship("NPC", back_populates="story", cascade="all, delete-orphan")
 
 class Character(Base):
     __tablename__ = "characters"
@@ -229,11 +230,28 @@ class Enemy(Base):
     gold_min = Column(Integer, default=0)
     gold_max = Column(Integer, default=0)
     loot_table = Column(JSON, nullable=True, default=list)  # Future: item drops
+    image_url = Column(Text, nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
     story = relationship("Story", back_populates="enemies")
+
+class NPC(Base):
+    """Non-Player Characters that are not enemies but context for DM"""
+    __tablename__ = "npcs"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=False)
+    
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    image_url = Column(Text, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    story = relationship("Story", back_populates="npcs")
 
 class Item(Base):
     """Items for survival mechanics (food, water, potions)"""

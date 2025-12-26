@@ -18,10 +18,14 @@ class LoginView(FormView):
             token = CollabookAPI.login(username, password)
             self.request.session['token'] = token
             self.request.session['username'] = username
-            messages.success(self.request, _("Login successful!"))
-            # TODO: Redirect to character creation or journey based on state
-            # For now, just redirect to a placeholder or home
-            return redirect('accounts:login') # Temporary
+            # Check if character exists and has a profession
+            user = CollabookAPI.get_current_user(token)
+            character = user.get('character')
+            
+            if character and character.get('profession'):
+                return redirect('world:selection')
+            else:
+                return redirect('character:create')
         except Exception as e:
             messages.error(self.request, str(e))
             return self.form_invalid(form)

@@ -83,3 +83,22 @@ class CharacterCreationView(View):
         
         stats = request.session.get('rolled_stats')
         return render(request, self.template_name, {'form': form, 'stats': stats})
+
+class CharacterSheetView(View):
+    template_name = 'character/sheet.html'
+
+    def get(self, request):
+        if 'token' not in request.session:
+            return redirect('accounts:login')
+        
+        try:
+            user = CollabookAPI.get_current_user(request.session['token'])
+            character = user.get('character')
+            if not character:
+                messages.warning(request, _("Please create a character first."))
+                return redirect('character:create')
+            
+            return render(request, self.template_name, {'character': character, 'user': user})
+        except Exception as e:
+            messages.error(request, str(e))
+            return redirect('world:selection')

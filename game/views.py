@@ -1,3 +1,4 @@
-from django.shortcuts import render
+from django.views.generic import TemplateView
 
-# Create your views here.
+class RulesView(TemplateView):
+    template_name = 'game/rules.html'

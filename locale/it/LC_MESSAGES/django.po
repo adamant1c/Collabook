@@ -92,3 +92,6 @@ msgstr "Biografia dell'Eroe"
 
 msgid "How to Play"
 msgstr "Come Giocare"
+
+msgid "Return to Worlds"
+msgstr "Torna ai Mondi"

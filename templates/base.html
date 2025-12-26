@@ -87,11 +87,13 @@
                                 class="lang-btn {% if LANGUAGE_CODE|slice:':2' == 'it' %}active{% endif %}">IT</button>
                         </form>
                     </div>
+                    {% if request.path != '/' and request.path != '/register/' %}
                     {% if request.session.token %}
                     <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger btn-sm">{% trans "Logout" %}</a>
                     {% else %}
                     <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm me-2">{% trans "Login"
                         %}</a>
+                    {% endif %}
                     {% endif %}
                 </div>
             </div>

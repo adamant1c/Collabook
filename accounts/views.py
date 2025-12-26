@@ -9,7 +9,12 @@ from .forms import LoginForm, RegisterForm, PasswordResetRequestForm, PasswordRe
 class LoginView(FormView):
     template_name = 'accounts/login.html'
     form_class = LoginForm
-    success_url = reverse_lazy('accounts:login') # Placeholder, should go to journey/character
+    success_url = reverse_lazy('accounts:login')
+
+    def get(self, request, *args, **kwargs):
+        if 'token' in request.session:
+            return redirect('world:selection')
+        return super().get(request, *args, **kwargs)
 
     def form_valid(self, form):
         username = form.cleaned_data['username']

@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Character Sheet" %} - Collabook RPG{% endblock %}
+{% block title %}
+{% trans "Character Sheet" %}
+- Collabook RPG
+{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -17,14 +20,20 @@
                         </div>
                     </div>
                     <div class="col">
-                        <h1 style="font-family: 'Cinzel', serif; color: #d4af37; margin-bottom: 0;">{{ character.name }}
+                        <h1 style="font-family: 'Cinzel', serif; color: #d4af37; margin-bottom: 0;">
+                            {{ character.name }}
                         </h1>
-                        <p class="lead text-secondary text-uppercase mb-0">Level {{ character.level|default:1 }} {{
-                            character.profession }}</p>
+                        <p class="lead text-secondary text-uppercase mb-0">
+                            Level
+                            {{ character.level|default:1 }}
+                            {{ character.profession }}
+                        </p>
                     </div>
                     <div class="col-auto text-end">
-                        <div class="badge bg-gold text-dark p-2 px-3 fs-5" style="font-family: 'Cinzel', serif;">XP: {{
-                            character.xp|default:0 }}</div>
+                        <div class="badge bg-gold text-dark p-2 px-3 fs-5" style="font-family: 'Cinzel', serif;">
+                            XP:
+                            {{ character.xp|default:0 }}
+                        </div>
                     </div>
                 </div>
 
@@ -32,7 +41,9 @@
                     <!-- Stats Column -->
                     <div class="col-md-5">
                         <div class="p-4 border border-secondary rounded bg-black bg-opacity-25">
-                            <h4 class="text-gold mb-4 border-bottom border-secondary pb-2">⚔️ {% trans "Basic Stats" %}
+                            <h4 class="text-gold mb-4 border-bottom border-secondary pb-2">
+                                ⚔️
+                                {% trans "Basic Stats" %}
                             </h4>
                             <div class="d-flex justify-content-between mb-3 align-items-center">
                                 <span class="text-secondary text-uppercase">❤️ HP</span>
@@ -40,7 +51,9 @@
                                     <div class="progress bg-secondary bg-opacity-25 shadow-sm" style="height: 25px;">
                                         <div class="progress-bar bg-danger shadow-sm" role="progressbar"
                                             style="width: {% widthratio character.hp character.max_hp 100 %}%">
-                                            {{ character.hp }} / {{ character.max_hp }}
+                                            {{ character.hp }}
+                                            /
+                                            {{ character.max_hp }}
                                         </div>
                                     </div>
                                 </div>
@@ -49,40 +62,74 @@
                             <div class="row g-3">
                                 <div class="col-6">
                                     <div class="stat-card p-3 border border-secondary rounded text-center">
-                                        <div class="small text-secondary text-uppercase">{% trans "Strength" %}</div>
-                                        <div class="h3 font-weight-bold mb-0">{{ character.strength }}</div>
+                                        <div class="small text-secondary text-uppercase">
+                                            {% trans "Strength" %}
+                                        </div>
+                                        <div class="h3 font-weight-bold mb-0">
+                                            {{ character.strength }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="stat-card p-3 border border-secondary rounded text-center">
-                                        <div class="small text-secondary text-uppercase">{% trans "Magic" %}</div>
-                                        <div class="h3 font-weight-bold mb-0">{{ character.magic }}</div>
+                                        <div class="small text-secondary text-uppercase">
+                                            {% trans "Magic" %}
+                                        </div>
+                                        <div class="h3 font-weight-bold mb-0">
+                                            {{ character.magic }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="stat-card p-3 border border-secondary rounded text-center">
-                                        <div class="small text-secondary text-uppercase">{% trans "Dexterity" %}</div>
-                                        <div class="h3 font-weight-bold mb-0">{{ character.dexterity }}</div>
+                                        <div class="small text-secondary text-uppercase">
+                                            {% trans "Dexterity" %}
+                                        </div>
+                                        <div class="h3 font-weight-bold mb-0">
+                                            {{ character.dexterity }}
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="stat-card p-3 border border-secondary rounded text-center">
-                                        <div class="small text-secondary text-uppercase">{% trans "Defense" %}</div>
-                                        <div class="h3 font-weight-bold mb-0">{{ character.defense }}</div>
+                                        <div class="small text-secondary text-uppercase">
+                                            {% trans "Defense" %}
+                                        </div>
+                                        <div class="h3 font-weight-bold mb-0">
+                                            {{ character.defense }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-4 p-4 border border-secondary rounded bg-black bg-opacity-25">
-                            <h4 class="text-gold mb-3 border-bottom border-secondary pb-2">📂 {% trans "Account Details"
-                                %}</h4>
-                            <p class="mb-1"><span class="text-secondary">Username:</span> {{ user.username }}</p>
-                            <p class="mb-1"><span class="text-secondary">Email:</span> {{ user.email }}</p>
-                            <p class="mb-0"><span class="text-secondary">Account Status:</span>
-                                <span class="badge {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}">
-                                    {% if user.is_active %}{% trans "Active" %}{% else %}{% trans "Inactive" %}{% endif
-                                    %}
+                            <h4 class="text-gold mb-3 border-bottom border-secondary pb-2">
+                                📂
+                                {% trans "Account Details" %}
+                            </h4>
+                            <p class="mb-1">
+                                <span class="text-secondary">Username:</span>
+                                {{ user.username }}
+                            </p>
+                            <p class="mb-1">
+                                <span class="text-secondary">Email:</span>
+                                {{ user.email }}
+                            </p>
+                            <p class="mb-0">
+                                <span class="text-secondary">Account Status:</span>
+                                <span class="badge 
+{% if user.is_active %}
+bg-success
+{% else %}
+bg-danger
+{% endif %}
+">
+                                    {% if user.is_active %}
+                                    {% trans "Active" %}
+                                    {% else %}
+                                    {% trans "Inactive" %}
+                                    {% endif %}
                                 </span>
                             </p>
                         </div>
@@ -91,8 +138,10 @@
                     <!-- Bio Column -->
                     <div class="col-md-7">
                         <div class="p-4 border border-secondary rounded h-100 bg-black bg-opacity-25">
-                            <h4 class="text-gold mb-4 border-bottom border-secondary pb-2">📖 {% trans "Hero's
-                                Backstory" %}</h4>
+                            <h4 class="text-gold mb-4 border-bottom border-secondary pb-2">
+                                📖
+                                {% trans "Hero's Backstory" %}
+                            </h4>
                             <div class="p-3" style="line-height: 1.8; color: #ddd; white-space: pre-line;">
                                 {{ character.description|default:"No backstory yet." }}
                             </div>
@@ -101,10 +150,14 @@
                 </div>
 
                 <div class="text-center mt-5 pt-3">
-                    <a href="{% url 'world:selection' %}" class="btn btn-outline-warning btn-lg me-3">⚔️ {% trans
-                        "Select World" %}</a>
-                    <a href="{% url 'world:journey' %}" class="btn btn-gold btn-lg shadow">✨ {% trans "Continue
-                        Adventure" %}</a>
+                    <a href="{% url 'world:selection' %}" class="btn btn-outline-warning btn-lg me-3">
+                        ⚔️
+                        {% trans "Select World" %}
+                    </a>
+                    <a href="{% url 'world:journey' %}" class="btn btn-gold btn-lg shadow">
+                        ✨
+                        {% trans "Continue Adventure" %}
+                    </a>
                 </div>
             </div>
         </div>

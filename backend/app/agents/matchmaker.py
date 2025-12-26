@@ -53,12 +53,12 @@ Nuovo Personaggio:
 - Storia: {description}
 
 Scrivi 2-3 frasi che descrivono come {name} entra nella scena. Scrivi SOLO la narrazione in italiano puro, senza titoli o sezioni.""",
-                "user": "Descrivi in italiano come entra {name}."
+                "user": "IMPORTANTE: Rispondi SOLO in lingua italiana. Descrivi come {name} entra nella scena."
             }
         }
         
         # Select template based on language (default to English)
-        lang_key = "it" if language == "it" else "en"
+        lang_key = "it" if language.lower().startswith("it") else "en"
         tmpl = templates[lang_key]
         
         # Format system prompt

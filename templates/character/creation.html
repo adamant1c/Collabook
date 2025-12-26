@@ -2,31 +2,42 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
 
-{% block title %}{% trans "Create Your Hero" %} - Collabook RPG{% endblock %}
+{% block title %}
+{% trans "Create Your Hero" %} - Collabook RPG
+{% endblock %}
 
 {% block content %}
 <style>
     .card-gold {
         border: 1px solid #d4af37;
-        background: rgba(20, 20, 20, 0.8);
-        backdrop-filter: blur(5px);
-    }
-
-    .stat-box {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        padding: 10px;
-        transition: transform 0.2s;
-    }
-
-    .stat-box:hover {
-        transform: translateY(-5px);
-        background: rgba(212, 175, 55, 0.1);
+        background-color: rgba(26, 26, 26, 0.95);
     }
 
     .hero-title {
         font-family: 'Cinzel', serif;
         color: #d4af37;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-gold {
+        background: linear-gradient(45deg, #d4af37, #b8962e);
+        color: #000;
+        border: none;
+        font-weight: bold;
+    }
+
+    .btn-gold:hover {
+        background: linear-gradient(45deg, #b8962e, #8a6d1c);
+        color: #000;
+        transform: translateY(-2px);
+        transition: 0.3s;
+    }
+
+    .stat-box {
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        padding: 15px;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.2);
     }
 </style>
 
@@ -35,14 +46,19 @@
         <div class="card card-gold shadow-lg mb-5">
             <div class="card-body p-4 p-md-5">
                 <header class="text-center mb-5">
-                    <h1 class="hero-title display-4">⚔️ {% trans "Create Your Hero" %} ⚔️</h1>
-                    <p class="lead text-secondary">{% trans "Customize your character and prepare for your journey." %}
+                    <h1 class="hero-title display-4">
+                        ⚔️ {% trans "Create Your Hero" %} ⚔️
+                    </h1>
+                    <p class="lead text-secondary">
+                        {% blocktrans trimmed %}
+                        Customize your character and prepare for your journey.
+                        {% endblocktrans %}
                     </p>
                 </header>
 
                 <div class="row g-5">
                     <!-- Left Column: Dice & Stats -->
-                    <div class="col-md-5 border-end border-secondary">
+                    <div class="col-md-5">
                         <div class="text-center mb-4">
                             <form method="post" class="mb-4">
                                 {% csrf_token %}
@@ -55,55 +71,55 @@
 
                         {% if stats %}
                         <div class="p-3 border border-success rounded bg-success bg-opacity-10">
-                            <h4 class="text-success text-center mb-3">✨ {% trans "Stats Generated" %}</h4>
+                            <h4 class="text-success text-center mb-3">
+                                ✨ {% trans "Stats Generated" %}
+                            </h4>
                             <div class="row g-3 text-center">
                                 <div class="col-6">
                                     <div class="stat-box">
-                                        <div class="small text-secondary text-uppercase font-weight-bold">{% trans
-                                            "Strength" %}</div>
+                                        <div class="small text-secondary text-uppercase font-weight-bold">
+                                            {% trans "Strength" %}
+                                        </div>
                                         <div class="h4 mb-0 text-white">{{ stats.strength }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="stat-box">
-                                        <div class="small text-secondary text-uppercase">{% trans "Magic" %}</div>
+                                        <div class="small text-secondary text-uppercase font-weight-bold">
+                                            {% trans "Magic" %}
+                                        </div>
                                         <div class="h4 mb-0 text-white">{{ stats.magic }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="stat-box">
-                                        <div class="small text-secondary text-uppercase">{% trans "Dexterity" %}</div>
+                                        <div class="small text-secondary text-uppercase font-weight-bold">
+                                            {% trans "Dexterity" %}
+                                        </div>
                                         <div class="h4 mb-0 text-white">{{ stats.dexterity }}</div>
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="stat-box">
-                                        <div class="small text-secondary text-uppercase">{% trans "Defense" %}</div>
+                                        <div class="small text-secondary text-uppercase font-weight-bold">
+                                            {% trans "Defense" %}
+                                        </div>
                                         <div class="h4 mb-0 text-white">{{ stats.defense }}</div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="stat-box border border-danger">
-                                        <div class="small text-danger text-uppercase font-weight-bold">HP</div>
-                                        <div class="h3 mb-0 text-white">{{ stats.hp }} / {{ stats.max_hp }}</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         {% else %}
                         <div class="text-center p-5 border border-dashed text-secondary rounded">
-                            <p class="mb-0">{% trans "Roll the dice to see your potential..." %}</p>
+                            <p class="mb-0">
+                                {% trans "Roll the dice to see your potential..." %}
+                            </p>
                         </div>
                         {% endif %}
                     </div>
 
                     <!-- Right Column: Info & Form -->
                     <div class="col-md-7">
-                        <h3 class="mb-4 d-flex align-items-center">
-                            <span class="badge bg-gold text-dark me-2">LVL 1</span>
-                            <span class="text-white">{{ character_name }}</span>
-                        </h3>
-
                         <form method="post">
                             {% csrf_token %}
                             {{ form|crispy }}
@@ -122,19 +138,23 @@
 <!-- Modal for missing stats error -->
 <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-danger shadow-lg">
+        <div class="modal-content border-danger shadow-lg bg-dark">
             <div class="modal-header bg-danger text-white border-0">
-                <h5 class="modal-title" id="errorModalLabel">⚠️ {% trans "Action Required" %}</h5>
+                <h5 class="modal-title" id="errorModalLabel">
+                    ⚠️ {% trans "Action Required" %}
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                     aria-label="Close"></button>
             </div>
             <div class="modal-body text-center p-4">
-                <p class="lead mb-0">{{ popup_message|default:_("You must carry out all the necessary actions before
-                    starting!") }}</p>
+                <p class="lead mb-0 text-white">
+                    {{ popup_message|default:"You must carry out all the necessary actions before starting!" }}
+                </p>
             </div>
             <div class="modal-footer border-0 justify-content-center">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "I Understood"
-                    %}</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    {% trans "I Understood" %}
+                </button>
                 <form method="post" class="ms-2">
                     {% csrf_token %}
                     <button type="submit" name="roll_stats" value="1" class="btn btn-gold shadow-sm">
@@ -146,13 +166,12 @@
     </div>
 </div>
 
-{% if error_popup %}
+{% if popup_message %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var myModal = new bootstrap.Modal(document.getElementById('errorModal'));
-        myModal.show();
+        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
     });
 </script>
 {% endif %}
-
 {% endblock %}

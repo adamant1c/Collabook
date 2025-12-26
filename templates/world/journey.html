@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Your Journey" %} - Collabook RPG{% endblock %}
+{% block title %}
+{% trans "Your Journey" %}
+- Collabook RPG
+{% endblock %}
 
 {% block content %}
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <h1 style='color: #d4af37; font-family: "Cinzel", serif; margin: 0;'>
-            📜 {% trans "Your Journey" %}
+            📜
+            {% trans "Your Journey" %}
         </h1>
         <a href="{% url 'world:selection' %}" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
             {% trans "Change World" %}
@@ -17,26 +21,34 @@
     <div class="journey-content">
         {% if not history %}
         <div class="journey-description">
-            <strong>{% trans "Your Arrival" %}</strong>
-            {% if character.insertion_point %}
-            {{ character.insertion_point }}
-            {% else %}
-            {% trans "You enter the world..." %}
-            {% endif %}
+            <strong>
+                {% trans "Your Arrival" %}
+            </strong>
+            <div class="mt-2" style="line-height: 1.6;">
+                {% if character.insertion_point %}
+                {{ character.insertion_point }}
+                {% else %}
+                {% trans "You enter the world..." %}
+                {% endif %}
+            </div>
         </div>
         {% else %}
         {% for turn in history %}
         <div class="turn-container" style="margin-bottom: 2rem;">
             <div style="margin-bottom: 0.5rem;">
-                <strong>{% trans "Your Action" %}:</strong>
+                <strong>
+                    {% trans "Your Action" %}:
+                </strong>
                 <div
-                    style="font-style: italic; color: var(--text-secondary); padding-left: 1rem; border-left: 2px solid var(--gold-dim);">
+                    style="font-style: italic; color: var(--text-secondary); padding-left: 1rem; border-left: 2px solid var(--gold-dim); margin-top: 0.5rem;">
                     {{ turn.action }}
                 </div>
             </div>
-            <div>
-                <strong>{% trans "The World Responds" %}:</strong>
-                <div class="llm-response">
+            <div class="mt-3">
+                <strong>
+                    {% trans "The World Responds" %}:
+                </strong>
+                <div class="llm-response mt-2">
                     {{ turn.narration|safe }}
                 </div>
             </div>
@@ -48,18 +60,24 @@
 
     <div class="action-section"
         style="margin-top: 2rem; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px;">
-        <h3 style="margin-top: 0;">✨ {% trans "What do you do?" %}</h3>
+        <h3 style="margin-top: 0;">
+            ✨
+            {% trans "What do you do?" %}
+        </h3>
 
-        <form method="post">
+        <form method="post" class="mt-3">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="user_action">{% trans "Describe your action" %}</label>
+            <div class="form-group mb-3">
+                <label for="user_action" class="mb-2">
+                    {% trans "Describe your action" %}
+                </label>
                 <textarea name="user_action" id="user_action" class="form-control" rows="3"
                     placeholder="{% trans 'e.g., I cautiously approach the ancient door...' %}"></textarea>
             </div>
 
-            <button type="submit" class="btn-primary" style="width: 100%;">
-                🎭 {% trans "Take Action" %}
+            <button type="submit" class="btn-gold btn-lg w-100 shadow">
+                🎭
+                {% trans "Take Action" %}
             </button>
         </form>
     </div>
@@ -71,4 +89,18 @@
         window.scrollTo(0, document.body.scrollHeight);
     };
 </script>
+
+<style>
+    .journey-description {
+        background: rgba(212, 175, 55, 0.05);
+        padding: 1.5rem;
+        border-radius: 8px;
+        border-left: 4px solid #d4af37;
+    }
+
+    .llm-response {
+        line-height: 1.8;
+        color: #ddd;
+    }
+</style>
 {% endblock %}

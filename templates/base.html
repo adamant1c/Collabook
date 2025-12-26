@@ -72,13 +72,19 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     {% if request.session.token %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'world:selection' %}">🏰 {% trans "Worlds" %}</a>
+                        <a class="nav-link" href="{% url 'world:selection' %}">
+                            🏰 {% trans "Worlds" %}
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'character:sheet' %}">👤 {% trans "Character" %}</a>
+                        <a class="nav-link" href="{% url 'character:sheet' %}">
+                            👤 {% trans "Character" %}
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'game:rules' %}">📜 {% trans "Rules" %}</a>
+                        <a class="nav-link" href="{% url 'game:rules' %}">
+                            📜 {% trans "Rules" %}
+                        </a>
                     </li>
                     {% endif %}
                 </ul>
@@ -102,10 +108,13 @@
                     </div>
                     {% if request.path != '/' and request.path != '/register/' %}
                     {% if request.session.token %}
-                    <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger btn-sm">{% trans "Logout" %}</a>
+                    <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger btn-sm">
+                        {% trans "Logout" %}
+                    </a>
                     {% else %}
-                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm me-2">{% trans "Login"
-                        %}</a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm me-2">
+                        {% trans "Login" %}
+                    </a>
                     {% endif %}
                     {% endif %}
                 </div>
@@ -118,7 +127,7 @@
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 shadow-sm" role="alert">
             {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-alert="dismiss" aria-label="Close"></button>
         </div>
         {% endfor %}
         {% endif %}

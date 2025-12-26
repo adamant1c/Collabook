@@ -63,7 +63,7 @@ Narra cosa succede dopo l'azione del personaggio. Rendi la narrazione coinvolgen
         }
         
         # Select template based on language
-        lang_key = "it" if language == "it" else "en"
+        lang_key = "it" if language.lower().startswith("it") else "en"
         tmpl = templates[lang_key]
         
         # Format system prompt

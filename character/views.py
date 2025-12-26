@@ -98,6 +98,8 @@ class CharacterSheetView(View):
                 messages.warning(request, _("Please create a character first."))
                 return redirect('character:create')
             
+            import logging
+            logging.error(f"DEBUG_CHAR: {character}")
             return render(request, self.template_name, {'character': character, 'user': user})
         except Exception as e:
             messages.error(request, str(e))

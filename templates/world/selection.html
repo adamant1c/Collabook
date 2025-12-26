@@ -1,41 +1,77 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "Select World" %} - Collabook RPG{% endblock %}
+{% block title %}
+{% trans "Select World" %}
+- Collabook RPG
+{% endblock %}
 
 {% block content %}
+<div style="display: none;">
+    {% trans "Echoes of the Past" %}
+    {% trans "Realm of Eternal Magic" %}
+    {% trans "Horizon Beyond Stars" %}
+    {% trans "Historical Adventure" %}
+    {% trans "Epic Fantasy" %}
+    {% trans "Science Fiction" %}
+    {% trans "A historically-inspired world set in medieval Europe during the height of the Renaissance. Great kingdoms
+    rise and fall, knights defend their honor, and scholars unlock ancient secrets. Navigate political intrigue,
+    participate in grand tournaments, or explore forgotten ruins." %}
+    {% trans "A high-fantasy realm where magic flows through every living thing. Ancient dragons soar the skies, elven
+    kingdoms hide in enchanted forests, and dwarven cities delve deep into mystical mountains. Dark forces stir in
+    forgotten places, and heroes are called to face legendary quests." %}
+    {% trans "The year is 2347. Humanity has colonized the solar system and made first contact with alien civilizations.
+    Advanced AI, cybernetic augmentations, and faster-than-light travel are commonplace. Navigate space politics,
+    explore alien worlds, uncover corporate conspiracies, or fight in the ongoing conflict between Earth Alliance and
+    the Outer Colonies." %}
+    {% trans "The kingdom prepares for the annual Tournament of Champions..." %}
+    {% trans "The Council of Mages senses a disturbance in the magical ley lines..." %}
+    {% trans "Your ship approaches the neutral trading station orbiting Jupiter..." %}
+</div>
 <div class="container">
     <h1 style='text-align: center; color: #d4af37; font-family: "Cinzel", serif;'>
-        🌍 {% trans "Choose Your World" %}
+        🌍
+        {% trans "Choose Your World" %}
     </h1>
 
     {% if is_admin %}
     <div class="alert alert-info">
         {% trans "Admin Mode: You can create new worlds." %}
-        <!-- TODO: Add world creation form for admin -->
     </div>
     {% endif %}
 
     {% if default_worlds %}
-    <h2 style="margin-top: 2rem;">{% trans "Classic Worlds" %}</h2>
+    <h2 style="margin-top: 2rem;">
+        {% trans "Classic Worlds" %}
+    </h2>
     {% for story in default_worlds %}
     <div class="quest-card">
-        <h3>📚 {{ story.title }} <small style="font-size: 0.6em; color: var(--text-muted);">• {{ story.genre }}</small>
+        <h3>
+            📚
+            {% trans story.title %}
+            <small style="font-size: 0.6em; color: var(--text-muted);">
+                •
+                {% trans story.genre %}
+            </small>
         </h3>
-        <p><strong>{% trans "World" %}:</strong> {{ story.world_description }}</p>
-        {% if story.current_state %}
-        <p><em>{{ story.current_state }}</em></p>
-        {% endif %}
+        <p>
+            <strong>
+                {% trans "World" %}:
+            </strong>
+            {% trans story.world_description %}
+        </p>
+
 
         <form method="post" style="margin-top: 1rem;">
             {% csrf_token %}
             <input type="hidden" name="story_id" value="{{ story.id }}">
+
             {% if story.existing_char %}
-            <button type="submit" name="action" value="continue" class="btn-primary">
+            <button type="submit" name="action" value="continue" class="btn-gold shadow">
                 {% trans "Continue Adventure" %}
             </button>
             {% else %}
-            <button type="submit" name="action" value="join" class="btn-primary">
+            <button type="submit" name="action" value="join" class="btn-gold shadow">
                 {% trans "Enter World" %}
             </button>
             {% endif %}
@@ -45,22 +81,36 @@
     {% endif %}
 
     {% if custom_worlds %}
-    <h2 style="margin-top: 2rem;">{% trans "Custom Worlds" %}</h2>
+    <h2 style="margin-top: 2rem;">
+        {% trans "Custom Worlds" %}
+    </h2>
     {% for story in custom_worlds %}
     <div class="quest-card">
-        <h3>📚 {{ story.title }} <small style="font-size: 0.6em; color: var(--text-muted);">• {{ story.genre }}</small>
+        <h3>
+            📚
+            {{ story.title }}
+            <small style="font-size: 0.6em; color: var(--text-muted);">
+                •
+                {{ story.genre }}
+            </small>
         </h3>
-        <p><strong>{% trans "World" %}:</strong> {{ story.world_description }}</p>
+        <p>
+            <strong>
+                {% trans "World" %}:
+            </strong>
+            {{ story.world_description }}
+        </p>
 
         <form method="post" style="margin-top: 1rem;">
             {% csrf_token %}
             <input type="hidden" name="story_id" value="{{ story.id }}">
+
             {% if story.existing_char %}
-            <button type="submit" name="action" value="continue" class="btn-primary">
+            <button type="submit" name="action" value="continue" class="btn-gold shadow">
                 {% trans "Continue Adventure" %}
             </button>
             {% else %}
-            <button type="submit" name="action" value="join" class="btn-primary">
+            <button type="submit" name="action" value="join" class="btn-gold shadow">
                 {% trans "Enter World" %}
             </button>
             {% endif %}

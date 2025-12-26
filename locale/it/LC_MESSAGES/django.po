@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-26 17:50+0000\n"
+"POT-Creation-Date: 2025-12-26 18:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -12,86 +12,520 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "Login"
-msgstr "Accedi"
+#: accounts/forms.py:5 accounts/forms.py:9
+msgid "Username"
+msgstr ""
 
-msgid "Logout"
-msgstr "Esci"
+#: accounts/forms.py:6 accounts/forms.py:11
+msgid "Password"
+msgstr ""
 
-msgid "Register"
-msgstr "Registrati"
+#: accounts/forms.py:10 accounts/forms.py:24
+msgid "Email"
+msgstr ""
 
-msgid "Reset"
+#: accounts/forms.py:12
+msgid "Confirm Password"
+msgstr ""
+
+#: accounts/forms.py:20 accounts/forms.py:37
+msgid "Passwords do not match"
+msgstr ""
+
+#: accounts/forms.py:27
+#, fuzzy
+#| msgid "Reset"
+msgid "Reset Token"
 msgstr "Resetta"
 
-msgid "Welcome Back"
-msgstr "Bentornato"
+#: accounts/forms.py:28
+msgid "New Password"
+msgstr ""
 
-msgid "Continue your epic adventure"
-msgstr "Continua la tua epica avventura"
+#: accounts/forms.py:29
+msgid "Confirm New Password"
+msgstr ""
 
-msgid "Home"
-msgstr "Home"
+#: accounts/views.py:52
+msgid "Registration successful!"
+msgstr ""
 
-msgid "Create Your Hero"
-msgstr "Crea il Tuo Eroe"
-
-msgid "Begin Adventure"
-msgstr "Inizia l'Avventura"
-
-msgid "Roll Dice"
-msgstr "Tira i Dadi"
-
-msgid "Roll Your Destiny"
-msgstr "Tira il Tuo Destino"
-
-msgid "Customize your character"
-msgstr "Personalizza il tuo personaggio"
-
-msgid "Profession"
-msgstr "Professione"
-
-msgid "Backstory"
-msgstr "Biografia"
-
-msgid "Entering world..."
-msgstr "Entrando nel mondo..."
-
-msgid "Resuming adventure..."
-msgstr "Riprendendo l'avventura..."
-
+#: accounts/views.py:61
 msgid "You have been logged out."
 msgstr "Sei uscito con successo."
 
+#: accounts/views.py:80
+msgid "Reset link sent (check console/logs)."
+msgstr ""
+
+#: accounts/views.py:84
+msgid "Invalid email."
+msgstr ""
+
+#: accounts/views.py:92
+msgid "Password reset successful! Please login."
+msgstr ""
+
+#: accounts/views.py:97
+msgid "Invalid data."
+msgstr ""
+
+#: character/forms.py:6
+msgid "Warrior"
+msgstr "Guerriero"
+
+#: character/forms.py:7
+msgid "Mage"
+msgstr "Mago"
+
+#: character/forms.py:8
+msgid "Rogue"
+msgstr "Ladro"
+
+#: character/forms.py:9
+msgid "Cleric"
+msgstr "Chierico"
+
+#: character/forms.py:10
+msgid "Ranger"
+msgstr "Ramingo"
+
+#: character/forms.py:11
+msgid "Paladin"
+msgstr "Paladino"
+
+#: character/forms.py:12
+msgid "Bard"
+msgstr "Bardo"
+
+#: character/forms.py:13
+msgid "Druid"
+msgstr "Druido"
+
+#: character/forms.py:16
+msgid "Profession"
+msgstr "Professione"
+
+#: character/forms.py:17
+msgid "Backstory"
+msgstr "Biografia"
+
+#: character/forms.py:17
+msgid "Describe your character's background..."
+msgstr ""
+
+#: character/views.py:45
+msgid "Stats generated!"
+msgstr ""
+
+#: character/views.py:52
+msgid "Please roll stats first!"
+msgstr ""
+
+#: character/views.py:57
+msgid ""
+"You must roll your dice to determine your hero's destiny before beginning "
+"the adventure!"
+msgstr ""
+
+#: character/views.py:64
+msgid "Character record not found. Please contact support."
+msgstr ""
+
+#: character/views.py:78
+#, fuzzy
+#| msgid "Character Sheet"
+msgid "Character created!"
+msgstr "Scheda Personaggio"
+
+#: character/views.py:98
+msgid "Please create a character first."
+msgstr ""
+
+#: templates/accounts/login.html:4 templates/accounts/login.html:17
+#: templates/accounts/password_reset.html:17
+#: templates/accounts/register.html:17 templates/base.html:116
+msgid "Login"
+msgstr "Accedi"
+
+#: templates/accounts/login.html:21 templates/accounts/password_reset.html:21
+#: templates/accounts/register.html:21
+msgid "Register"
+msgstr "Registrati"
+
+#: templates/accounts/login.html:25 templates/accounts/password_reset.html:25
+#: templates/accounts/register.html:25
+msgid "Reset"
+msgstr "Resetta"
+
+#: templates/accounts/login.html:33
+msgid "Welcome Back"
+msgstr "Bentornato"
+
+#: templates/accounts/login.html:36
+msgid "Continue your epic adventure"
+msgstr "Continua la tua epica avventura"
+
+#: templates/accounts/login.html:54
+msgid "LOGIN"
+msgstr ""
+
+#: templates/accounts/password_reset.html:4
+#: templates/accounts/password_reset.html:73
+msgid "Reset Password"
+msgstr ""
+
+#: templates/accounts/password_reset.html:33
+msgid "Account Recovery"
+msgstr ""
+
+#: templates/accounts/password_reset.html:40
+msgid "Request Reset"
+msgstr ""
+
+#: templates/accounts/password_reset.html:44
+msgid "Enter Code"
+msgstr ""
+
+#: templates/accounts/password_reset.html:57
+msgid "Send Reset Link"
+msgstr ""
+
+#: templates/accounts/register.html:4
+#, fuzzy
+#| msgid "Create Your Hero"
+msgid "Create Account"
+msgstr "Crea il Tuo Eroe"
+
+#: templates/accounts/register.html:33
+msgid "Begin Your Journey"
+msgstr ""
+
+#: templates/accounts/register.html:36
+#, fuzzy
+#| msgid "Continue your epic adventure"
+msgid "Register to begin your adventure"
+msgstr "Continua la tua epica avventura"
+
+#: templates/accounts/register.html:54
+msgid "REGISTER"
+msgstr ""
+
+#: templates/base.html:76
 msgid "Worlds"
 msgstr "Mondi"
 
+#: templates/base.html:81
 msgid "Character"
 msgstr "Personaggio"
 
+#: templates/base.html:86
 msgid "Rules"
 msgstr "Regole"
 
-msgid "Game Rules"
-msgstr "Regole di Gioco"
+#: templates/base.html:112
+msgid "Logout"
+msgstr "Esci"
 
+#: templates/character/creation.html:6 templates/character/creation.html:50
+msgid "Create Your Hero"
+msgstr "Crea il Tuo Eroe"
+
+#: templates/character/creation.html:53
+#, fuzzy
+#| msgid "Customize your character"
+msgid "Customize your character and prepare for your journey."
+msgstr "Personalizza il tuo personaggio"
+
+#: templates/character/creation.html:67
+msgid "Roll Your Destiny"
+msgstr "Tira il Tuo Destino"
+
+#: templates/character/creation.html:75
+msgid "Stats Generated"
+msgstr ""
+
+#: templates/character/creation.html:81 templates/character/sheet.html:66
+#: templates/game/rules.html:76
+msgid "Strength"
+msgstr "Forza"
+
+#: templates/character/creation.html:89 templates/character/sheet.html:76
+#: templates/game/rules.html:88
+msgid "Magic"
+msgstr "Magia"
+
+#: templates/character/creation.html:97 templates/character/sheet.html:86
+#: templates/game/rules.html:100
+msgid "Dexterity"
+msgstr "Destrezza"
+
+#: templates/character/creation.html:105 templates/character/sheet.html:96
+#: templates/game/rules.html:112
+msgid "Defense"
+msgstr "Difesa"
+
+#: templates/character/creation.html:115
+msgid "Roll the dice to see your potential..."
+msgstr ""
+
+#: templates/character/creation.html:128
+msgid "Begin Adventure"
+msgstr "Inizia l'Avventura"
+
+#: templates/character/creation.html:144
+msgid "Action Required"
+msgstr ""
+
+#: templates/character/creation.html:156
+msgid "I Understood"
+msgstr ""
+
+#: templates/character/creation.html:161
+#, fuzzy
+#| msgid "Roll Dice"
+msgid "Roll Dice Now"
+msgstr "Tira i Dadi"
+
+#: templates/character/sheet.html:5
 msgid "Character Sheet"
 msgstr "Scheda Personaggio"
 
-msgid "Select World"
-msgstr "Seleziona Mondo"
-
-msgid "Change World"
-msgstr "Cambia Mondo"
-
+#: templates/character/sheet.html:46
 msgid "Basic Stats"
 msgstr "Statistiche Base"
 
+#: templates/character/sheet.html:109
+msgid "Account Details"
+msgstr ""
+
+#: templates/character/sheet.html:129
+msgid "Active"
+msgstr "Attivo"
+
+#: templates/character/sheet.html:131
+msgid "Inactive"
+msgstr "Inattivo"
+
+#: templates/character/sheet.html:143
 msgid "Hero's Backstory"
 msgstr "Biografia dell'Eroe"
 
+#: templates/character/sheet.html:155 templates/world/selection.html:5
+msgid "Select World"
+msgstr "Seleziona Mondo"
+
+#: templates/character/sheet.html:159 templates/world/selection.html:87
+#: templates/world/selection.html:126
+msgid "Continue Adventure"
+msgstr "Continua Avventura"
+
+#: templates/game/rules.html:5 templates/game/rules.html:17
+msgid "Game Rules"
+msgstr "Regole di Gioco"
+
+#: templates/game/rules.html:25
 msgid "How to Play"
 msgstr "Come Giocare"
 
+#: templates/game/rules.html:28
+msgid ""
+"Collabook is a collaborative RPG where you write your own destiny. Describe "
+"your actions, and the world will respond through our advanced AI Dungeon "
+"Master."
+msgstr ""
+"Collabook è un RPG collaborativo dove scrivi il tuo destino. Descrivi le tue "
+"azioni e il mondo risponderà attraverso il nostro avanzato AI Dungeon Master."
+
+#: templates/game/rules.html:40
+#, fuzzy
+#| msgid "Roll Dice"
+msgid "Rolling Dice"
+msgstr "Tira i Dadi"
+
+#: templates/game/rules.html:43
+msgid ""
+"During character creation, you must roll your attributes. These stats "
+"influence how successful your actions will be in the world."
+msgstr ""
+"Durante la creazione del personaggio, devi tirare i tuoi attributi. Queste "
+"statistiche influenzano il successo delle tue azioni nel mondo."
+
+#: templates/game/rules.html:54
+msgid "Taking Action"
+msgstr "Agire"
+
+#: templates/game/rules.html:57
+msgid ""
+"Be descriptive! The more detail you provide about your intent, the more "
+"creatively the world will react."
+msgstr ""
+"Sii descrittivo! Più dettagli fornisci sul tuo intento, più creativamente il "
+"mondo reagirà."
+
+#: templates/game/rules.html:69
+#, fuzzy
+#| msgid "Character Sheet"
+msgid "Character Stats"
+msgstr "Scheda Personaggio"
+
+#: templates/game/rules.html:80
+msgid "Physical power and combat prowess."
+msgstr "Potere fisico e abilità in combattimento."
+
+#: templates/game/rules.html:92
+msgid "Affinity for the mystical arts and ancient spells."
+msgstr "Affinità per le arti mistiche e gli antichi incantesimi."
+
+#: templates/game/rules.html:104
+msgid "Agility, speed, and precision in movement."
+msgstr "Agilità, velocità e precisione nei movimenti."
+
+#: templates/game/rules.html:116
+msgid "Ability to withstand hits and avoid damage."
+msgstr "Capacità di resistere ai colpi ed evitare danni."
+
+#: templates/game/rules.html:126
+#, fuzzy
+#| msgid "Return to Worlds"
 msgid "Return to Worlds"
 msgstr "Torna ai Mondi"
+
+#: templates/world/journey.html:5 templates/world/journey.html:14
+msgid "Your Journey"
+msgstr "Il Tuo Viaggio"
+
+#: templates/world/journey.html:17
+msgid "Change World"
+msgstr "Cambia Mondo"
+
+#: templates/world/journey.html:25
+msgid "Your Arrival"
+msgstr "Il Tuo Arrivo"
+
+#: templates/world/journey.html:31
+#, fuzzy
+#| msgid "Entering world..."
+msgid "You enter the world..."
+msgstr "Entrando nel mondo..."
+
+#: templates/world/journey.html:40
+msgid "Your Action"
+msgstr "La Tua Azione"
+
+#: templates/world/journey.html:49
+msgid "The World Responds"
+msgstr "Il Mondo Risponde"
+
+#: templates/world/journey.html:65
+msgid "What do you do?"
+msgstr "Cosa fai?"
+
+#: templates/world/journey.html:72
+msgid "Describe your action"
+msgstr "Descrivi la tua azione"
+
+#: templates/world/journey.html:75
+msgid "e.g., I cautiously approach the ancient door..."
+msgstr "es: Mi avvicino con cautela alla porta antica..."
+
+#: templates/world/journey.html:80
+msgid "Take Action"
+msgstr "Agisci"
+
+#: templates/world/selection.html:11
+msgid "Echoes of the Past"
+msgstr "Echi del Passato"
+
+#: templates/world/selection.html:12
+msgid "Realm of Eternal Magic"
+msgstr "Regno della Magia Eterna"
+
+#: templates/world/selection.html:13
+msgid "Horizon Beyond Stars"
+msgstr "Orizzonte Oltre le Stelle"
+
+#: templates/world/selection.html:14
+msgid "Historical Adventure"
+msgstr "Avventura Storica"
+
+#: templates/world/selection.html:15
+msgid "Epic Fantasy"
+msgstr "Fantasy Epico"
+
+#: templates/world/selection.html:16
+msgid "Science Fiction"
+msgstr "Fantascienza"
+
+#: templates/world/selection.html:27 templates/world/selection.html:68
+msgid "The kingdom prepares for the annual Tournament of Champions..."
+msgstr "Il regno si prepara per l'annuale Torneo dei Campioni..."
+
+#: templates/world/selection.html:28 templates/world/selection.html:71
+msgid "The Council of Mages senses a disturbance in the magical ley lines..."
+msgstr "Il Consiglio dei Maghi percepisce una perturbazione nelle linee energetiche magiche..."
+
+#: templates/world/selection.html:29 templates/world/selection.html:73
+msgid "Your ship approaches the neutral trading station orbiting Jupiter..."
+msgstr "La tua nave si avvicina alla stazione commerciale neutrale in orbita attorno a Giove..."
+
+#: templates/world/selection.html:34
+msgid "Choose Your World"
+msgstr "Scegli il Tuo Mondo"
+
+#: templates/world/selection.html:39
+msgid "Admin Mode: You can create new worlds."
+msgstr "Modalità Admin: Puoi creare nuovi mondi."
+
+#: templates/world/selection.html:45
+msgid "Classic Worlds"
+msgstr "Mondi Classici"
+
+#: templates/world/selection.html:59 templates/world/selection.html:115
+msgid "World"
+msgstr "Mondo"
+
+#: templates/world/selection.html:91 templates/world/selection.html:130
+msgid "Enter World"
+msgstr "Entra nel Mondo"
+
+#: templates/world/selection.html:101
+msgid "Custom Worlds"
+msgstr "Mondi Personalizzati"
+
+#: templates/world/selection.html:140
+msgid "No worlds available at the moment."
+msgstr "Nessun mondo disponibile al momento."
+
+#: world/views.py:50
+msgid "Entering world..."
+msgstr "Entrando nel mondo..."
+
+#: world/views.py:65
+msgid "Resuming adventure..."
+msgstr "Riprendendo l'avventura..."
+
+#: world/views.py:68 world/views.py:103
+#, fuzzy
+#| msgid "Character Sheet"
+msgid "Character not found."
+msgstr "Scheda Personaggio"
+
+#: world/views.py:84
+msgid "Please select a world first."
+msgstr ""
+
+#~ msgid "Home"
+#~ msgstr "Home"
+
+#: templates/world/selection.html:17
+msgid "A historically-inspired world set in medieval Europe during the height of the Renaissance. Great kingdoms rise and fall, knights defend their honor, and scholars unlock ancient secrets. Navigate political intrigue, participate in grand tournaments, or explore forgotten ruins."
+msgstr "Un mondo d'ispirazione storica ambientato nell'Europa medievale durante l'apice del Rinascimento. Grandi regni sorgono e cadono, i cavalieri difendono il proprio onore e gli studiosi svelano antichi segreti. Naviga tra intrighi politici, partecipa a grandi tornei o esplora rovine dimenticate."
+
+#: templates/world/selection.html:20
+msgid "A high-fantasy realm where magic flows through every living thing. Ancient dragons soar the skies, elven kingdoms hide in enchanted forests, and dwarven cities delve deep into mystical mountains. Dark forces stir in forgotten places, and heroes are called to face legendary quests."
+msgstr "Un regno high-fantasy dove la magia scorre in ogni essere vivente. Antichi draghi solcano i cieli, regni elfici si nascondono in foreste incantate e città naniche scavano nelle profondità di montagne mistiche. Forze oscure si muovono in luoghi dimenticati e gli eroi sono chiamati ad affrontare missioni leggendarie."
+
+#: templates/world/selection.html:23
+msgid "The year is 2347. Humanity has colonized the solar system and made first contact with alien civilizations. Advanced AI, cybernetic augmentations, and faster-than-light travel are commonplace. Navigate space politics, explore alien worlds, uncover corporate conspiracies, or fight in the ongoing conflict between Earth Alliance and the Outer Colonies."
+msgstr "L'anno è il 2347. L'umanità ha colonizzato il sistema solare e ha stabilito il primo contatto con civiltà aliene. IA avanzate, potenziamenti cibernetici e viaggi più veloci della luce sono all'ordine del giorno. Naviga tra la politica spaziale, esplora mondi alieni, svela cospirazioni aziendali o combatti nel conflitto in corso tra l'Alleanza Terrestre e le Colonie Esterne."

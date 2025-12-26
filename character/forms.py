@@ -13,5 +13,5 @@ class CharacterCreationForm(forms.Form):
         ('Druid', _('Druid')),
     ]
 
-    profession = forms.ChoiceField(label=_("Profession"), choices=PROFESSION_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))
-    description = forms.CharField(label=_("Backstory"), widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}), help_text=_("Describe your character's background..."))
+    profession = forms.ChoiceField(label=_("Profession"), choices=PROFESSION_CHOICES)
+    description = forms.CharField(label=_("Backstory"), widget=forms.Textarea(attrs={'rows': 5}), help_text=_("Describe your character's background..."))

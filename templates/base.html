@@ -1,45 +1,118 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="{{ LANGUAGE_CODE }}">
+<html lang="{{ LANGUAGE_CODE }}" data-bs-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Collabook RPG{% endblock %}</title>
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Cinzel for headers, Inter for text -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f0f0f;
+            color: #e0e0e0;
+        }
+
+        .navbar-brand {
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            color: #d4af37 !important;
+        }
+
+        .btn-gold {
+            background-color: #d4af37;
+            color: #000;
+            border: none;
+            font-weight: 600;
+        }
+
+        .btn-gold:hover {
+            background-color: #b8962e;
+            color: #000;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            color: #aaa;
+            transition: 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .lang-btn.active {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .lang-btn:hover {
+            color: #fff;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="main-container">
-        <div class="lang-toggle">
-            <form action="{% url 'set_language' %}" method="post">
-                {% csrf_token %}
-                <input name="next" type="hidden" value="{{ request.path }}">
-                <input name="language" type="hidden" value="en">
-                <button type="submit" class="lang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}">🇬🇧 EN</button>
-            </form>
-            <form action="{% url 'set_language' %}" method="post">
-                {% csrf_token %}
-                <input name="next" type="hidden" value="{{ request.path }}">
-                <input name="language" type="hidden" value="it">
-                <button type="submit" class="lang-btn {% if LANGUAGE_CODE == 'it' %}active{% endif %}">🇮🇹 IT</button>
-            </form>
-        </div>
-
-        {% if messages %}
-        <div class="messages">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
+    <nav class="navbar navbar-expand-lg navbar-dark border-bottom border-secondary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">⚔️ COLLABOOK</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/">{% trans "Home" %}</a></li>
+                </ul>
+                <div class="d-flex align-items-center">
+                    <div class="me-3 d-flex border rounded border-secondary p-1">
+                        <form action="{% url 'set_language' %}" method="post" class="m-0">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.path }}">
+                            <input name="language" type="hidden" value="en">
+                            <button type="submit"
+                                class="lang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}">EN</button>
+                        </form>
+                        <span class="text-secondary mx-1">|</span>
+                        <form action="{% url 'set_language' %}" method="post" class="m-0">
+                            {% csrf_token %}
+                            <input name="next" type="hidden" value="{{ request.path }}">
+                            <input name="language" type="hidden" value="it">
+                            <button type="submit"
+                                class="lang-btn {% if LANGUAGE_CODE|slice:':2' == 'it' %}active{% endif %}">IT</button>
+                        </form>
+                    </div>
+                    {% if request.session.token %}
+                    <a href="{% url 'accounts:logout' %}" class="btn btn-outline-danger btn-sm">{% trans "Logout" %}</a>
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-sm me-2">{% trans "Login"
+                        %}</a>
+                    {% endif %}
+                </div>
             </div>
-            {% endfor %}
         </div>
+    </nav>
+
+    <div class="container pb-5">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show border-0 shadow-sm" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
         {% endif %}
 
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </div>
+
+    <!-- Bootstrap 5.3 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

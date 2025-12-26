@@ -1,76 +1,158 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load crispy_forms_tags %}
 
 {% block title %}{% trans "Create Your Hero" %} - Collabook RPG{% endblock %}
 
 {% block content %}
-<div class="auth-container" style="max-width: 800px; margin: 0 auto;">
-    <h1 style='text-align: center; color: #d4af37; font-family: "Cinzel", serif;'>
-        ⚔️ {% trans "Create Your Hero" %} ⚔️
-    </h1>
-    <p style='text-align: center; color: #e8d4a0; font-size: 1.2rem; margin-bottom: 2rem;'>
-        {% trans "Customize your character" %}
-    </p>
+<style>
+    .card-gold {
+        border: 1px solid #d4af37;
+        background: rgba(20, 20, 20, 0.8);
+        backdrop-filter: blur(5px);
+    }
 
-    <div class="stats-section" style="margin-bottom: 2rem;">
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit" name="roll_stats" value="1" class="btn-primary" style="width: 100%;">
-                🎲 {% trans "Roll Dice" %}
-            </button>
-        </form>
+    .stat-box {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 10px;
+        transition: transform 0.2s;
+    }
 
-        {% if stats %}
-        <div class="alert alert-success" style="margin-top: 1rem;">
-            <h4 style="margin-top: 0;">✨ {% trans "Stats Generated" %}</h4>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
-                <div>
-                    <strong>💪 {% trans "Strength" %}</strong>: {{ stats.strength }}
-                </div>
-                <div>
-                    <strong>✨ {% trans "Magic" %}</strong>: {{ stats.magic }}
-                </div>
-                <div>
-                    <strong>🎯 {% trans "Dexterity" %}</strong>: {{ stats.dexterity }}
-                </div>
-                <div>
-                    <strong>🛡️ {% trans "Defense" %}</strong>: {{ stats.defense }}
-                </div>
-                <div>
-                    <strong>❤️ HP</strong>: {{ stats.hp }}
-                </div>
-                <div>
-                    <strong>❤️ Max HP</strong>: {{ stats.max_hp }}
+    .stat-box:hover {
+        transform: translateY(-5px);
+        background: rgba(212, 175, 55, 0.1);
+    }
+
+    .hero-title {
+        font-family: 'Cinzel', serif;
+        color: #d4af37;
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card card-gold shadow-lg mb-5">
+            <div class="card-body p-4 p-md-5">
+                <header class="text-center mb-5">
+                    <h1 class="hero-title display-4">⚔️ {% trans "Create Your Hero" %} ⚔️</h1>
+                    <p class="lead text-secondary">{% trans "Customize your character and prepare for your journey." %}
+                    </p>
+                </header>
+
+                <div class="row g-5">
+                    <!-- Left Column: Dice & Stats -->
+                    <div class="col-md-5 border-end border-secondary">
+                        <div class="text-center mb-4">
+                            <form method="post" class="mb-4">
+                                {% csrf_token %}
+                                <button type="submit" name="roll_stats" value="1"
+                                    class="btn btn-gold btn-lg w-100 shadow">
+                                    🎲 {% trans "Roll Your Destiny" %}
+                                </button>
+                            </form>
+                        </div>
+
+                        {% if stats %}
+                        <div class="p-3 border border-success rounded bg-success bg-opacity-10">
+                            <h4 class="text-success text-center mb-3">✨ {% trans "Stats Generated" %}</h4>
+                            <div class="row g-3 text-center">
+                                <div class="col-6">
+                                    <div class="stat-box">
+                                        <div class="small text-secondary text-uppercase font-weight-bold">{% trans
+                                            "Strength" %}</div>
+                                        <div class="h4 mb-0 text-white">{{ stats.strength }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-box">
+                                        <div class="small text-secondary text-uppercase">{% trans "Magic" %}</div>
+                                        <div class="h4 mb-0 text-white">{{ stats.magic }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-box">
+                                        <div class="small text-secondary text-uppercase">{% trans "Dexterity" %}</div>
+                                        <div class="h4 mb-0 text-white">{{ stats.dexterity }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-box">
+                                        <div class="small text-secondary text-uppercase">{% trans "Defense" %}</div>
+                                        <div class="h4 mb-0 text-white">{{ stats.defense }}</div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="stat-box border border-danger">
+                                        <div class="small text-danger text-uppercase font-weight-bold">HP</div>
+                                        <div class="h3 mb-0 text-white">{{ stats.hp }} / {{ stats.max_hp }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center p-5 border border-dashed text-secondary rounded">
+                            <p class="mb-0">{% trans "Roll the dice to see your potential..." %}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Right Column: Info & Form -->
+                    <div class="col-md-7">
+                        <h3 class="mb-4 d-flex align-items-center">
+                            <span class="badge bg-gold text-dark me-2">LVL 1</span>
+                            <span class="text-white">{{ character_name }}</span>
+                        </h3>
+
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mt-4 shadow-sm border-0"
+                                style="background: linear-gradient(45deg, #d4af37, #b8962e);">
+                                ⚔️ {% trans "Begin Adventure" %}
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-        {% endif %}
     </div>
-
-    <form method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <h3 style="margin-bottom: 1rem;">👤 {{ character_name }}</h3>
-        </div>
-
-        {% for field in form %}
-        <div class="form-group">
-            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-            {{ field }}
-            {% if field.help_text %}
-            <small style="color: var(--text-muted);">{{ field.help_text }}</small>
-            {% endif %}
-            {% if field.errors %}
-            <div class="alert alert-danger">
-                {{ field.errors }}
-            </div>
-            {% endif %}
-        </div>
-        {% endfor %}
-
-        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">
-            ⚔️ {% trans "Begin Adventure" %}
-        </button>
-    </form>
 </div>
+
+<!-- Modal for missing stats error -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-danger shadow-lg">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title" id="errorModalLabel">⚠️ {% trans "Action Required" %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <p class="lead mb-0">{{ popup_message|default:_("You must carry out all the necessary actions before
+                    starting!") }}</p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "I Understood"
+                    %}</button>
+                <form method="post" class="ms-2">
+                    {% csrf_token %}
+                    <button type="submit" name="roll_stats" value="1" class="btn btn-gold shadow-sm">
+                        🎲 {% trans "Roll Dice Now" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if error_popup %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var myModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        myModal.show();
+    });
+</script>
+{% endif %}
+
 {% endblock %}

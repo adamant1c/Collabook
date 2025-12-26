@@ -50,7 +50,12 @@ class CharacterCreationView(View):
             stats = request.session.get('rolled_stats')
             if not stats:
                 messages.error(request, _("Please roll stats first!"))
-                return redirect('character:create')
+                return render(request, self.template_name, {
+                    'form': form, 
+                    'character_name': user.get('username', 'Hero'),
+                    'error_popup': True,
+                    'popup_message': _("You must roll your dice to determine your hero's destiny before beginning the adventure!")
+                })
             
             try:
                 user = CollabookAPI.get_current_user(request.session['token'])

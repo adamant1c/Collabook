@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load i18n %}
-
+{% load static %}
 {% block title %}
 {% trans "Your Journey" %}
 - Collabook RPG
@@ -70,16 +70,18 @@
                 </div>
             </div>
 
-            {% if turn.entities %}
-            <div class="detected-entities mt-3 d-flex flex-wrap gap-4">
+        {% if turn.entities %}
+            <div class="detected-entities mt-3 d-flex flex-wrap gap-4 justify-content-center">
                 {% for entity in turn.entities %}
-                <div class="entity-card animate-pop-in">
+                <div class="entity-card animate-pop-in text-center">
                     {% if entity.image_url %}
-                    <div class="entity-image-container">
-                        <img src="{{ entity.image_url }}" alt="{{ entity.name }}" class="entity-image shadow">
-                    </div>
+                        <div class="entity-image-container">
+                            <img src="{% if '/static/' in entity.image_url %}{{ entity.image_url }}{% else %}{% static 'images/' %}{{ entity.image_url }}{% endif %}"
+                                 alt="{{ entity.name }}"
+                                 class="entity-image shadow">
+                        </div>
                     {% endif %}
-                    <div class="entity-label mt-2">
+                    <div class="entity-label mt-2 text-center">
                         <span class="badge {% if entity.type == 'enemy' %}badge-enemy{% else %}badge-npc{% endif %}">
                             {% if entity.type == 'enemy' %}💀{% else %}👤{% endif %}
                             {{ entity.name }}
@@ -88,7 +90,7 @@
                 </div>
                 {% endfor %}
             </div>
-            {% endif %}
+        {% endif %}
 
             <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;">
         </div>

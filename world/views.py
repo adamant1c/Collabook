@@ -126,10 +126,18 @@ class JourneyView(View):
             response = CollabookAPI.interact(character_id, user_action, request.session['token'], language=lang)
             
             history = request.session.get('history', [])
+            # Fix image URLs to use Django static paths
+            entities = response.get('detected_entities', [])
+            for entity in entities:
+                if 'image_url' in entity and entity['image_url']:
+                    # Se l'URL non inizia già con /static/, aggiungilo
+                    if not entity['image_url'].startswith('/static/'):
+                        entity['image_url'] = f"/static/images/{entity['image_url']}"
+
             history.append({
                 'action': user_action,
                 'narration': response['narration'],
-                'entities': response.get('detected_entities', [])
+                'entities': entities
             })
             request.session['history'] = history
             

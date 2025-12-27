@@ -5,6 +5,8 @@ echo "🚀 Starting Django frontend..."
 
 # Wait for database to be ready
 echo "⏳ Waiting for database..."
+# Wait for database to be ready
+echo "⏳ Waiting for database..."
 max_attempts=60
 attempt=0
 
@@ -19,7 +21,6 @@ until psql "$DATABASE_URL" -c '\q' 2>/dev/null; do
 done
 
 echo "✅ Database is ready!"
-
 # The rest remains the same
 echo "📊 Running database migrations..."
 python manage.py migrate --noinput

@@ -18,6 +18,15 @@ RUN pip install --no-cache-dir gunicorn==21.2.0
 # Copy project files
 COPY . .
 
+
+# Install psql client
+RUN if [ -f /etc/alpine-release ]; then \
+      apk add --no-cache postgresql-client; \
+    else \
+      apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*; \
+    fi
+
+
 # Copy and set entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh

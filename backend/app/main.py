@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
-
+from sqlalchemy import text
 from app.core.database import engine, Base, SessionLocal
 from app.core.security_utils import validate_secret_key, get_cors_origins
 from app.core.content_filter import validate_content_filter_config
@@ -57,44 +57,38 @@ async def root():
         "docs": "/docs"
     }
 
+
 @app.get("/health")
 async def health_check():
     """
     Health check endpoint (QA recommendation)
-    
-    Checks:
-    - API status
-    - Database connectivity
-    - Redis cache (if configured)
-    
-    Returns 200 if healthy, 503 if degraded
     """
     health_status = {
         "status": "healthy",
         "version": "2.1.0",
         "checks": {}
     }
-    
-    # Check database
+
+    # Check database - FIX: usa text()
     try:
         db = SessionLocal()
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))  # ← AGGIUNGI text() qui !!!
         db.close()
         health_status["checks"]["database"] = "healthy"
     except Exception as e:
         health_status["status"] = "degraded"
         health_status["checks"]["database"] = f"unhealthy: {str(e)}"
-    
-    # Check Redis (optional, won't fail if not configured)
+
+    # Check Redis (opzionale, non rompe il tutto)
     try:
         from app.core.redis_client import redis_client
         redis_client.redis.ping()
         health_status["checks"]["redis"] = "healthy"
     except Exception:
         health_status["checks"]["redis"] = "not configured or unavailable"
-    
+
     # Return 503 if degraded
     if health_status["status"] == "degraded":
         return JSONResponse(status_code=503, content=health_status)
-    
+
     return health_status

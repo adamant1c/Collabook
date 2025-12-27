@@ -1,5 +1,6 @@
 import os
 from google import genai
+from google.genai.types import GenerateContentConfig
 from typing import Optional
 import asyncio
 
@@ -64,11 +65,16 @@ class LLMClient:
             gemini_key = os.getenv("GEMINI_API_KEY")
             if gemini_key:
                 try:
-                    genai.configure(api_key=gemini_key)
-                    # Use Gemini 2.5 Flash (latest stable version)
-                    self.model = genai.GenerativeModel('models/gemini-2.5-flash')
+
+                    self.genai_client = genai.Client(api_key=gemini_key)  # or () if env var GEMINI_API_KEY is set
                     self.provider = "gemini"
-                    print("✓ Using Google Gemini Flash")
+                    self.model = type('FakeModel', (), {
+                        'generate_content_async': lambda prompt: self.genai_client.aio.models.generate_content(
+                            model="models/gemini-2.5-flash",
+                            contents=[{"role": "user", "parts": [{"text": prompt}]}]
+                        )
+                    })()
+                    print("✓ Using Google GenAI SDK (new unified)")
                 except Exception as e:
                     print(f"⚠ Gemini initialization failed: {e}")
 
@@ -172,40 +178,52 @@ class LLMClient:
         except Exception as e:
             print(f"Error generating with Ollama: {e}")
             raise
-    
+
     async def _generate_gemini(self, system_prompt: str, user_message: str, history: list = None) -> str:
         """Generate using Google Gemini"""
+
+
+        # Manteniamo lo stesso approccio "stringa unica" che avevi prima
         full_prompt = f"{system_prompt}\n\n{user_message}"
-        
+
         if history:
             history_text = "\n\n".join([
                 f"User: {turn.get('user', '')}\nAssistant: {turn.get('ai', '')}"
                 for turn in history
             ])
             full_prompt = f"{system_prompt}\n\nPrevious conversation:\n{history_text}\n\n{user_message}"
-        
+
         try:
             # Add retry logic for ResourceExhausted (429) errors
             from google.api_core import exceptions
             import random
-            
+
             max_retries = 3
             base_delay = 2
-            
+
             for attempt in range(max_retries):
                 try:
-                    response = await self.model.generate_content_async(full_prompt)
+                    # Nuova chiamata async con il nuovo client
+                    response = await self.genai_client.aio.models.generate_content(
+                        model="models/gemini-2.5-flash",  # ← cambia qui se usi un altro modello
+                        contents=[{"role": "user", "parts": [{"text": full_prompt}]}],
+                        config=GenerateContentConfig(
+                            system_instruction=system_prompt,  # ← sposto system prompt qui (più corretto)
+                            temperature=0.7
+                        )
+                    )
                     return response.text
+
                 except exceptions.ResourceExhausted as e:
                     if attempt == max_retries - 1:
                         print(f"❌ Gemini Quota Exceeded after {max_retries} attempts.")
-                        raise e # Raise to trigger fallback to Groq
-                    
+                        raise e  # Raise to trigger fallback to Groq
+
                     # Exponential backoff with jitter
                     delay = (base_delay * (2 ** attempt)) + random.uniform(0, 1)
-                    print(f"⏳ Gemini Quota Exceeded. Retrying in {delay:.2f}s... (Attempt {attempt+1}/{max_retries})")
+                    print(f"⏳ Gemini Quota Exceeded. Retrying in {delay:.2f}s... (Attempt {attempt + 1}/{max_retries})")
                     await asyncio.sleep(delay)
-                    
+
         except Exception as e:
             print(f"Error generating with Gemini: {e}")
             raise

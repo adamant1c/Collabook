@@ -10,7 +10,7 @@ groq
 slowapi
 langchain
 langchain-openai
-google-genai
+google-genai>=1.56.0
 python-multipart
 passlib[bcrypt]
 python-jose[cryptography]

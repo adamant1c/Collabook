@@ -195,7 +195,7 @@ class LLMClient:
 
         try:
             # Add retry logic for ResourceExhausted (429) errors
-            from google.api_core import exceptions
+            from google.genai.types import ResourceExhausted
             import random
 
             max_retries = 3
@@ -214,7 +214,7 @@ class LLMClient:
                     )
                     return response.text
 
-                except exceptions.ResourceExhausted as e:
+                except ResourceExhausted as e:
                     if attempt == max_retries - 1:
                         print(f"❌ Gemini Quota Exceeded after {max_retries} attempts.")
                         raise e  # Raise to trigger fallback to Groq

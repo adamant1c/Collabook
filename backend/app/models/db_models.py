@@ -1,12 +1,24 @@
-from sqlalchemy import Column, String, Text, Integer, DateTime, ForeignKey, JSON, Enum as SQLEnum, Boolean
+from sqlalchemy import (
+    Column, String, Text, Integer, DateTime,
+    ForeignKey, JSON, Boolean
+)
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import ENUM
 from datetime import datetime
 from app.core.database import Base
 import uuid
 import enum
 
+# -------------------------------------------------
+# Utilities
+# -------------------------------------------------
+
 def generate_uuid():
     return str(uuid.uuid4())
+
+# -------------------------------------------------
+# ENUM DEFINITIONS (Python)
+# -------------------------------------------------
 
 class UserRole(str, enum.Enum):
     ADMIN = "ADMIN"
@@ -33,23 +45,35 @@ class ItemType(str, enum.Enum):
     POTION = "POTION"
     MISC = "MISC"
 
+# -------------------------------------------------
+# ENUM DEFINITIONS (PostgreSQL)
+# ⚠️ create_type=False = Alembic gestirà la creazione
+# -------------------------------------------------
+
+user_role_enum = ENUM(UserRole, name="userrole", create_type=False)
+quest_type_enum = ENUM(QuestType, name="questtype", create_type=False)
+quest_status_enum = ENUM(QuestStatus, name="queststatus", create_type=False)
+enemy_type_enum = ENUM(EnemyType, name="enemytype", create_type=False)
+item_type_enum = ENUM(ItemType, name="itemtype", create_type=False)
+
+# -------------------------------------------------
+# MODELS
+# -------------------------------------------------
+
 class User(Base):
     __tablename__ = "users"
-    
-    # Authentication
+
     id = Column(String, primary_key=True, default=generate_uuid)
     username = Column(String, unique=True, nullable=False, index=True)
     email = Column(String, unique=True, nullable=False, index=True)
     password_hash = Column(String, nullable=False)
-    role = Column(SQLEnum(UserRole), default=UserRole.PLAYER, nullable=False)
-    
-    # Character Info
-    name = Column(String, nullable=False)  # Character display name
-    profession = Column(String, nullable=True)
-    description = Column(Text, nullable=True)
-    avatar_description = Column(Text, nullable=True)
-    
-    # RPG Stats (Phase 2 - initialized to 0 for now)
+    role = Column(user_role_enum, default=UserRole.PLAYER, nullable=False)
+
+    name = Column(String, nullable=False)
+    profession = Column(String)
+    description = Column(Text)
+    avatar_description = Column(Text)
+
     hp = Column(Integer, default=0)
     max_hp = Column(Integer, default=200)
     strength = Column(Integer, default=0)
@@ -58,236 +82,215 @@ class User(Base):
     defense = Column(Integer, default=0)
     xp = Column(Integer, default=0)
     level = Column(Integer, default=1)
-    
-    # Account Management
+
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
-    last_login = Column(DateTime, nullable=True)
-    reset_token = Column(String, nullable=True)
-    reset_token_expires = Column(DateTime, nullable=True)
-    
-    # Relationships
-    characters = relationship("Character", back_populates="user", cascade="all, delete-orphan")
+    last_login = Column(DateTime)
+    reset_token = Column(String)
+    reset_token_expires = Column(DateTime)
 
-    @property
-    def joined_stories(self):
-        return [char.story_id for char in self.characters]
+    characters = relationship(
+        "Character", back_populates="user", cascade="all, delete-orphan"
+    )
 
 class Story(Base):
     __tablename__ = "stories"
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     title = Column(String, nullable=False)
     world_description = Column(Text, nullable=False)
-    genre = Column(String, nullable=True)
-    current_state = Column(Text, nullable=True)
-    world_metadata = Column(JSON, nullable=True)
-    
-    # World management
-    is_default = Column(Boolean, default=False)  # True for 3 predefined worlds
-    created_by = Column(String, ForeignKey("users.id"), nullable=True)  # NULL for defaults
-    
+    genre = Column(String)
+    current_state = Column(Text)
+    world_metadata = Column(JSON)
+
+    is_default = Column(Boolean, default=False)
+    created_by = Column(String, ForeignKey("users.id"))
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relationships
+
     characters = relationship("Character", back_populates="story", cascade="all, delete-orphan")
-    turns = relationship("Turn", back_populates="story", cascade="all, delete-orphan")
     quests = relationship("Quest", back_populates="story", cascade="all, delete-orphan")
     enemies = relationship("Enemy", back_populates="story", cascade="all, delete-orphan")
     npcs = relationship("NPC", back_populates="story", cascade="all, delete-orphan")
 
 class Character(Base):
     __tablename__ = "characters"
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     user_id = Column(String, ForeignKey("users.id"), nullable=False)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False)
-    insertion_point = Column(Text, nullable=True)
-    status = Column(String, default="active")  # active, inactive, dead
-    
-    # Survival stats (Phase 5)
+
+    insertion_point = Column(Text)
+    status = Column(String, default="active")
+
     hunger = Column(Integer, default=100)
     thirst = Column(Integer, default=100)
     fatigue = Column(Integer, default=0)
-    
-    # Survival Mode (New)
+
     days_survived = Column(Integer, default=0)
-    last_played_date = Column(DateTime, nullable=True)
-    
-    # Death tracking (Phase 4 - Combat)
+    last_played_date = Column(DateTime)
+
     deaths = Column(Integer, default=0)
     can_resurrect = Column(Boolean, default=True)
-    
-    # Currency (Phase 3)
     gold = Column(Integer, default=0)
-    
+
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
+
     user = relationship("User", back_populates="characters")
     story = relationship("Story", back_populates="characters")
-    turns = relationship("Turn", back_populates="character", cascade="all, delete-orphan")
-    player_quests = relationship("PlayerQuest", back_populates="character", cascade="all, delete-orphan")
+    inventory = relationship("Inventory", cascade="all, delete-orphan")
 
 class Turn(Base):
     __tablename__ = "turns"
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False)
     character_id = Column(String, ForeignKey("characters.id"), nullable=False)
+
     user_action = Column(Text, nullable=False)
     narration = Column(Text, nullable=False)
     turn_number = Column(Integer, nullable=False)
-    
-    # Combat tracking (Phase 4)
+
+    # Combat tracking
     was_combat = Column(Boolean, default=False)
-    combat_result = Column(JSON, nullable=True)  # Store combat details
-    combat_enemy_id = Column(String, ForeignKey("enemies.id"), nullable=True)
-    
+    combat_result = Column(JSON)
+    combat_enemy_id = Column(String, ForeignKey("enemies.id"))
+
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
     # Relationships
     story = relationship("Story", back_populates="turns")
     character = relationship("Character", back_populates="turns")
     combat_enemy = relationship("Enemy")
 
+
 class Quest(Base):
     __tablename__ = "quests"
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False)
-    
-    # Quest info
+
     title = Column(String, nullable=False)
     description = Column(Text, nullable=False)
-    quest_type = Column(SQLEnum(QuestType), nullable=False)
-    
-    # Objectives (JSON list of objectives)
-    # Example: [{"id": "obj1", "description": "Find the ancient tome", "completed": false}]
-    objectives = Column(JSON, nullable=False, default=list)
-    
-    # Rewards
+    quest_type = Column(quest_type_enum, nullable=False)
+
+    objectives = Column(JSON, default=list)
+
     xp_reward = Column(Integer, default=0)
     gold_reward = Column(Integer, default=0)
-    item_rewards = Column(JSON, nullable=True, default=list)  # Phase 3B - Inventory
-    
-    # Quest giver NPC
-    quest_giver = Column(String, nullable=True)
-    quest_giver_description = Column(Text, nullable=True)
-    
-    # Requirements
-    is_repeatable = Column(Boolean, default=False)
-    required_level = Column(Integer, default=1)
-    
+    item_rewards = Column(JSON, default=list)
+
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
+
     story = relationship("Story", back_populates="quests")
-    player_quests = relationship("PlayerQuest", back_populates="quest", cascade="all, delete-orphan")
 
 class PlayerQuest(Base):
     __tablename__ = "player_quests"
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     character_id = Column(String, ForeignKey("characters.id"), nullable=False)
     quest_id = Column(String, ForeignKey("quests.id"), nullable=False)
-    
-    status = Column(SQLEnum(QuestStatus), default=QuestStatus.NOT_STARTED)
-    
+
+    # ⚠️ ENUM PostgreSQL corretto
+    status = Column(
+        quest_status_enum,
+        default=QuestStatus.NOT_STARTED,
+        nullable=False
+    )
+
     # Progress tracking
-    objectives_completed = Column(JSON, default=list)  # List of completed objective IDs
-    progress_notes = Column(Text, nullable=True)  # LLM-generated notes about progress
-    
+    objectives_completed = Column(JSON, default=list)
+    progress_notes = Column(Text)
+
     # Timestamps
     started_at = Column(DateTime, default=datetime.utcnow)
-    completed_at = Column(DateTime, nullable=True)
-    
+    completed_at = Column(DateTime)
+
     # Relationships
     character = relationship("Character", back_populates="player_quests")
     quest = relationship("Quest", back_populates="player_quests")
 
+
+# -------------------- Enemy --------------------
+
 class Enemy(Base):
     __tablename__ = "enemies"
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False)
-    
-    # Enemy info
+
     name = Column(String, nullable=False)
-    description = Column(Text, nullable=True)
-    enemy_type = Column(SQLEnum(EnemyType), default=EnemyType.COMMON)
-    
-    # Combat stats
+    description = Column(Text)
+    enemy_type = Column(enemy_type_enum, default=EnemyType.COMMON)
+
     level = Column(Integer, default=1)
     hp = Column(Integer, nullable=False)
-    max_hp = Column(Integer, nullable=False)  # For display
+    max_hp = Column(Integer, nullable=False)
     attack = Column(Integer, nullable=False)
     defense = Column(Integer, nullable=False)
-    
-    # Loot rewards
+
     xp_reward = Column(Integer, default=0)
     gold_min = Column(Integer, default=0)
     gold_max = Column(Integer, default=0)
-    loot_table = Column(JSON, nullable=True, default=list)  # Future: item drops
-    image_url = Column(Text, nullable=True)
-    
+    loot_table = Column(JSON, default=list)
+    image_url = Column(Text)
+
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
+
     story = relationship("Story", back_populates="enemies")
 
+# -------------------- NPC --------------------
+
 class NPC(Base):
-    """Non-Player Characters that are not enemies but context for DM"""
     __tablename__ = "npcs"
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False)
-    
+
     name = Column(String, nullable=False)
-    description = Column(Text, nullable=True)
-    image_url = Column(Text, nullable=True)
-    
+    description = Column(Text)
+    image_url = Column(Text)
+
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
+
     story = relationship("Story", back_populates="npcs")
 
+# -------------------- Item --------------------
+
 class Item(Base):
-    """Items for survival mechanics (food, water, potions)"""
     __tablename__ = "items"
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     name = Column(String, nullable=False)
-    item_type = Column(SQLEnum(ItemType), default=ItemType.MISC)
-    description = Column(Text, nullable=True)
-    
-    # Restoration effects
-    hunger_restore = Column(Integer, default=0)  # How much hunger it restores
-    thirst_restore = Column(Integer, default=0)  # How much thirst it restores
-    fatigue_restore = Column(Integer, default=0)  # How much fatigue it reduces
-    hp_restore = Column(Integer, default=0)       # HP healing
-    
-    # Properties
+    item_type = Column(item_type_enum, default=ItemType.MISC)
+    description = Column(Text)
+
+    hunger_restore = Column(Integer, default=0)
+    thirst_restore = Column(Integer, default=0)
+    fatigue_restore = Column(Integer, default=0)
+    hp_restore = Column(Integer, default=0)
+
     gold_cost = Column(Integer, default=0)
     is_consumable = Column(Boolean, default=True)
-    
+
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    inventory_items = relationship("Inventory", back_populates="item", cascade="all, delete-orphan")
+
+    inventory_items = relationship(
+        "Inventory", back_populates="item", cascade="all, delete-orphan"
+    )
+
+# -------------------- Inventory --------------------
 
 class Inventory(Base):
-    """Character inventory for items"""
     __tablename__ = "inventory"
-    
+
     id = Column(String, primary_key=True, default=generate_uuid)
     character_id = Column(String, ForeignKey("characters.id"), nullable=False)
     item_id = Column(String, ForeignKey("items.id"), nullable=False)
     quantity = Column(Integer, default=1)
-    
+
     created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
+
     character = relationship("Character")
     item = relationship("Item", back_populates="inventory_items")

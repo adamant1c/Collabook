@@ -6,16 +6,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=collabook
-      - POSTGRES_PASSWORD=collabook_pass
-      - POSTGRES_DB=collabook_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
     networks:
       - collabook-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
       - "6379:6379"
     networks:
@@ -29,37 +35,54 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://collabook:collabook_pass@db:5432/collabook_db
-      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
-      - OLLAMA_MODEL=gemma3:latest
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+      - ENVIRONMENT=development
+      - LLM_PROVIDER=${LLM_PROVIDER}
+      - CONTENT_FILTER_LEVEL=${CONTENT_FILTER_LEVEL}
+      - LOG_VIOLATIONS=${LOG_VIOLATIONS}
+      - LANGUAGE=${LANGUAGE}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - collabook-net
-    restart: no
+    restart: unless-stopped
 
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+    # Development: usa runserver con hot reload
     command: python manage.py runserver 0.0.0.0:8501
+    # Production-like: usa gunicorn (commenta la riga sopra e decommenta questa)
+    # command: gunicorn collabook_frontend.wsgi:application --bind 0.0.0.0:8501 --workers 2 --reload --timeout 120
     volumes:
       - .:/app
     ports:
       - "8501:8501"
     environment:
-      - BACKEND_URL=http://backend:8000
-      - DATABASE_URL=postgresql://collabook:collabook_pass@db:5432/collabook_db
+      - BACKEND_URL=${BACKEND_URL}
+      - DATABASE_URL=${DATABASE_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - ENVIRONMENT=development
+      - LANGUAGE=${LANGUAGE}
+      - DJANGO_SETTINGS_MODULE=collabook_frontend.settings
     depends_on:
       - backend
     networks:
       - collabook-net
+    restart: unless-stopped
 
 networks:
   collabook-net:

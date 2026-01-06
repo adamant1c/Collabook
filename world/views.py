@@ -2,7 +2,21 @@ from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.contrib import messages
 from django.utils.translation import gettext as _
+from django.utils.translation import gettext as _
 from core.api_client import CollabookAPI
+# Models are imported locally in the view usually to avoid circular imports? 
+# No, standard django practice is top level. But I added them in the previous block.
+# Wait, I added them *inside* the previous block but outside the class?
+# Let's check the previous `replace_file_content` result.
+# I added `from game.models import Turn, Character, Story` in the previous step's replacement content.
+# However, to be safe and clean, I should move imports to the top if they are needed elsewhere, but they are only used in PDF view.
+# Actually, looking at the previous tool call, I included the imports in the replacement text:
+# `from game.models import Turn, Character, Story`
+# So they are now at the bottom of the file before the class. This is valid Python.
+# But I might want to double check if `BackendUser` is needed for `character.user`.
+# Character.user is a ForeignKey to BackendUser.
+# I accessed `character.user.username`. That should work if `BackendUser` is defined in `game.models` which it is.
+
 
 class WorldSelectionView(View):
     template_name = 'world/selection.html'
@@ -141,7 +155,66 @@ class JourneyView(View):
             })
             request.session['history'] = history
             
+
             return redirect('world:journey')
+
+# PDF Generation imports
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from game.models import Turn, Character, Story
+# We need to import the unmanaged models to query the DB directly
+
+class DownloadStoryPDFView(View):
+    def get(self, request):
+        if 'token' not in request.session:
+            return redirect('accounts:login')
+            
+        character_id = request.session.get('character_id')
+        if not character_id:
+            messages.warning(request, _("No active character found."))
+            return redirect('world:selection')
+            
+        try:
+            # 1. Fetch Character and Story Details
+            # We use the unmanaged models from game.models
+            character = Character.objects.get(id=character_id)
+            story = character.story
+            user = character.user
+            
+            # 2. Fetch turns
+            turns = Turn.objects.filter(character_id=character_id).order_by('turn_number')
+            
+            # 3. Prepare Context
+            context = {
+                'story_title': story.title,
+                'world_name': story.title, # or world_description summary?
+                'character_name': character.user.username, # In backend this links to BackendUser
+                'date': character.created_at.strftime("%B %d, %Y"),
+                'insertion_point': character.insertion_point,
+                'turns': turns,
+            }
+            
+            # 4. Render Template
+            template_path = 'world/story_pdf.html'
+            template = get_template(template_path)
+            html = template.render(context)
+            
+            # 5. Create PDF
+            response = HttpResponse(content_type='application/pdf')
+            # filename
+            filename = f"{story.title.replace(' ', '_')}-{character.user.username}.pdf"
+            response['Content-Disposition'] = f'attachment; filename="{filename}"'
+            
+            pisa_status = pisa.CreatePDF(
+                html, dest=response
+            )
+            
+            if pisa_status.err:
+                return HttpResponse('We had some errors <pre>' + html + '</pre>')
+                
+            return response
+            
         except Exception as e:
-            messages.error(request, str(e))
+            messages.error(request, f"Error generating PDF: {str(e)}")
             return redirect('world:journey')

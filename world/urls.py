@@ -6,4 +6,5 @@ app_name = 'world'
 urlpatterns = [
     path('selection/', views.WorldSelectionView.as_view(), name='selection'),
     path('journey/', views.JourneyView.as_view(), name='journey'),
+    path('download_pdf/', views.DownloadStoryPDFView.as_view(), name='download_pdf'),
 ]

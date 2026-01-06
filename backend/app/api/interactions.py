@@ -125,11 +125,23 @@ Rispondi direttamente in 2-3 paragrafi."""
     if character.last_played_date is None or character.last_played_date.date() != today:
         character.days_survived += 1
         character.last_played_date = datetime.utcnow()
+        
+        goal = story.survival_goal_days if hasattr(story, "survival_goal_days") else 10
+        
+        # Win Condition Check
+        if character.days_survived >= goal:
+             return InteractionResponse(
+                turn_id=db_turn.id,
+                narration=f"CONGRATULATIONS! You have survived {goal} days! You have won the Survival Mode!",
+                turn_number=turn_number,
+                quest_hint="SURVIVAL COMPLETED!"
+            )
+            
         # Add a notification about the new day
         if character.days_survived == 1:
-            quest_hint = f"Day 1/100. Survive!"
+            quest_hint = f"Day 1/{goal}. Survive!"
         else:
-            day_msg = f"Day {character.days_survived}/100"
+            day_msg = f"Day {character.days_survived}/{goal}"
             quest_hint = f"{quest_hint} | {day_msg}" if quest_hint else day_msg
     
     # Apply HP drain if any

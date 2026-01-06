@@ -92,6 +92,7 @@ class StoryCreate(BaseModel):
     world_description: str
     genre: Optional[str] = None
     world_metadata: Optional[Dict[str, Any]] = None
+    survival_goal_days: Optional[int] = 10
 
 class StoryResponse(BaseModel):
     id: str
@@ -100,6 +101,7 @@ class StoryResponse(BaseModel):
     genre: Optional[str]
     current_state: Optional[str]
     world_metadata: Optional[Dict[str, Any]]
+    survival_goal_days: int
     is_default: bool
     created_at: datetime
     updated_at: datetime

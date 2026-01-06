@@ -24,6 +24,7 @@ async def create_story(
         genre=story.genre,
         world_metadata=story.world_metadata,
         current_state="The story is beginning...",
+        survival_goal_days=story.survival_goal_days,
         created_by=current_user.id  # Track who created it
     )
     db.add(db_story)

@@ -82,6 +82,7 @@ class Story(Base):
     genre = Column(String, nullable=True)
     current_state = Column(Text, nullable=True)
     world_metadata = Column(JSON, nullable=True)
+    survival_goal_days = Column(Integer, default=10) # Survival Mode Goal
     
     # World management
     is_default = Column(Boolean, default=False)  # True for 3 predefined worlds

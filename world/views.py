@@ -157,6 +157,9 @@ class JourneyView(View):
             
 
             return redirect('world:journey')
+        except Exception as e:
+            messages.error(request, str(e))
+            return redirect('world:journey')
 
 # PDF Generation imports
 from django.http import HttpResponse

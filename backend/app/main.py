@@ -17,7 +17,7 @@ validate_secret_key()
 validate_content_filter_config()
 
 # Create database tables
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Collabook API", 

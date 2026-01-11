@@ -196,10 +196,23 @@ async def request_password_reset(request: Request, reset_request: PasswordResetR
     
     db.commit()
     
-    # TODO: Send email with reset link
-    #  For now, just log it (in production, use email service)
-    print(f"Password reset token for {user.email}: {reset_token}")
-    print(f"Reset link: http://localhost:8501/reset?token={reset_token}")
+    # Send email with reset link
+    reset_link = f"http://localhost:8501/reset-password?token={reset_token}"
+    
+    email_body = f"""
+    Hello,
+    
+    You have requested to reset your password for Collabook.
+    Please click the link below to reset it:
+    {reset_link}
+    
+    This link will expire in 1 hour.
+    
+    If you did not request this, please ignore this email.
+    """
+    
+    send_email(user.email, "Collabook Password Reset", email_body)
+    print(f"📧 [DEBUG] Password reset email sent to {user.email}")
     
     return {"message": "If the email exists, a reset link has been sent"}
 

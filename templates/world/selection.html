@@ -31,7 +31,7 @@
 <div class="container">
     <h1 style='text-align: center; color: #d4af37; font-family: "Cinzel", serif;'>
         🌍
-        {% trans "Choose Your World" %}
+        {% trans "Choose your world from the available options" %}
     </h1>
 
     {% if is_admin %}
@@ -41,9 +41,6 @@
     {% endif %}
 
     {% if default_worlds %}
-    <h2 style="margin-top: 2rem;">
-        {% trans "Classic Worlds" %}
-    </h2>
     {% for story in default_worlds %}
     <div class="quest-card">
         <h3>

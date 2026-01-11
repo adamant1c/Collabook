@@ -37,15 +37,36 @@
                         ⏳
                         {% trans "Survival Mode" %}
                     </h3>
-                    <p class="lead">
+                    <div class="lead">
                         {% blocktrans with goal=survival_goal trimmed %}
                         Your objective is to survive for <strong class="text-gold">{{ goal }} days</strong>.
+                        {% endblocktrans %}
+                    </div>
+                    <p class="small text-secondary mt-2">
+                        {% blocktrans trimmed %}
+                        Time passes naturally as you play: 1 day passes for each real-world day you interact with the
+                        story.
+                        Manage your hunger, thirst, and fatigue to stay alive!
+                        {% endblocktrans %}
+                    </p>
+                </section>
+
+                <section class="mb-5">
+                    <h3 class="text-warning mb-3">
+                        📊
+                        {% trans "Attributes & Vitality" %}
+                    </h3>
+                    <p class="lead">
+                        {% blocktrans trimmed %}
+                        At the start of your journey, your <strong>Hit Points</strong> and <strong>Ability
+                            Points</strong> are determined by your initial attribute rolls.
                         {% endblocktrans %}
                     </p>
                     <p class="small text-secondary">
                         {% blocktrans trimmed %}
-                        Time passes naturally as you play: <strong>1 day passes for each real-world day</strong> you interact with the story.
-                        Manage your hunger, thirst, and fatigue to stay alive!
+                        Currently, these stats are automatically generated based on your character's background and
+                        attributes to ensure a balanced start.
+                        In the future, you may have the option to further customize your starting potential!
                         {% endblocktrans %}
                     </p>
                 </section>

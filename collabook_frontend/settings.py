@@ -131,6 +131,11 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+# Language persistence
+LANGUAGE_COOKIE_NAME = 'django_language'
+LANGUAGE_COOKIE_AGE = 31536000 # 1 year
+LANGUAGE_COOKIE_HTTPONLY = True
+
 # ========================================
 # Static files (CSS, JavaScript, Images)
 # ========================================

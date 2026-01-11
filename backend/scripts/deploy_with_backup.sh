@@ -102,7 +102,7 @@ echo "✓ Complete cleanup done"
 # --------------------------------------------------
 echo ""
 echo "📥 Pulling latest code from git..."
-git pull
+git pull || echo "   ⚠️  Warning: git pull failed (possibly no upstream tracking). Continuing with existing local code."
 
 # --------------------------------------------------
 # 5. Rebuild & start (1 backend only)
@@ -141,6 +141,13 @@ if [ -d "$MIGRATION_DIR" ] && [ -n "$(ls -A $MIGRATION_DIR/*.py 2>/dev/null)" ];
 else
     echo "   ℹ️  No migrations found, skipping..."
 fi
+
+# --------------------------------------------------
+# 6.6. Compile translations
+# --------------------------------------------------
+echo ""
+echo "🌐 Compiling translations..."
+$COMPOSE exec backend python manage.py compilemessages || echo "   ⚠️  Could not compile messages (gettext might not be installed)"
 
 # --------------------------------------------------
 # 7. Seed or Import database

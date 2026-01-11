@@ -56,6 +56,18 @@ async def create_interaction(
         PlayerQuest.status == QuestStatus.IN_PROGRESS
     ).all()
     
+    # Multiplayer: Get other active characters in this story
+    active_char_ids = redis_client.get_active_characters(story.id)
+    other_players = []
+    if active_char_ids:
+        # Filter out current character
+        other_ids = [cid for cid in active_char_ids if cid != character.id]
+        if other_ids:
+            # Query db for details - join with User for names
+            other_players = db.query(Character).join(User).filter(
+                Character.id.in_(other_ids)
+            ).all()
+
     # Create OPTIMIZED compact context (200-400 tokens vs 1000-2000)
     compact_context = create_compact_context(
         user=current_user,
@@ -63,7 +75,8 @@ async def create_interaction(
         story=story,
         recent_turns=recent_turns,
         active_quests=active_quests,
-        max_turns=3  # Only last 3 turns
+        max_turns=3,  # Only last 3 turns
+        other_players=other_players  # Pass other players to context
     )
     
     # Create optimized prompt
@@ -158,10 +171,10 @@ Rispondi direttamente in 2-3 paragrafi."""
             critical_warning=True
         )
     
-    # Update story current_state (compact summary)
+    # Update character current_state (compact summary)
     last_action = interaction.user_action[:100]
     last_result = narration[:150]
-    story.current_state = f"{last_action}... {last_result}"
+    character.current_state = f"{last_action}... {last_result}"
     
     db.commit()
     db.refresh(db_turn)

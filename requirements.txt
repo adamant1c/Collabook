@@ -15,4 +15,3 @@ psycopg2-binary
 
 
 xhtml2pdf>=0.2.15
-reportlab==3.6.13

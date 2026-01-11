@@ -80,7 +80,6 @@ class Story(Base):
     title = Column(String, nullable=False)
     world_description = Column(Text, nullable=False)
     genre = Column(String, nullable=True)
-    current_state = Column(Text, nullable=True)
     world_metadata = Column(JSON, nullable=True)
     survival_goal_days = Column(Integer, default=10) # Survival Mode Goal
     
@@ -106,6 +105,9 @@ class Character(Base):
     story_id = Column(String, ForeignKey("stories.id"), nullable=False)
     insertion_point = Column(Text, nullable=True)
     status = Column(String, default="active")  # active, inactive, dead
+    
+    # Game state summary (moved from Story)
+    current_state = Column(Text, nullable=True)
     
     # Survival stats (Phase 5)
     hunger = Column(Integer, default=100)

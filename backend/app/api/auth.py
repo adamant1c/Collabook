@@ -10,7 +10,46 @@ from app.core.security import verify_password, hash_password, create_access_toke
 from app.core.rpg_stats import initialize_character_stats
 from app.core.security_utils import sanitize_user_input, validate_email_format
 from app.models.db_models import User, UserRole
+import smtplib
+import os
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from app.models.schemas import UserRegister, UserLogin, Token, UserResponse, PasswordResetRequest, PasswordReset
+
+def send_email(to_email: str, subject: str, content: str):
+    """Send email via SMTP (configured for Mailhog or external)"""
+    smtp_server = os.getenv("SMTP_SERVER", "mailhog")
+    smtp_port = int(os.getenv("SMTP_PORT", "1025"))
+    sender_email = os.getenv("SMTP_SENDER", "noreply@collabook.com")
+    
+    smtp_username = os.getenv("SMTP_USERNAME")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+
+    msg = MIMEMultipart()
+    msg["From"] = sender_email
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(content, "plain"))
+    
+    try:
+        # Connect to server
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.ehlo()
+        
+        # Enable TLS if using port 587 (Gmail)
+        if smtp_port == 587:
+            server.starttls()
+            server.ehlo()
+            
+        if smtp_username and smtp_password:
+            server.login(smtp_username, smtp_password)
+            
+        server.send_message(msg)
+        server.quit()
+        
+        print(f"📧 Email sent to {to_email}")
+    except Exception as e:
+        print(f"❌ Failed to send email to {to_email}: {e}")
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -49,7 +88,7 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
 
-@router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 @limiter.limit("50/hour")  # Max 50 registrations per hour per IP
 async def register(request: Request, user_data: UserRegister, db: Session = Depends(get_db)):
     """Register a new player account (rate limited: 3/hour)"""
@@ -80,19 +119,38 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
         profession=user_data.profession,
         description=user_data.description,
         avatar_description=user_data.avatar_description,
+        is_active=False  # Verification required
     )
     
     # Initialize RPG stats (random 1-10)
     initialize_character_stats(db_user)
     
+    # Generate verification token (reusing reset_token logic for simplicity)
+    verification_token = generate_reset_token()
+    db_user.reset_token = verification_token
+    db_user.reset_token_expires = datetime.utcnow() + timedelta(hours=24)
+    
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     
-    # Create access token
-    access_token = create_access_token(data={"sub": db_user.username})
+    # Send verification email (Mock)
+    # Frontend URLs for accounts are at root path (""), so use /verify-email/
+    verification_link = f"http://localhost:8501/verify-email/?token={verification_token}"
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    email_body = f"""
+    Welcome to Collabook, {db_user.username}!
+    
+    Please click the link below to verify your account:
+    {verification_link}
+    
+    If you did not request this, please ignore this email.
+    """
+    
+    send_email(db_user.email, "Verify your Collabook Account", email_body)
+    print(f"📧 [DEBUG] Verification link: {verification_link}")
+    
+    return {"message": "Registration successful. Please check your email to verify your account."}
 
 @router.post("/login", response_model=Token)
 @limiter.limit("100/minute")  # Max 100 login attempts per minute per IP
@@ -164,3 +222,23 @@ async def reset_password(reset_data: PasswordReset, db: Session = Depends(get_db
     db.commit()
     
     return {"message": "Password successfully reset"}
+
+@router.get("/verify-email")
+async def verify_email(token: str, db: Session = Depends(get_db)):
+    """Verify email address using token"""
+    
+    user = db.query(User).filter(User.reset_token == token).first()
+    
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid verification token")
+        
+    if user.reset_token_expires and user.reset_token_expires < datetime.utcnow():
+        raise HTTPException(status_code=400, detail="Verification token has expired")
+        
+    # Activate user
+    user.is_active = True
+    user.reset_token = None
+    user.reset_token_expires = None
+    db.commit()
+    
+    return {"message": "Email verified successfully"}

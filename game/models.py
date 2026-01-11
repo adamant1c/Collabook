@@ -39,7 +39,6 @@ class Story(models.Model):
     title = models.CharField(max_length=255)
     world_description = models.TextField()
     genre = models.CharField(max_length=100, null=True, blank=True)
-    current_state = models.TextField(null=True, blank=True)
     survival_goal_days = models.IntegerField(default=10)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -58,6 +57,9 @@ class Character(models.Model):
     story = models.ForeignKey(Story, related_name='characters', db_column='story_id', on_delete=models.DO_NOTHING)
     insertion_point = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=50, default='active')
+    
+    # Game state summary (moved from Story)
+    current_state = models.TextField(null=True, blank=True)
     
     # Survival stats
     hunger = models.IntegerField(default=100)

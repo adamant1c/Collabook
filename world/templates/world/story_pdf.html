@@ -1,5 +1,4 @@
 {% load i18n %}
-{% load static %}
 <!DOCTYPE html>
 <html>
 
@@ -7,59 +6,49 @@
     <meta charset="utf-8">
     <title>{{ story_title }}</title>
     <style>
-        @page {
-            size: A4;
-            margin: 2.5cm;
-        }
-
         body {
-            font-family: "Times New Roman", serif;
+            font-family: serif;
             font-size: 12pt;
-            line-height: 1.5;
-            color: #000;
+            line-height: 1.6;
+            margin: 2cm;
         }
 
         h1 {
             font-size: 24pt;
             text-align: center;
-            margin-bottom: 2cm;
-            color: #000;
+            margin-bottom: 1cm;
         }
 
         h2 {
             font-size: 18pt;
             margin-top: 1cm;
             margin-bottom: 0.5cm;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 5px;
-        }
-
-        .chapter {
-            margin-bottom: 1cm;
-        }
-
-        .user-action {
-            font-style: italic;
-            color: #444;
-            margin-bottom: 0.5cm;
-            padding-left: 0.5cm;
-            border-left: 2px solid #ccc;
-        }
-
-        .narrator-response {
-            text-align: justify;
+            border-bottom: 1px solid #999;
+            padding-bottom: 3pt;
         }
 
         .metadata {
             text-align: center;
             font-size: 10pt;
             color: #666;
-            margin-bottom: 2cm;
+            margin-bottom: 1cm;
+        }
+
+        .user-action {
+            font-style: italic;
+            color: #333;
+            margin-bottom: 0.3cm;
+            padding-left: 0.5cm;
+            border-left: 2px solid #999;
+        }
+
+        .chapter {
+            margin-bottom: 1cm;
         }
 
         .the-end {
             text-align: center;
-            margin-top: 3cm;
+            margin-top: 2cm;
             font-style: italic;
             font-weight: bold;
         }
@@ -78,24 +67,17 @@
     {% if insertion_point %}
     <div class="chapter">
         <h2>{% trans "Prologue" %}</h2>
-        <div class="narrator-response">
-            {{ insertion_point|linebreaks }}
-        </div>
+        <p>{{ insertion_point }}</p>
     </div>
     {% endif %}
 
     {% for turn in turns %}
     <div class="chapter">
-        <!-- We use Turn Number as Chapter title or just a separator -->
         <h2>{% trans "Chapter" %} {{ forloop.counter }}</h2>
-
         <div class="user-action">
             {{ turn.user_action }}
         </div>
-
-        <div class="narrator-response">
-            {{ turn.narration|safe }}
-        </div>
+        <p>{{ turn.narration|safe }}</p>
     </div>
     {% endfor %}
 

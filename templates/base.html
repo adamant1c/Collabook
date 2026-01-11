@@ -89,6 +89,14 @@
                     {% endif %}
                 </ul>
                 <div class="d-flex align-items-center">
+                    {% if character_survival and character_survival.is_active %}
+                    <div class="me-3 px-3 py-1 rounded border border-warning"
+                        style="background-color: rgba(212, 175, 55, 0.1);">
+                        <span class="text-warning" style="font-weight: 600;">
+                            🕐 {% trans "Day" %} {{ character_survival.days_survived }}/{{ character_survival.survival_goal }}
+                        </span>
+                    </div>
+                    {% endif %}
                     <div class="me-3 d-flex border rounded border-secondary p-1">
                         <form action="{% url 'set_language' %}" method="post" class="m-0">
                             {% csrf_token %}

@@ -28,7 +28,7 @@ class CollabookAPI:
             })
             response.raise_for_status()
             data = response.json()
-            return data["access_token"]
+            return data["message"]
         except requests.exceptions.HTTPError as e:
             if e.response is not None:
                 try:
@@ -85,6 +85,13 @@ class CollabookAPI:
         response.raise_for_status()
         return response.json()
     
+    @staticmethod
+    def verify_email(token: str) -> dict:
+        """Verify email using token"""
+        response = requests.get(f"{BACKEND_URL}/auth/verify-email", params={"token": token})
+        response.raise_for_status()
+        return response.json()
+
     # ==================== Stories ====================
     
     @staticmethod

@@ -20,7 +20,8 @@ def create_compact_context(
     story: Story,
     recent_turns: List[Turn],
     active_quests: List[PlayerQuest],
-    max_turns: int = 3
+    max_turns: int = 3,
+    other_players: List[Character] = None  # NEW: Multiplayer support
 ) -> Dict[str, Any]:
     """Create ultra-compact context for LLM
     
@@ -40,11 +41,23 @@ def create_compact_context(
     world_context = {
         "world": story.title,
         "genre": story.genre,
-        "scene": story.current_state or "Beginning of adventure"
+        "scene": character.current_state or "Beginning of adventure"
     }
     
     # Available Entities (NEW)
     entities = {}
+    
+    # Add other players present in the story
+    if other_players:
+        entities["players"] = [
+            {
+                "name": p.user.name,  # Access User via Character relationship
+                "class": p.user.profession,
+                "state": p.current_state or "Exploring"
+            }
+            for p in other_players
+        ]
+        
     if story.npcs:
         entities["npcs"] = [{"name": n.name, "desc": n.description[:100]} for n in story.npcs]
     if story.enemies:

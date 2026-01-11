@@ -17,12 +17,12 @@ echo "Service options:"
 echo "  1) Development"
 echo "  2) Production"
 echo ""
-read -p "Choose an option [1/2]: " EXPORT_CHOICE
+read -p "Choose an option [1/2]: " EXPORT_CHOICE_OP
 
-if [[ "$EXPORT_CHOICE" == "1" ]]; then
+if [[ "$EXPORT_CHOICE_OP" == "1" ]]; then
     echo "Implementing Development:"
     COMPOSE="docker compose -f docker-compose.yml"
-elif [[ "$EXPORT_CHOICE" == "2" ]]; then
+elif [[ "$EXPORT_CHOICE_OP" == "2" ]]; then
     echo "Implementing Production:"
     COMPOSE="docker compose -f docker-compose.prod.yml"
 else
@@ -75,9 +75,9 @@ echo "  - STOP all containers"
 echo "  - DELETE the PostgreSQL database"
 echo "  - REBUILD all images"
 echo ""
-read -p "Type 'YES' to continue: " CONFIRM
+read -p "Type 'Y' to continue: " CONFIRM
 
-if [[ "$CONFIRM" != "YES" ]]; then
+if [[ "$CONFIRM" != "Y" ]]; then
     echo "❌ Operation cancelled by user."
     exit 0
 fi
@@ -122,6 +122,27 @@ echo "🧱 Initializing database schema..."
 $COMPOSE exec backend python manage.py init-db
 
 # --------------------------------------------------
+# 6.5. Run migrations if any exist
+# --------------------------------------------------
+echo ""
+echo "🔄 Running database migrations (if any)..."
+MIGRATION_DIR="backend/migrations"
+
+if [ -d "$MIGRATION_DIR" ] && [ -n "$(ls -A $MIGRATION_DIR/*.py 2>/dev/null)" ]; then
+    echo "📋 Found migration scripts in $MIGRATION_DIR"
+    for migration_script in $MIGRATION_DIR/*.py; do
+        if [ -f "$migration_script" ]; then
+            script_name=$(basename "$migration_script")
+            echo "   ⚙️  Running: $script_name"
+            $COMPOSE exec backend python "migrations/$script_name" || echo "   ⚠️  Migration $script_name failed (may be already applied)"
+        fi
+    done
+    echo "✓ All migrations processed"
+else
+    echo "   ℹ️  No migrations found, skipping..."
+fi
+
+# --------------------------------------------------
 # 7. Seed or Import database
 # --------------------------------------------------
 echo ""
@@ -141,11 +162,25 @@ else
 fi
 
 # --------------------------------------------------
-# 8. Scale backend
+# 8. Create superuser for development
 # --------------------------------------------------
-echo ""
-echo "⚡ Scaling backend to 4 replicas..."
-$COMPOSE up -d --scale backend=4
+if [[ "$EXPORT_CHOICE_OP" == "1" ]]; then
+    echo ""
+    echo "👤 Creating admin user 'adm1n' for development..."
+    $COMPOSE exec backend python scripts/create_admin.py
+fi
+
+# --------------------------------------------------
+# 8. Scale backend (only in production)
+# --------------------------------------------------
+if [[ "$EXPORT_CHOICE_OP" == "2" ]]; then
+    echo ""
+    echo "⚡ Scaling backend to 4 replicas (Production)..."
+    $COMPOSE up -d --scale backend=4
+else
+    echo ""
+    echo "ℹ️  Development mode: keeping 1 backend instance"
+fi
 
 echo ""
 echo "✅ Deploy completed successfully!"

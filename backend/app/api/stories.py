@@ -23,7 +23,6 @@ async def create_story(
         world_description=story.world_description,
         genre=story.genre,
         world_metadata=story.world_metadata,
-        current_state="The story is beginning...",
         survival_goal_days=story.survival_goal_days,
         created_by=current_user.id  # Track who created it
     )
@@ -35,7 +34,6 @@ async def create_story(
     redis_client.set_story_context(db_story.id, {
         "world_description": db_story.world_description,
         "genre": db_story.genre,
-        "current_state": db_story.current_state,
         "world_metadata": db_story.world_metadata
     })
     
@@ -94,7 +92,6 @@ async def join_story(
         story_context = {
             "world_description": story.world_description,
             "genre": story.genre,
-            "current_state": story.current_state,
             "world_metadata": story.world_metadata
         }
     

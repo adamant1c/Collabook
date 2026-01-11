@@ -99,7 +99,6 @@ class StoryResponse(BaseModel):
     title: str
     world_description: str
     genre: Optional[str]
-    current_state: Optional[str]
     world_metadata: Optional[Dict[str, Any]]
     survival_goal_days: int
     is_default: bool

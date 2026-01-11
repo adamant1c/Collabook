@@ -116,10 +116,25 @@ class JourneyView(View):
             if not character:
                 messages.error(request, _("Character not found."))
                 return redirect('world:selection')
+            
+            # Check if game has ended (for PDF download button visibility)
+            game_ended = False
+            try:
+                from game.models import Character as DBCharacter, Story as DBStory
+                db_character = DBCharacter.objects.get(id=request.session['character_id'])
+                db_story = db_character.story
+                
+                # Game ends if character is dead OR survival goal reached
+                if db_character.status == 'dead' or db_character.days_survived >= db_story.survival_goal_days:
+                    game_ended = True
+            except Exception:
+                # If we can't check, default to False (hide button)
+                pass
                 
             return render(request, self.template_name, {
                 'history': history,
-                'character': character
+                'character': character,
+                'game_ended': game_ended
             })
         except Exception as e:
             messages.error(request, str(e))

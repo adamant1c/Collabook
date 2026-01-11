@@ -46,14 +46,28 @@ class RegisterView(FormView):
         password = form.cleaned_data['password']
         # Name is same as username for now, as per Streamlit app
         try:
-            token = CollabookAPI.register(username, email, password, name=username)
-            self.request.session['token'] = token
-            self.request.session['username'] = username
-            messages.success(self.request, _("Registration successful!"))
-            return redirect('accounts:login') # Temporary
+            message = CollabookAPI.register(username, email, password, name=username)
+            # No auto-login!
+            messages.success(self.request, _("Registration successful! Please check your email to verify your account."))
+            return redirect('accounts:login')
         except Exception as e:
             messages.error(self.request, str(e))
             return self.form_invalid(form)
+
+class VerifyEmailView(View):
+    def get(self, request):
+        token = request.GET.get('token')
+        if not token:
+            messages.error(request, _("Invalid verification link."))
+            return redirect('accounts:login')
+            
+        try:
+            CollabookAPI.verify_email(token)
+            messages.success(request, _("Email verified successfully! You can now login."))
+        except Exception as e:
+            messages.error(request, _("Verification failed: ") + str(e))
+            
+        return redirect('accounts:login')
 
 class LogoutView(View):
     def get(self, request):

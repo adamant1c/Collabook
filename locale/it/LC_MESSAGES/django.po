@@ -565,9 +565,8 @@ msgstr ""
 "attributi."
 
 #: templates/game/rules.html:62
-msgid ""
-"Currently, these stats are automatically generated based on your character's "
-"ulteriormente il tuo potenziale iniziale!"
+msgid "Currently, these stats are automatically generated based on your character's destiny."
+msgstr "Attualmente, queste statistiche sono generate automaticamente in base al destino del tuo personaggio."
 
 #: templates/base.html:96
 msgid "Day"

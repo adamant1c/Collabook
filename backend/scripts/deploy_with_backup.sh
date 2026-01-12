@@ -147,7 +147,7 @@ fi
 # --------------------------------------------------
 echo ""
 echo "🌐 Compiling translations..."
-$COMPOSE exec backend python manage.py compilemessages || echo "   ⚠️  Could not compile messages (gettext might not be installed)"
+$COMPOSE exec frontend python manage.py compilemessages || echo "   ⚠️  Could not compile messages (gettext might not be installed)"
 
 # --------------------------------------------------
 # 7. Seed or Import database

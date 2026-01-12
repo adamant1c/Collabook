@@ -18,7 +18,7 @@ services:
           cpus: '0.5'
           memory: 512M
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -53,6 +53,11 @@ services:
       - CONTENT_FILTER_LEVEL=${CONTENT_FILTER_LEVEL}
       - LOG_VIOLATIONS=${LOG_VIOLATIONS}
       - LANGUAGE=${LANGUAGE}
+      - SMTP_SERVER=${SMTP_SERVER}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_SENDER=${SMTP_SENDER}
     depends_on:
       db:
         condition: service_healthy
@@ -60,6 +65,9 @@ services:
         condition: service_started
     networks:
       - collabook-net
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     restart: unless-stopped
     deploy:
       resources:
@@ -67,7 +75,7 @@ services:
           cpus: '1.0'
           memory: 512M
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3

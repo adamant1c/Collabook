@@ -17,9 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from django.http import HttpResponse
+
+def ads_txt(request):
+    return HttpResponse("google.com, pub-9623905672643205, DIRECT, f08c47fec0942fa0")
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),
+    path('ads.txt', ads_txt),
     path('', include('accounts.urls')),
     path('character/', include('character.urls')),
     path('world/', include('world.urls')),

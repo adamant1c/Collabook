@@ -10,6 +10,11 @@ class RegisterForm(forms.Form):
     email = forms.EmailField(label=_("Email"), widget=forms.EmailInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label=_("Password"), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password_confirm = forms.CharField(label=_("Confirm Password"), widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    privacy_policy = forms.BooleanField(
+        label=_("I have read and accepted the Privacy Policy"),
+        required=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
+    )
 
     def clean(self):
         cleaned_data = super().clean()

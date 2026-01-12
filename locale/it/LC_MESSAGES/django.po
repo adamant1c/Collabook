@@ -567,10 +567,26 @@ msgstr ""
 #: templates/game/rules.html:62
 msgid ""
 "Currently, these stats are automatically generated based on your character's "
-"background and attributes to ensure a balanced start. In the future, you may "
-"have the option to further customize your starting potential!"
-msgstr ""
-"Attualmente, queste statistiche sono generate automaticamente in base al "
-"background e agli attributi del tuo personaggio per garantire un inizio "
-"equilibrato. In futuro, potresti avere l'opzione di personalizzare "
 "ulteriormente il tuo potenziale iniziale!"
+
+#: templates/base.html:96
+msgid "Day"
+msgstr "Giorno"
+
+#: accounts/forms.py:14
+msgid "I have read and accepted the Privacy Policy"
+msgstr "Ho letto e accetto l'Informativa sulla Privacy"
+
+#: templates/accounts/register.html:56
+msgid "Privacy & GDPR"
+msgstr "Privacy e GDPR"
+
+#: templates/accounts/register.html:59
+msgid ""
+"We only collect your email address for the sole purpose of managing your "
+"account credentials. Your data is not shared with third parties, except for "
+"required security and session management."
+msgstr ""
+"Raccogliamo il tuo indirizzo email al solo scopo di gestire le credenziali del "
+"tuo account. I tuoi dati non vengono condivisi con terze parti, eccetto per la "
+"gestione della sicurezza e della sessione."

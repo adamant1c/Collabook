@@ -49,7 +49,7 @@ def send_email(to_email: str, subject: str, content: str):
         
         print(f"📧 Email sent to {to_email}")
     except Exception as e:
-        print(f"❌ Failed to send email to {to_email}: {e}")
+        print(f"❌ Failed to send email to {to_email} via {smtp_server}:{smtp_port}: {e}")
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

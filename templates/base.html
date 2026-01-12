@@ -7,6 +7,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Collabook RPG{% endblock %}</title>
+    <!-- Google AdSense -->
+    <meta name="google-adsense-account" content="ca-pub-9623905672643205">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9623905672643205"
+        crossorigin="anonymous"></script>
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts: Cinzel for headers, Inter for text -->
@@ -93,7 +97,8 @@
                     <div class="me-3 px-3 py-1 rounded border border-warning"
                         style="background-color: rgba(212, 175, 55, 0.1);">
                         <span class="text-warning" style="font-weight: 600;">
-                            🕐 {% trans "Day" %} {{ character_survival.days_survived }}/{{ character_survival.survival_goal }}
+                            🕐 {% trans "Day" %} {{ character_survival.days_survived }}/{{
+                            character_survival.survival_goal }}
                         </span>
                     </div>
                     {% endif %}

@@ -21,7 +21,7 @@ def character_info(request):
         print(f"DEBUG context_processor: days_survived={character.days_survived}, survival_goal_days={story.survival_goal_days}")
         
         context['character_survival'] = {
-            'days_survived': character.days_survived,
+            'days_survived': max(1, character.days_survived),
             'survival_goal': story.survival_goal_days,
             'days_remaining': story.survival_goal_days - character.days_survived,
             'is_active': character.status == 'active'

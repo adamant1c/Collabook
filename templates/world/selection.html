@@ -7,6 +7,22 @@
 {% endblock %}
 
 {% block content %}
+<style>
+    .quest-card {
+        background: rgba(26, 22, 18, 0.6);
+        border: 1px solid var(--gold-dim);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        /* Aggiunto spazio fra i mondi */
+        transition: transform 0.3s ease;
+    }
+
+    .quest-card:hover {
+        transform: translateY(-5px);
+        background: rgba(26, 22, 18, 0.8);
+    }
+</style>
 <div style="display: none;">
     {% trans "Echoes of the Past" %}
     {% trans "Realm of Eternal Magic" %}

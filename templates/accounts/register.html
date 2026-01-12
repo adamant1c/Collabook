@@ -39,11 +39,23 @@
         <form method="post">
             {% csrf_token %}
             {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <div class="form-group mb-3">
+                {% if field.name == 'privacy_policy' %}
+                <div class="form-check" style="display: flex; align-items: flex-start; gap: 10px; margin-top: 1rem;">
+                    {{ field }}
+                    <label class="form-check-label" for="{{ field.id_for_label }}"
+                        style="margin-top: -2px; color: #e8d4a0; cursor: pointer;">
+                        {{ field.label }}
+                    </label>
+                </div>
+                {% else %}
+                <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 0.5rem; color: #d4af37;">{{
+                    field.label }}</label>
                 {{ field }}
+                {% endif %}
+
                 {% if field.errors %}
-                <div class="alert alert-danger">
+                <div class="alert alert-danger" style="padding: 0.5rem; font-size: 0.8rem; margin-top: 0.5rem;">
                     {{ field.errors }}
                 </div>
                 {% endif %}

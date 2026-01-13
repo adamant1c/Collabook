@@ -136,7 +136,8 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     
     # Send verification email (Mock)
     # Frontend URLs for accounts are at root path (""), so use /verify-email/
-    verification_link = f"http://localhost:8501/verify-email/?token={verification_token}"
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:8501")
+    verification_link = f"{frontend_url}/verify-email/?token={verification_token}"
     
     email_body = f"""
     Welcome to Collabook, {db_user.username}!
@@ -197,7 +198,8 @@ async def request_password_reset(request: Request, reset_request: PasswordResetR
     db.commit()
     
     # Send email with reset link
-    reset_link = f"http://localhost:8501/reset-password?token={reset_token}"
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:8501")
+    reset_link = f"{frontend_url}/reset-password?token={reset_token}"
     
     email_body = f"""
     Hello,

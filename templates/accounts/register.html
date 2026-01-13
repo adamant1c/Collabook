@@ -4,6 +4,97 @@
 {% block title %}{% trans "Create Account" %} - Collabook RPG{% endblock %}
 
 {% block content %}
+<style>
+    /* Custom checkbox style - RPG themed */
+    .privacy-checkbox-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-top: 1rem;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .privacy-checkbox-wrapper input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+    }
+
+    .checkbox-custom {
+        position: relative;
+        height: 24px;
+        width: 24px;
+        background-color: rgba(0, 0, 0, 0.4);
+        border: 2px solid #d4af37;
+        border-radius: 4px;
+        flex-shrink: 0;
+        margin-top: 2px;
+        transition: all 0.3s ease;
+    }
+
+    .privacy-checkbox-wrapper:hover .checkbox-custom {
+        background-color: rgba(212, 175, 55, 0.1);
+        box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+    }
+
+    .checkbox-custom:after {
+        content: "";
+        position: absolute;
+        display: none;
+        left: 7px;
+        top: 3px;
+        width: 6px;
+        height: 12px;
+        border: solid #d4af37;
+        border-width: 0 3px 3px 0;
+        transform: rotate(45deg);
+    }
+
+    .privacy-checkbox-wrapper input:checked ~ .checkbox-custom {
+        background-color: rgba(212, 175, 55, 0.2);
+        border-color: #d4af37;
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.5);
+    }
+
+    .privacy-checkbox-wrapper input:checked ~ .checkbox-custom:after {
+        display: block;
+        animation: checkmark 0.3s ease;
+    }
+
+    @keyframes checkmark {
+        0% {
+            height: 0;
+            width: 0;
+            opacity: 0;
+        }
+        50% {
+            height: 0;
+            width: 6px;
+            opacity: 1;
+        }
+        100% {
+            height: 12px;
+            width: 6px;
+            opacity: 1;
+        }
+    }
+
+    .checkbox-label {
+        color: #e8d4a0;
+        cursor: pointer;
+        user-select: none;
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+
+    .privacy-checkbox-wrapper input:checked ~ .checkbox-label {
+        color: #d4af37;
+    }
+</style>
+
 <div class="auth-container" style="max-width: 450px; margin: 0 auto;">
     <h1
         style='text-align: center; color: #d4af37; font-family: "Cinzel", serif; font-size: 2.5rem; margin-bottom: 0.5rem;'>
@@ -41,21 +132,15 @@
             {% for field in form %}
                 <div class="form-group mb-3">
                     {% if field.name == 'privacy_policy' %}
-                        <div class="form-check"
-                            style="display: flex; align-items: flex-start; gap: 10px; margin-top: 1rem; position: relative;">
+                        <label class="privacy-checkbox-wrapper">
                             <input type="checkbox"
                                    name="{{ field.name }}"
                                    id="{{ field.id_for_label }}"
-                                   class="form-check-input"
-                                   style="width: 20px; height: 20px; cursor: pointer; margin: 3px 0 0 0; flex-shrink: 0; position: relative; z-index: 10;"
                                    {% if field.value %}checked{% endif %}
                                    required>
-                            <label class="form-check-label"
-                                   for="{{ field.id_for_label }}"
-                                   style="color: #e8d4a0; cursor: pointer; user-select: none; line-height: 1.4; position: relative; z-index: 5;">
-                                {{ field.label }}
-                            </label>
-                        </div>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-label">{{ field.label }}</span>
+                        </label>
                     {% else %}
                         <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 0.5rem; color: #d4af37;">{{ field.label }}</label>
                         {{ field }}

@@ -58,6 +58,7 @@ services:
       - SMTP_USERNAME=${SMTP_USERNAME}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_SENDER=${SMTP_SENDER}
+      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
       db:
         condition: service_healthy

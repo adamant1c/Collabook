@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 from django.http import HttpResponse
+from core import views as core_views
 
 def ads_txt(request):
     return HttpResponse("google.com, pub-9623905672643205, DIRECT, f08c47fec0942fa0", content_type="text/plain")
@@ -31,4 +32,5 @@ urlpatterns = [
     path('character/', include('character.urls')),
     path('world/', include('world.urls')),
     path('game/', include('game.urls')),
+    path('about/', core_views.about, name='about'),
 ]

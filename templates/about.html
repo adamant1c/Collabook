@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Alessandro Perotti - {% trans "About Me" %}{% endblock %}
+
+{% block content %}
+<style>
+    .about-header {
+        border-bottom: 3px solid #d4af37;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .about-role {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #d4af37;
+    }
+
+    .about-location {
+        color: #aaa;
+    }
+
+    .experience-item {
+        margin-bottom: 22px;
+        border-left: 2px solid #555;
+        padding-left: 15px;
+    }
+
+    .experience-item h3 {
+        margin-bottom: 4px;
+        color: #e0e0e0;
+    }
+
+    .date {
+        font-size: 0.9em;
+        color: #aaa;
+        font-style: italic;
+    }
+
+    .section-title {
+        color: #d4af37;
+        border-bottom: 1px solid #444;
+        padding-bottom: 5px;
+        margin-top: 35px;
+        font-family: 'Cinzel', serif;
+    }
+
+    .about-link {
+        color: #d4af37;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+    .about-link:hover {
+        color: #fff;
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container mt-5">
+
+    <!-- HEADER -->
+    <header class="about-header text-center text-md-start">
+        <h1 style="font-family: 'Cinzel', serif;">Alessandro Perotti</h1>
+        <p class="about-role">Senior Consultant · Software & QA Engineer</p>
+        <p class="about-location">Milano, Lombardia, Italia</p>
+
+        <div class="top-links">
+            <a href="https://it.linkedin.com/in/alessandro3perotti" target="_blank" class="about-link">LinkedIn</a>
+            <span class="text-secondary mx-2">|</span>
+            <a href="mailto:palexander82@gmail.com" class="about-link">{% trans "Contact" %}</a>
+        </div>
+    </header>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- ABOUT -->
+            <section>
+                <h2 class="section-title">{% trans "Profile" %}</h2>
+                <p>
+                    Senior Software & QA Engineer con oltre 15 anni di esperienza in automazione test,
+                    sviluppo Python, sistemi distribuiti e contesti aerospace e industriali.
+                    Specializzato in framework di test, data analysis e architetture client-server,
+                    con forte orientamento a qualità, affidabilità e scalabilità.
+                </p>
+            </section>
+
+            <!-- EXPERIENCE -->
+            <section>
+                <h2 class="section-title">{% trans "Experience" %}</h2>
+
+                <div class="experience-item">
+                    <h3>Senior Consultant – Adentis Italia @ OHB SE</h3>
+                    <p class="date">{% trans "January" %} 2026 – {% trans "Present" %}</p>
+                    <ul>
+                        <li>Consulenza senior su sistemi software per applicazioni aerospace.</li>
+                        <li>Supporto a sviluppo, validazione e automazione dei test.</li>
+                        <li>Integrazione software in ambienti mission-critical.</li>
+                    </ul>
+                </div>
+
+                <div class="experience-item">
+                    <h3>Senior Software QA Engineer & Python Developer – Oversonic</h3>
+                    <p class="date">2024 – 2025</p>
+                    <ul>
+                        <li>Framework di test custom in Python con Kubernetes.</li>
+                        <li>Automazione test API, web, functional e performance.</li>
+                        <li>Persistenza risultati su MongoDB e dashboard statistiche.</li>
+                    </ul>
+                </div>
+
+                <div class="experience-item">
+                    <h3>Software Engineer – Nielsen</h3>
+                    <p class="date">2021 – 2024</p>
+                    <ul>
+                        <li>Linguaggio di scripting per test automation in Python.</li>
+                        <li>Backend REST con Django, Docker e AWS Lambda.</li>
+                    </ul>
+                </div>
+
+                <div class="experience-item">
+                    <h3>Design & Test Engineer – Elettronica Aster</h3>
+                    <p class="date">2018 – 2021</p>
+                    <ul>
+                        <li>Signal analysis, dashboard web e report automatici.</li>
+                        <li>Test equipment e data processing in Python.</li>
+                    </ul>
+                </div>
+
+                <div class="experience-item">
+                    <h3>Project Leader & AIV/AIT Engineer – Thales Alenia Space</h3>
+                    <p class="date">2008 – 2018</p>
+                    <ul>
+                        <li>Leadership tecnica su programmi Galileo e GPS.</li>
+                        <li>Test elettrici, EMC, TVAC e integrazione sistemi.</li>
+                    </ul>
+                </div>
+
+            </section>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- SKILLS -->
+            <section>
+                <h2 class="section-title">{% trans "Skills" %}</h2>
+                <ul class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent text-light border-secondary">Python, C, Django, Flask,
+                        Dash</li>
+                    <li class="list-group-item bg-transparent text-light border-secondary">Test Automation, QA, CI/CD
+                    </li>
+                    <li class="list-group-item bg-transparent text-light border-secondary">Docker, Kubernetes, AWS</li>
+                    <li class="list-group-item bg-transparent text-light border-secondary">Data Analysis (Pandas, NumPy,
+                        SciPy, sklearn)</li>
+                    <li class="list-group-item bg-transparent text-light border-0">Linux & Windows</li>
+                </ul>
+            </section>
+
+            <!-- EDUCATION -->
+            <section>
+                <h2 class="section-title">{% trans "Education" %}</h2>
+                <div class="p-3 border border-secondary rounded bg-dark bg-opacity-25">
+                    <strong>Politecnico di Torino</strong><br>
+                    <span class="text-secondary">Laurea Specialistica in Elettronica</span>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="text-center mt-5 text-secondary">
+        <small>© 2026 Alessandro Perotti</small>
+    </footer>
+
+</div>
+{% endblock %}

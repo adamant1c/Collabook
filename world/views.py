@@ -179,7 +179,7 @@ class JourneyView(View):
 # PDF Generation imports
 from django.http import HttpResponse
 from django.template.loader import get_template
-from xhtml2pdf import pisa
+# from xhtml2pdf import pisa
 from game.models import Turn, Character, Story
 # We need to import the unmanaged models to query the DB directly
 

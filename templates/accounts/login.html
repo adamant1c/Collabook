@@ -54,6 +54,17 @@
                 🎮 {% trans "LOGIN" %}
             </button>
         </form>
+
+        <div style="margin-top: 1.5rem; border-top: 1px solid rgba(212, 175, 55, 0.2); padding-top: 1.5rem;">
+            {% load socialaccount %}
+            <a href="{% provider_login_url 'google' %}"
+                class="btn btn-outline-light w-100 d-flex align-items-center justify-content-center"
+                style="gap: 10px; border-color: rgba(212, 175, 55, 0.5); color: #e8d4a0;">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                    style="width: 20px; height: 20px;">
+                {% trans "Accedi con Google" %}
+            </a>
+        </div>
     </div>
 </div>
 

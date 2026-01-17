@@ -213,3 +213,4 @@ test.db
 test.db
 
 certbot/
+/staticfiles/account/js/onload.js

@@ -4,6 +4,15 @@
 <html lang="{{ LANGUAGE_CODE }}" data-bs-theme="dark">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PX5G5RFEHY"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-PX5G5RFEHY');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Collabook RPG{% endblock %}</title>
@@ -97,7 +106,8 @@
                     <div class="me-3 px-3 py-1 rounded border border-warning"
                         style="background-color: rgba(212, 175, 55, 0.1);">
                         <span class="text-warning" style="font-weight: 600;">
-                            🕐 {% trans "Day" %} {{ character_survival.days_survived }}/{{character_survival.survival_goal }}
+                            🕐 {% trans "Day" %} {{ character_survival.days_survived
+                            }}/{{character_survival.survival_goal }}
                         </span>
                     </div>
                     {% endif %}

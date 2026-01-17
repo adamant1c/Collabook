@@ -96,6 +96,8 @@ services:
       - ENVIRONMENT=${ENVIRONMENT}
       - LANGUAGE=${LANGUAGE}
       - DJANGO_SETTINGS_MODULE=collabook_frontend.settings
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     depends_on:
       backend:
         condition: service_healthy

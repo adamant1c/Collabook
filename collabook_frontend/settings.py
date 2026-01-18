@@ -161,6 +161,8 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 
+ACCOUNT_ADAPTER = 'accounts.adapters.MyAccountAdapter'
+
 
 # ========================================
 # Internationalization

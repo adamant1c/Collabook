@@ -214,6 +214,17 @@ test.db
 
 certbot/
 /staticfiles/account/js/onload.js
+/staticfiles/account/js/account.b8b2bd9322b2.js
+/staticfiles/account/js/account.b8b2bd9322b2.js.br
+/staticfiles/account/js/account.b8b2bd9322b2.js.gz
+/staticfiles/account/js/account.js
+/staticfiles/account/js/account.js.br
+/staticfiles/account/js/account.js.gz
+/staticfiles/account/js/onload.79dcf5a401d0.js
+/staticfiles/account/js/onload.79dcf5a401d0.js.br
+/staticfiles/account/js/onload.79dcf5a401d0.js.gz
+/staticfiles/account/js/onload.js.br
+/staticfiles/account/js/onload.js.gz
 /staticfiles/account/js/account.b8b2bd9322b2.js.br
 /staticfiles/account/js/account.b8b2bd9322b2.js
 /staticfiles/account/js/account.b8b2bd9322b2.js.gz

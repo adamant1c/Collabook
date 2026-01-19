@@ -223,6 +223,10 @@ msgstr "Personaggio"
 msgid "Rules"
 msgstr "Regole"
 
+#: templates/base.html:86
+msgid "Contacts"
+msgstr "Contatti"
+
 #: templates/base.html:112
 msgid "Logout"
 msgstr "Esci"

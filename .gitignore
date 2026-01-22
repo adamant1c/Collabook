@@ -5,7 +5,7 @@ __pycache__/
 *.md
 # C extensions
 *.so
-
+*.json
 # Distribution / packaging
 .Python
 build/

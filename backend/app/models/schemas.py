@@ -91,6 +91,12 @@ class StoryCreate(BaseModel):
     title: str
     world_description: str
     genre: Optional[str] = None
+    
+    # Localization
+    title_it: Optional[str] = None
+    world_description_it: Optional[str] = None
+    genre_it: Optional[str] = None
+    
     world_metadata: Optional[Dict[str, Any]] = None
     survival_goal_days: Optional[int] = 10
 
@@ -99,6 +105,12 @@ class StoryResponse(BaseModel):
     title: str
     world_description: str
     genre: Optional[str]
+    
+    # Localization
+    title_it: Optional[str]
+    world_description_it: Optional[str]
+    genre_it: Optional[str]
+    
     world_metadata: Optional[Dict[str, Any]]
     survival_goal_days: int
     is_default: bool

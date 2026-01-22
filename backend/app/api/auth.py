@@ -168,7 +168,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
         )
     
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise HTTPException(status_code=400, detail="Please verify your email before logging in. Check your inbox for the verification link.")
     
     # Update last login
     user.last_login = datetime.utcnow()

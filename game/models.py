@@ -39,6 +39,12 @@ class Story(models.Model):
     title = models.CharField(max_length=255)
     world_description = models.TextField()
     genre = models.CharField(max_length=100, null=True, blank=True)
+    
+    # Localization
+    title_it = models.CharField(max_length=255, null=True, blank=True)
+    world_description_it = models.TextField(null=True, blank=True)
+    genre_it = models.CharField(max_length=100, null=True, blank=True)
+
     survival_goal_days = models.IntegerField(default=10)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

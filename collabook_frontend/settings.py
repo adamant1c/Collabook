@@ -208,7 +208,8 @@ if ENVIRONMENT == 'production':
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # SECURE_PROXY_SSL_HEADER moved to global scope below
+
     # Security headers
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
@@ -219,11 +220,22 @@ if ENVIRONMENT == 'production':
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
     
-    # Trusted origins for CSRF
-    CSRF_TRUSTED_ORIGINS = [
-        'https://collabook.click',
-        'https://www.collabook.click',
-    ]
+    
+    # Trusted origins for CSRF moved to global scope below
+
+
+# ========================================
+# Global Security Settings (Applied to all environments)
+# ========================================
+
+# Trust the X-Forwarded-Proto header to detect HTTPS (Safe for both dev behind proxy and prod)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Trusted origins for CSRF
+CSRF_TRUSTED_ORIGINS = [
+    'https://collabook.click',
+    'https://www.collabook.click',
+]
 
 # ========================================
 # Other Settings

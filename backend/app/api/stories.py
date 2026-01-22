@@ -22,6 +22,12 @@ async def create_story(
         title=story.title,
         world_description=story.world_description,
         genre=story.genre,
+        
+        # Localization
+        title_it=story.title_it,
+        world_description_it=story.world_description_it,
+        genre_it=story.genre_it,
+        
         world_metadata=story.world_metadata,
         survival_goal_days=story.survival_goal_days,
         created_by=current_user.id  # Track who created it

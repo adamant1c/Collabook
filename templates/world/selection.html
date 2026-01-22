@@ -23,27 +23,6 @@
         background: rgba(26, 22, 18, 0.8);
     }
 </style>
-<div style="display: none;">
-    {% trans "Echoes of the Past" %}
-    {% trans "Realm of Eternal Magic" %}
-    {% trans "Horizon Beyond Stars" %}
-    {% trans "Historical Adventure" %}
-    {% trans "Epic Fantasy" %}
-    {% trans "Science Fiction" %}
-    {% trans "A historically-inspired world set in medieval Europe during the height of the Renaissance. Great kingdoms
-    rise and fall, knights defend their honor, and scholars unlock ancient secrets. Navigate political intrigue,
-    participate in grand tournaments, or explore forgotten ruins." %}
-    {% trans "A high-fantasy realm where magic flows through every living thing. Ancient dragons soar the skies, elven
-    kingdoms hide in enchanted forests, and dwarven cities delve deep into mystical mountains. Dark forces stir in
-    forgotten places, and heroes are called to face legendary quests." %}
-    {% trans "The year is 2347. Humanity has colonized the solar system and made first contact with alien civilizations.
-    Advanced AI, cybernetic augmentations, and faster-than-light travel are commonplace. Navigate space politics,
-    explore alien worlds, uncover corporate conspiracies, or fight in the ongoing conflict between Earth Alliance and
-    the Outer Colonies." %}
-    {% trans "The kingdom prepares for the annual Tournament of Champions..." %}
-    {% trans "The Council of Mages senses a disturbance in the magical ley lines..." %}
-    {% trans "Your ship approaches the neutral trading station orbiting Jupiter..." %}
-</div>
 <div class="container">
     <h1 style='text-align: center; color: #d4af37; font-family: "Cinzel", serif;'>
         🌍
@@ -61,17 +40,17 @@
     <div class="quest-card">
         <h3>
             📚
-            {% trans story.title %}
+            {{ story.title }}
             <small style="font-size: 0.6em; color: var(--text-muted);">
                 •
-                {% trans story.genre %}
+                {{ story.genre }}
             </small>
         </h3>
         <p>
             <strong>
                 {% trans "World" %}:
             </strong>
-            {% trans story.world_description %}
+            {{ story.world_description }}
         </p>
 
 

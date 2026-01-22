@@ -80,6 +80,12 @@ class Story(Base):
     title = Column(String, nullable=False)
     world_description = Column(Text, nullable=False)
     genre = Column(String, nullable=True)
+    
+    # Localization (Italian)
+    title_it = Column(String, nullable=True)
+    world_description_it = Column(Text, nullable=True)
+    genre_it = Column(String, nullable=True)
+    
     world_metadata = Column(JSON, nullable=True)
     survival_goal_days = Column(Integer, default=10) # Survival Mode Goal
     

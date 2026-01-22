@@ -593,3 +593,110 @@ msgstr ""
 "Raccogliamo il tuo indirizzo email al solo scopo di gestire le credenziali del "
 "tuo account. I tuoi dati non vengono condivisi con terze parti, eccetto per la "
 "gestione della sicurezza e della sessione."
+
+#: core/api_client.py - API Error Messages
+msgid "Username already registered"
+msgstr "Nome utente già registrato"
+
+msgid "Email already registered"
+msgstr "Indirizzo email già registrato"
+
+msgid "Invalid email format"
+msgstr "Formato email non valido"
+
+msgid "Incorrect username or password"
+msgstr "Nome utente o password errati"
+
+msgid "Please verify your email before logging in. Check your inbox for the verification link."
+msgstr "Per favore verifica la tua email prima di accedere. Controlla la tua casella di posta per il link di verifica."
+
+msgid "Invalid or expired reset token"
+msgstr "Token di reset non valido o scaduto"
+
+msgid "Reset token has expired"
+msgstr "Il token di reset è scaduto"
+
+msgid "Invalid verification token"
+msgstr "Token di verifica non valido"
+
+msgid "Verification token has expired"
+msgstr "Il token di verifica è scaduto"
+
+msgid "Inactive user"
+msgstr "Utente non attivo"
+
+msgid "Admin access required"
+msgstr "Accesso amministratore richiesto"
+
+msgid "Could not validate credentials"
+msgstr "Impossibile validare le credenziali"
+
+msgid "Story not found"
+msgstr "Storia non trovata"
+
+msgid "Character not found"
+msgstr "Personaggio non trovato"
+
+msgid "Not your character"
+msgstr "Non è il tuo personaggio"
+
+msgid "You already have a character in this story"
+msgstr "Hai già un personaggio in questa storia"
+
+msgid "Quest not found"
+msgstr "Missione non trovata"
+
+msgid "Quest already accepted"
+msgstr "Missione già accettata"
+
+msgid "Quest not accepted"
+msgstr "Missione non accettata"
+
+msgid "Quest already completed"
+msgstr "Missione già completata"
+
+msgid "No active combat"
+msgstr "Nessun combattimento attivo"
+
+msgid "Invalid action"
+msgstr "Azione non valida"
+
+msgid "Item not found"
+msgstr "Oggetto non trovato"
+
+msgid "Item not found in inventory"
+msgstr "Oggetto non trovato nell'inventario"
+
+msgid "Not authorized"
+msgstr "Non autorizzato"
+
+msgid "Hours must be between 1 and 24"
+msgstr "Le ore devono essere tra 1 e 24"
+
+msgid "User not found"
+msgstr "Utente non trovato"
+
+#: accounts/views.py - Additional translations
+msgid "Registration successful! Please check your email to verify your account."
+msgstr "Registrazione completata! Controlla la tua email per verificare il tuo account."
+
+msgid "Invalid verification link."
+msgstr "Link di verifica non valido."
+
+msgid "Email verified successfully! You can now login."
+msgstr "Email verificata con successo! Ora puoi accedere."
+
+msgid "Verification failed: "
+msgstr "Verifica fallita: "
+
+#: World Descriptions
+msgid "A historically-inspired world set in medieval Europe during the height of the Renaissance. Great kingdoms rise and fall, knights defend their honor, and scholars unlock ancient secrets. Navigate political intrigue, participate in grand tournaments, or explore forgotten ruins."
+msgstr "Un mondo di ispirazione storica ambientato nell'Europa medievale durante l'apice del Rinascimento. Grandi regni sorgono e cadono, i cavalieri difendono il loro onore e gli studiosi svelano antichi segreti. Naviga intrighi politici, partecipa a grandi tornei o esplora rovine dimenticate."
+
+msgid "A high-fantasy realm where magic flows through every living thing. Ancient dragons soar the skies, elven kingdoms hide in enchanted forests, and dwarven cities delve deep into mystical mountains. Dark forces stir in forgotten places, and heroes are called to face legendary quests."
+msgstr "Un regno high-fantasy dove la magia fluisce in ogni essere vivente. Antichi draghi solcano i cieli, regni elfici si nascondono in foreste incantate e città naniche scavano nelle profondità delle montagne mistiche. Forze oscure si agitano in luoghi dimenticati e gli eroi sono chiamati ad affrontare leggendarie imprese."
+
+msgid "The year is 2347. Humanity has colonized the solar system and made first contact with alien civilizations. Advanced AI, cybernetic augmentations, and faster-than-light travel are commonplace. Navigate space politics, explore alien worlds, uncover corporate conspiracies, or fight in the ongoing conflict between Earth Alliance and the Outer Colonies."
+msgstr "L'anno è il 2347. L'umanità ha colonizzato il sistema solare ed è entrata in contatto con civiltà aliene. IA avanzate, potenziamenti cibernetici e viaggi più veloci della luce sono all'ordine del giorno. Naviga la politica spaziale, esplora mondi alieni, sventa cospirazioni aziendali o combatti nel conflitto in corso tra l'Alleanza Terrestre e le Colonie Esterne."
+
+

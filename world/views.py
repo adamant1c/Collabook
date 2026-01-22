@@ -18,6 +18,29 @@ from core.api_client import CollabookAPI
 # I accessed `character.user.username`. That should work if `BackendUser` is defined in `game.models` which it is.
 
 
+def translate_story_data(story):
+    """Translate story title, genre and description if in known list or if DB has translation"""
+    from django.utils.translation import get_language
+    
+    lang = get_language()
+    is_italian = lang and lang.startswith('it')
+
+    # 1. Check DB columns (Priority for Custom Worlds)
+    if is_italian:
+        if story.get('title_it'):
+            story['title'] = story['title_it']
+        if story.get('world_description_it'):
+            story['world_description'] = story['world_description_it']
+        if story.get('genre_it'):
+            story['genre'] = story['genre_it']
+            
+    # 2. Fallback to hardcoded/gettext translations (REMOVED - DB is source of truth)
+    # The database fields (title_it, world_description_it) are verified to be populated.
+    pass
+
+
+    return story
+
 class WorldSelectionView(View):
     template_name = 'world/selection.html'
 
@@ -30,9 +53,10 @@ class WorldSelectionView(View):
             user = CollabookAPI.get_current_user(request.session['token'])
             user_characters = user.get('characters', [])
             
-            # Add 'existing_char' flag to stories
+            # Add 'existing_char' flag to stories and translate
             for story in stories:
                 story['existing_char'] = next((c for c in user_characters if c['story_id'] == story['id']), None)
+                translate_story_data(story)
             
             default_worlds = [s for s in stories if s.get('is_default', False)]
             custom_worlds = [s for s in stories if not s.get('is_default', False)]

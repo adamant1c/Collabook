@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from sqlalchemy.orm import Session
+from sqlalchemy import MetaData, Table, select
 from sqlalchemy.inspection import inspect
 
 # 🔧 Backend root (./backend mounted as /app)
@@ -35,18 +36,28 @@ def serialize_value(value):
     return value
 
 
-def serialize_model(instance):
-    data = {}
-    mapper = inspect(instance.__class__)
-    for column in mapper.columns:
-        value = getattr(instance, column.key)
-        data[column.key] = serialize_value(value)
-    return data
-
-
 def export_table(session, model, filename):
-    records = session.query(model).all()
-    output = [serialize_model(r) for r in records]
+    # Use reflection to get the actual columns in the database
+    # This matches the DB schema, not the potentially newer code model
+    table_name = model.__tablename__
+    metadata = MetaData()
+    try:
+        table = Table(table_name, metadata, autoload_with=engine)
+    except Exception as e:
+        print(f"⚠️  Skipping {model.__name__}: Table '{table_name}' lookup failed ({e})")
+        return
+
+    # Select all columns from the reflected table
+    stmt = select(table)
+    result = session.execute(stmt)
+    
+    output = []
+    for row in result:
+        # row._mapping converts the row to a dict-like object
+        row_dict = {}
+        for key, val in row._mapping.items():
+            row_dict[key] = serialize_value(val)
+        output.append(row_dict)
 
     path = EXPORT_DIR / filename
     with open(path, "w", encoding="utf-8") as f:

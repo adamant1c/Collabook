@@ -23,10 +23,21 @@ from core import views as core_views
 def ads_txt(request):
     return HttpResponse("google.com, pub-9623905672643205, DIRECT, f08c47fec0942fa0", content_type="text/plain")
 
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Allow: /ads.txt",
+        "Allow: /",
+        "",
+        "Sitemap: https://collabook.click/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),
     path('ads.txt', ads_txt),
+    path('robots.txt', robots_txt),
     path('accounts/', include('allauth.urls')),
     path('', include('accounts.urls')),
     path('character/', include('character.urls')),

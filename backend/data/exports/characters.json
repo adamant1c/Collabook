@@ -100,5 +100,22 @@
     "can_resurrect": true,
     "gold": 0,
     "created_at": "2026-01-06T18:47:24.963473"
+  },
+  {
+    "id": "7f002299-79c6-4119-9269-c6e2217f6403",
+    "user_id": "a676c366-17c0-4f65-a169-920c25def8ca",
+    "story_id": "b308eb37-424e-4784-8391-565bf8fd2eaa",
+    "insertion_point": "La pioggia di maggio batteva incessante su Firenze, trasformando le strade in fiumi di fango. Alex apparve improvvisamente, come un'ombra tra le case colorate, il cappotto di lana sgualcito e gli stivali consumati testimonianza di un viaggio incerto. Nessuno sapeva da dove venisse, né cosa volesse, ma il suo sguardo, perso nel labirinto di palazzi, suggeriva una solitudine antica e profonda.\n",
+    "status": "active",
+    "current_state": null,
+    "hunger": 100,
+    "thirst": 100,
+    "fatigue": 0,
+    "days_survived": 0,
+    "last_played_date": null,
+    "deaths": 0,
+    "can_resurrect": true,
+    "gold": 0,
+    "created_at": "2026-01-24T15:08:06.372929"
   }
 ]

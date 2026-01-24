@@ -129,6 +129,7 @@ Rispondi direttamente in 2-3 paragrafi."""
         turn_number=turn_number
     )
     db.add(db_turn)
+    db.flush()  # Ensure db_turn.id is populated immediately
     
     # Update survival stats (Phase 5)
     survival_result = update_survival_stats(character, turns_elapsed=1)
@@ -143,6 +144,8 @@ Rispondi direttamente in 2-3 paragrafi."""
         
         # Win Condition Check
         if character.days_survived >= goal:
+             db.commit()
+             db.refresh(db_turn)
              return InteractionResponse(
                 turn_id=db_turn.id,
                 narration=f"CONGRATULATIONS! You have survived {goal} days! You have won the Survival Mode!",
@@ -164,6 +167,8 @@ Rispondi direttamente in 2-3 paragrafi."""
     # Check for death from starvation/dehydration
     death_result = apply_starvation_death(character, current_user, db)
     if death_result.get("permanent_death"):
+        db.commit()
+        db.refresh(db_turn)
         return InteractionResponse(
             turn_id=db_turn.id,
             narration=death_result["message"],

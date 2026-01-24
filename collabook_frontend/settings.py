@@ -236,6 +236,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_TRUSTED_ORIGINS = [
     'https://collabook.click',
     'https://www.collabook.click',
+    'http://localhost:8501',
+    'http://127.0.0.1:8501',
 ]
 
 # ========================================

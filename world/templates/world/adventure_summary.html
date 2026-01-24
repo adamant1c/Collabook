@@ -12,7 +12,7 @@
         <a href="{% url 'world:journey' %}" class="btn-primary">
             &larr; {% trans "Back to Journey" %}
         </a>
-        <button onclick="window.print()" class="btn-gold">
+        <button onclick="window.print()" class="btn-primary">
             🖨️ {% trans "Print or Save as PDF" %}
         </button>
     </div>
@@ -96,24 +96,47 @@
         font-family: 'Lora', serif;
         line-height: 1.8;
         position: relative;
+        border: 1px solid #d4af37;
+        box-shadow: 0 0 0 8px #fcfaf2, 0 0 0 10px #d4af37;
     }
 
     /* Decorative border for the "book" effect */
     .adventure-book-page::before {
         content: '';
         position: absolute;
-        top: 20px;
-        left: 20px;
-        right: 20px;
-        bottom: 20px;
-        border: 1px solid rgba(139, 115, 85, 0.2);
+        top: 15px;
+        left: 15px;
+        right: 15px;
+        bottom: 15px;
+        border: 1px solid #d4af37;
         pointer-events: none;
+        opacity: 0.4;
+    }
+
+    /* Decorative corners */
+    .adventure-book-page::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        background-image:
+            radial-gradient(circle at 100% 100%, transparent 20px, #d4af37 21px, #d4af37 23px, transparent 24px),
+            radial-gradient(circle at 0 100%, transparent 20px, #d4af37 21px, #d4af37 23px, transparent 24px),
+            radial-gradient(circle at 100% 0, transparent 20px, #d4af37 21px, #d4af37 23px, transparent 24px),
+            radial-gradient(circle at 0 0, transparent 20px, #d4af37 21px, #d4af37 23px, transparent 24px);
+        background-repeat: no-repeat;
+        background-size: 40px 40px;
+        background-position: bottom right, bottom left, top right, top left;
+        margin: 10px;
     }
 
     .story-title {
         font-family: 'Cinzel', serif;
         font-size: 3.5rem;
-        color: #8b7355;
+        color: #5d4037;
         margin-bottom: 0.5rem;
     }
 
@@ -135,7 +158,7 @@
 
     .section-title {
         font-family: 'Cinzel', serif;
-        color: #8b7355;
+        color: #5d4037;
         border-bottom: 1px solid #d4af37;
         padding-bottom: 0.5rem;
         margin-bottom: 1.5rem;
@@ -150,7 +173,7 @@
         text-align: right;
         font-family: 'Cinzel', serif;
         font-size: 0.9rem;
-        color: #a0a0a0;
+        color: #888;
         margin-bottom: 1rem;
     }
 
@@ -160,7 +183,7 @@
         font-family: 'Cinzel', serif;
         font-size: 0.8rem;
         font-weight: bold;
-        color: #8b7355;
+        color: #5d4037;
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-bottom: 0.5rem;
@@ -187,7 +210,7 @@
 
     .end-title {
         font-family: 'Cinzel', serif;
-        color: #8b7355;
+        color: #5d4037;
     }
 
     .death .end-title {
@@ -218,12 +241,18 @@
 
         .adventure-book-page {
             box-shadow: none !important;
-            padding: 0 !important;
+            padding: 2rem !important;
             background: white !important;
+            border: 2px solid #d4af37 !important;
         }
 
         .adventure-book-page::before {
-            display: none;
+            border-color: #d4af37 !important;
+            opacity: 1 !important;
+            top: 10px !important;
+            left: 10px !important;
+            right: 10px !important;
+            bottom: 10px !important;
         }
 
         .container {

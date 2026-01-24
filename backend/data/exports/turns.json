@@ -226,5 +226,17 @@
     "combat_result": null,
     "combat_enemy_id": null,
     "created_at": "2026-01-06T18:18:22.422546"
+  },
+  {
+    "id": "423b680c-ec50-42a3-b8b6-f0c3e3217499",
+    "story_id": "b308eb37-424e-4784-8391-565bf8fd2eaa",
+    "character_id": "7f002299-79c6-4119-9269-c6e2217f6403",
+    "user_action": "vado al bar\r\n",
+    "narration": "Ti avverto, Alex, il fumo denso e l'odore di birra stantia ti investono non appena varchi il portone del \"Drago Dormiente\". Il bar è un luogo brulicante di avventurieri, mercanti stanchi e qualche figura dall'aria sinistra che sembra aver visto cose che farebbero impallidire un corvo. Il pavimento è scuro e macchiato, le tavolate sono affollate e il rumore di voci e risate si mescola al tintinnio dei bicchieri. Un uomo corpulento, probabilmente il barista, ti osserva con un'espressione che oscilla tra il disinteresse e il sospetto. Ti chiede, con voce roca: “Cosa posso offrirti, giovane avventuriero?”\n\nMentre stai valutando se ordinare una birra per riscaldarti, senti un sussurro provenire da un angolo più buio. Un uomo anziano, avvolto in un mantello scuro, ti indica un tavolino traballante. \"Ascolta, ragazzo, ho sentito dire che cerchi fortuna. C'è una vecchia leggenda... parla di un artefatto nascosto nelle rovine del castello di Blackwood, un luogo infestato e pieno di pericoli. Potrebbe essere il tuo inizio.\"  Il vecchio ti lancia un'occhiata intensa, quasi supplicante.\n\nPrima di poter fare domande, il rumore del bar si fa più intenso. Un gruppo di uomini, vestiti di cuoio e armati fino ai denti, si avvicina al tuo tavolo, scrutandoti con occhi minacciosi. Il loro capo, un uomo massiccio con una cicatrice che gli solca il volto, ti dice con voce gutturale: \"Questo posto è nostro, straniero. E non abbiamo piacere di vedere gente nuova che si intromette.\"  Sembra che la tua improvvisa visita abbia attirato l'attenzione di qualcuno di molto più potente di te.\n✨ Quest progress!",
+    "turn_number": 1,
+    "was_combat": false,
+    "combat_result": null,
+    "combat_enemy_id": null,
+    "created_at": "2026-01-24T15:18:28.366746"
   }
 ]

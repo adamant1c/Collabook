@@ -35,26 +35,27 @@ def robots_txt(request):
 
 def sitemap_xml(request):
     xml_content = """<?xml version="1.0" encoding="UTF-8"?>
-                        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-                          <url>
-                            <loc>https://collabook.click/</loc>
-                            <lastmod>2026-01-24</lastmod>
-                            <changefreq>weekly</changefreq>
-                            <priority>1.0</priority>
-                          </url>
-                          <url>
-                            <loc>https://collabook.click/about/</loc>
-                            <lastmod>2026-01-24</lastmod>
-                            <changefreq>monthly</changefreq>
-                            <priority>0.8</priority>
-                          </url>
-                          <url>
-                            <loc>https://collabook.click/game/rules/</loc>
-                            <lastmod>2026-01-24</lastmod>
-                            <changefreq>monthly</changefreq>
-                            <priority>0.8</priority>
-                          </url>
-                """
+                    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+                      <url>
+                        <loc>https://collabook.click/</loc>
+                        <lastmod>2026-01-24</lastmod>
+                        <changefreq>weekly</changefreq>
+                        <priority>1.0</priority>
+                      </url>
+                      <url>
+                        <loc>https://collabook.click/about/</loc>
+                        <lastmod>2026-01-24</lastmod>
+                        <changefreq>monthly</changefreq>
+                        <priority>0.8</priority>
+                      </url>
+                      <url>
+                        <loc>https://collabook.click/game/rules/</loc>
+                        <lastmod>2026-01-24</lastmod>
+                        <changefreq>monthly</changefreq>
+                        <priority>0.8</priority>
+                      </url>
+                    </urlset>
+                    """
     return HttpResponse(xml_content, content_type="application/xml")
 
 urlpatterns = [

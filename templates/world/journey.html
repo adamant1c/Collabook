@@ -59,7 +59,7 @@
         </div>
         {% else %}
         {% for turn in history %}
-        <div class="turn-container" style="margin-bottom: 2rem;">
+        <div class="turn-container" {% if forloop.last %}id="latest-turn" {% endif %} style="margin-bottom: 2rem;">
             <div style="margin-bottom: 0.5rem;">
                 <strong>
                     {% trans "Your Action" %}:
@@ -144,13 +144,23 @@
             submitBtn.style.opacity = '0.5';
             submitBtn.innerText = "{% trans 'Summoning response...' %}";
 
-            // Auto-scroll to top to see the loader if needed, 
-            // but loader is fixed so it's always visible
+            // Store a flag in session storage to trigger scrolling after reload
+            sessionStorage.setItem('scroll_to_latest', 'true');
         });
 
-        // Auto-scroll to bottom of journey content
-        // Removed as per user request to allow reading from the start of the response.
-        // window.scrollTo(0, document.body.scrollHeight);
+        // Check if we should scroll to the latest turn
+        if (sessionStorage.getItem('scroll_to_latest') === 'true') {
+            const latestTurn = document.getElementById('latest-turn');
+            if (latestTurn) {
+                // Use a small timeout to ensure everything is rendered
+                setTimeout(() => {
+                    latestTurn.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    sessionStorage.removeItem('scroll_to_latest');
+                }, 100);
+            } else {
+                sessionStorage.removeItem('scroll_to_latest');
+            }
+        }
     });
 </script>
 

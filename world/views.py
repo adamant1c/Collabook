@@ -200,14 +200,13 @@ class JourneyView(View):
             messages.error(request, str(e))
             return redirect('world:journey')
 
-# PDF Generation imports
-from django.http import HttpResponse
+# Adventure Summary
 from django.template.loader import get_template
-# from xhtml2pdf import pisa
 from game.models import Turn, Character, Story
-# We need to import the unmanaged models to query the DB directly
 
-class DownloadStoryPDFView(View):
+class AdventureSummaryView(View):
+    template_name = 'world/adventure_summary.html'
+
     def get(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
@@ -218,45 +217,21 @@ class DownloadStoryPDFView(View):
             return redirect('world:selection')
             
         try:
-            # 1. Fetch Character and Story Details
-            # We use the unmanaged models from game.models
+            # Fetch Character and Story Details from managed models
             character = Character.objects.get(id=character_id)
             story = character.story
-            user = character.user
             
-            # 2. Fetch turns
+            # Fetch turns ordered by turn number
             turns = Turn.objects.filter(character_id=character_id).order_by('turn_number')
             
-            # 3. Prepare Context
-            context = {
-                'story_title': story.title,
-                'world_name': story.title, # or world_description summary?
-                'character_name': character.user.username, # In backend this links to BackendUser
-                'date': character.created_at.strftime("%B %d, %Y"),
-                'insertion_point': character.insertion_point,
+            return render(request, self.template_name, {
+                'story': story,
+                'character': character,
                 'turns': turns,
-            }
-            
-            # 4. Render Template
-            template_path = 'world/story_pdf.html'
-            template = get_template(template_path)
-            html = template.render(context)
-            
-            # 5. Create PDF
-            response = HttpResponse(content_type='application/pdf')
-            # filename
-            filename = f"{story.title.replace(' ', '_')}-{character.user.username}.pdf"
-            response['Content-Disposition'] = f'attachment; filename="{filename}"'
-            
-            pisa_status = pisa.CreatePDF(
-                html, dest=response
-            )
-            
-            if pisa_status.err:
-                return HttpResponse('We had some errors <pre>' + html + '</pre>')
-                
-            return response
+                'date': character.created_at.strftime("%B %d, %Y"),
+            })
             
         except Exception as e:
-            messages.error(request, f"Error generating PDF: {str(e)}")
+            messages.error(request, f"Error generating summary: {str(e)}")
             return redirect('world:journey')
+

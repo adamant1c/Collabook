@@ -32,9 +32,9 @@
         </h1>
         <div class="d-flex gap-2">
             {% if game_ended %}
-            <a href="{% url 'world:download_pdf' %}" class="btn-gold"
+            <a href="{% url 'world:adventure_summary' %}" class="btn-gold"
                 style="padding: 0.5rem 1rem; font-size: 0.9rem; text-decoration: none; border: 1px solid #d4af37;">
-                📜 {% trans "Download Story" %}
+                📜 {% trans "View Full Story" %}
             </a>
             {% endif %}
             <a href="{% url 'world:selection' %}" class="btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">

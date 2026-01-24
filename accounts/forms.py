@@ -1,5 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
+import re
 
 class LoginForm(forms.Form):
     username = forms.CharField(label=_("Username"), max_length=150, widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -15,6 +16,19 @@ class RegisterForm(forms.Form):
         required=True,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+        if password:
+            if len(password) < 8:
+                raise forms.ValidationError(_("Password must be at least 8 characters long."))
+            if not re.search(r'\d', password):
+                raise forms.ValidationError(_("Password must contain at least one digit."))
+            if not re.search(r'[A-Z]', password):
+                raise forms.ValidationError(_("Password must contain at least one uppercase letter."))
+            if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+                raise forms.ValidationError(_("Password must contain at least one special character."))
+        return password
 
     def clean(self):
         cleaned_data = super().clean()

@@ -221,6 +221,12 @@ class AdventureSummaryView(View):
             character = Character.objects.get(id=character_id)
             story = character.story
             
+            # Localize Story Title
+            from django.utils.translation import get_language
+            lang = get_language()
+            if lang and lang.startswith('it') and story.title_it:
+                story.title = story.title_it
+
             # Fetch turns ordered by turn number
             turns = Turn.objects.filter(character_id=character_id).order_by('turn_number')
             
@@ -228,7 +234,7 @@ class AdventureSummaryView(View):
                 'story': story,
                 'character': character,
                 'turns': turns,
-                'date': character.created_at.strftime("%B %d, %Y"),
+                'date': character.created_at,  # Pass datetime object for template filter
             })
             
         except Exception as e:

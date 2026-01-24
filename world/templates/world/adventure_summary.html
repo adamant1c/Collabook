@@ -23,7 +23,7 @@
                 <h1 class="story-title">{{ story.title }}</h1>
                 <div class="story-meta">
                     <span class="character-name">{% trans "Adventurer" %}: {{ character.user.username }}</span>
-                    <span class="adventure-date">{{ date }}</span>
+                    <span class="adventure-date">{{ date|date:"d F Y" }}</span>
                 </div>
                 <div class="separator-ornament">⚜</div>
             </header>

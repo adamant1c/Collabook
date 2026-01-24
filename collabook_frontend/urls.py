@@ -33,11 +33,34 @@ def robots_txt(request):
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
+def sitemap_xml(request):
+    xml_content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://collabook.click/</loc>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://collabook.click/about/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://collabook.click/game/rules/</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://collabook.click/accounts/register/</loc>
+    <priority>0.7</priority>
+  </url>
+</urlset>"""
+    return HttpResponse(xml_content, content_type="application/xml")
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),
     path('ads.txt', ads_txt),
     path('robots.txt', robots_txt),
+    path('sitemap.xml', sitemap_xml),
     path('accounts/', include('allauth.urls')),
     path('', include('accounts.urls')),
     path('character/', include('character.urls')),

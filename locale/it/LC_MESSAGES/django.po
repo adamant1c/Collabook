@@ -699,4 +699,11 @@ msgstr "Un regno high-fantasy dove la magia fluisce in ogni essere vivente. Anti
 msgid "The year is 2347. Humanity has colonized the solar system and made first contact with alien civilizations. Advanced AI, cybernetic augmentations, and faster-than-light travel are commonplace. Navigate space politics, explore alien worlds, uncover corporate conspiracies, or fight in the ongoing conflict between Earth Alliance and the Outer Colonies."
 msgstr "L'anno è il 2347. L'umanità ha colonizzato il sistema solare ed è entrata in contatto con civiltà aliene. IA avanzate, potenziamenti cibernetici e viaggi più veloci della luce sono all'ordine del giorno. Naviga la politica spaziale, esplora mondi alieni, sventa cospirazioni aziendali o combatti nel conflitto in corso tra l'Alleanza Terrestre e le Colonie Esterne."
 
+msgid "View Full Story"
+msgstr "Vedi Storia Completa"
 
+msgid "Back to Journey"
+msgstr "Torna al Viaggio"
+
+msgid "Print or Save as PDF"
+msgstr "Stampa o Salva come PDF"

@@ -164,6 +164,16 @@ class CollabookAPI:
                               headers={"Authorization": f"Bearer {token}"})
         response.raise_for_status()
         return response.json()
+
+    @staticmethod
+    def list_public_stories() -> list:
+        """List available worlds and characters (No Auth Required)"""
+        try:
+            response = requests.get(f"{BACKEND_URL}/stories/public")
+            response.raise_for_status()
+            return response.json()
+        except Exception:
+            return []
     
     @staticmethod
     def get_story(story_id: str, token: str) -> dict:

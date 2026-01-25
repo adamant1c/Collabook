@@ -14,6 +14,14 @@ class LandingView(TemplateView):
             return redirect('world:selection')
         return super().get(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            context['worlds'] = CollabookAPI.list_public_stories()
+        except Exception:
+            context['worlds'] = []
+        return context
+
 class LoginView(FormView):
     template_name = 'accounts/login.html'
     form_class = LoginForm

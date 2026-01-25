@@ -147,6 +147,24 @@ class StoryResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class PublicEntity(BaseModel):
+    name: str
+    description: Optional[str]
+    image_url: Optional[str]
+
+class PublicStoryResponse(BaseModel):
+    id: str
+    title: str
+    world_description: str
+    genre: Optional[str]
+    title_it: Optional[str]
+    world_description_it: Optional[str]
+    genre_it: Optional[str]
+    entities: List[PublicEntity] = []
+
+    class Config:
+        from_attributes = True
+
 
 
 class InteractionRequest(BaseModel):

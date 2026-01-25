@@ -764,3 +764,9 @@ msgstr "Unisciti alla Community"
 
 msgid "More than just a game, it's a collaborative storytelling experience. Register now and begin your first quest!"
 msgstr "Più di un semplice gioco, è un'esperienza di narrazione collaborativa. Registrati ora e inizia la tua prima missione!"
+
+msgid "Explore Our Worlds"
+msgstr "Esplora i Nostri Mondi"
+
+msgid "Legendary Inhabitants"
+msgstr "Abitanti Leggendari"

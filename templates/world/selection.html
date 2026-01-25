@@ -40,17 +40,29 @@
     <div class="quest-card">
         <h3>
             📚
+            {% if LANGUAGE_CODE|slice:":2" == "it" and story.title_it %}
+            {{ story.title_it }}
+            {% else %}
             {{ story.title }}
+            {% endif %}
             <small style="font-size: 0.6em; color: var(--text-muted);">
                 •
+                {% if LANGUAGE_CODE|slice:":2" == "it" and story.genre_it %}
+                {{ story.genre_it }}
+                {% else %}
                 {{ story.genre }}
+                {% endif %}
             </small>
         </h3>
         <p>
             <strong>
                 {% trans "World" %}:
             </strong>
+            {% if LANGUAGE_CODE|slice:":2" == "it" and story.world_description_it %}
+            {{ story.world_description_it }}
+            {% else %}
             {{ story.world_description }}
+            {% endif %}
         </p>
 
 
@@ -80,17 +92,29 @@
     <div class="quest-card">
         <h3>
             📚
+            {% if LANGUAGE_CODE|slice:":2" == "it" and story.title_it %}
+            {{ story.title_it }}
+            {% else %}
             {{ story.title }}
+            {% endif %}
             <small style="font-size: 0.6em; color: var(--text-muted);">
                 •
+                {% if LANGUAGE_CODE|slice:":2" == "it" and story.genre_it %}
+                {{ story.genre_it }}
+                {% else %}
                 {{ story.genre }}
+                {% endif %}
             </small>
         </h3>
         <p>
             <strong>
                 {% trans "World" %}:
             </strong>
+            {% if LANGUAGE_CODE|slice:":2" == "it" and story.world_description_it %}
+            {{ story.world_description_it }}
+            {% else %}
             {{ story.world_description }}
+            {% endif %}
         </p>
 
         <form method="post" style="margin-top: 1rem;">

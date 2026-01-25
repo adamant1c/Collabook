@@ -83,12 +83,64 @@
         text-transform: uppercase;
         letter-spacing: 1px;
     }
+
+    .world-card {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(212, 175, 55, 0.3);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .world-title {
+        font-family: 'Cinzel', serif;
+        color: #d4af37;
+        padding: 20px;
+        background: rgba(212, 175, 55, 0.1);
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+    }
+
+    .entity-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .entity-card {
+        width: 120px;
+        text-align: center;
+    }
+
+    .entity-image {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #444;
+        transition: transform 0.3s;
+    }
+
+    .entity-image:hover {
+        transform: scale(1.1);
+        border-color: #d4af37;
+    }
+
+    .entity-name {
+        font-size: 0.85rem;
+        margin-top: 8px;
+        color: #e8d4a0;
+    }
 </style>
 
 <div class="hero-section">
     <h1 class="hero-title">COLLABOOK</h1>
-    <p class="hero-subtitle">{% trans "Unleash your imagination in a collaborative RPG world powered by Advanced AI.
-        Your story, your choices, your legend." %}</p>
+    <p class="hero-subtitle">
+        {% blocktrans trimmed %}
+        Unleash your imagination in a collaborative RPG world powered by Advanced AI.
+        Your story, your choices, your legend.
+        {% endblocktrans %}
+    </p>
     <div class="cta-container">
         <a href="{% url 'accounts:register' %}" class="btn btn-gold btn-lg">{% trans "Start Playing" %}</a>
         <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">{% trans "Login" %}</a>
@@ -100,33 +152,103 @@
         <div class="feature-card">
             <div class="feature-icon">⚔️</div>
             <h3>{% trans "The Game" %}</h3>
-            <p>{% trans "Collabook is a unique Role-Playing Game where players collaborate to weave epic tales. Unlike
+            <p>
+                {% blocktrans trimmed %}
+                Collabook is a unique Role-Playing Game where players collaborate to weave epic tales. Unlike
                 traditional games, our AI Dungeon Master responds dynamically to your creative inputs, making every
-                adventure truly one-of-a-kind." %}</p>
+                adventure truly one-of-a-kind.
+                {% endblocktrans %}
+            </p>
         </div>
     </div>
     <div class="col-md-4">
         <div class="feature-card">
             <div class="feature-icon">📜</div>
             <h3>{% trans "The Rules" %}</h3>
-            <p>{% trans "Simplicity is key. Describe your actions, manage your character's vitality, and watch the world
-                react. Detailed mechanics for combat, exploration, and survival await you inside the realm." %}</p>
+            <p>
+                {% blocktrans trimmed %}
+                Simplicity is key. Describe your actions, manage your character's vitality, and watch the world
+                react. Detailed mechanics for combat, exploration, and survival await you inside the realm.
+                {% endblocktrans %}
+            </p>
         </div>
     </div>
     <div class="col-md-4">
         <div class="feature-card">
             <div class="feature-icon">🛡️</div>
             <h3>{% trans "Privacy First" %}</h3>
-            <p>{% trans "We value your anonymity. No real names required—just pick a username! We only collect your
-                email for account security and respect all GDPR regulations. Your journey is yours alone." %}</p>
+            <p>
+                {% blocktrans trimmed %}
+                We value your anonymity. No real names required—just pick a username! We only collect your
+                email for account security and respect all GDPR regulations. Your journey is yours alone.
+                {% endblocktrans %}
+            </p>
         </div>
     </div>
 </div>
 
+{% if worlds %}
+<div class="mb-5">
+    <h2 class="section-title">{% trans "Explore Our Worlds" %}</h2>
+    <div class="row">
+        {% for world in worlds %}
+        <div class="col-12">
+            <div class="world-card">
+                <div class="world-title">
+                    <h3 class="mb-0">
+                        {% if LANGUAGE_CODE|slice:":2" == "it" and world.title_it %}
+                        {{ world.title_it }}
+                        {% else %}
+                        {{ world.title }}
+                        {% endif %}
+                    </h3>
+                    <small class="text-secondary">
+                        {% if LANGUAGE_CODE|slice:":2" == "it" and world.genre_it %}
+                        {{ world.genre_it }}
+                        {% else %}
+                        {{ world.genre }}
+                        {% endif %}
+                    </small>
+                </div>
+                <div class="p-3">
+                    <p class="mb-4">
+                        {% if LANGUAGE_CODE|slice:":2" == "it" and world.world_description_it %}
+                        {{ world.world_description_it }}
+                        {% else %}
+                        {{ world.world_description }}
+                        {% endif %}
+                    </p>
+
+                    {% if world.entities %}
+                    <h5 class="text-gold mb-3" style="font-family: 'Cinzel', serif; font-size: 1rem;">
+                        {% trans "Legendary Inhabitants" %}
+                    </h5>
+                    <div class="entity-container">
+                        {% for entity in world.entities %}
+                        <div class="entity-card">
+                            <img src="{% if '/static/' in entity.image_url %}{{ entity.image_url }}{% else %}{% static 'images/' %}{{ entity.image_url }}{% endif %}"
+                                alt="{{ entity.name }}" class="entity-image" title="{{ entity.description }}">
+                            <div class="entity-name">{{ entity.name }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <div class="text-center mb-5">
     <h2 class="section-title">{% trans "Join the Community" %}</h2>
-    <p class="mb-4">{% trans "More than just a game, it's a collaborative storytelling experience. Register now and
-        begin your first quest!" %}</p>
+    <p class="mb-4">
+        {% blocktrans trimmed %}
+        More than just a game, it's a collaborative storytelling experience. Register now and
+        begin your first quest!
+        {% endblocktrans %}
+    </p>
     <a href="{% url 'accounts:register' %}" class="btn btn-gold btn-lg px-5">{% trans "Create Your Hero" %}</a>
 </div>
 {% endblock %}

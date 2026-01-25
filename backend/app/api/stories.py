@@ -4,12 +4,53 @@ from typing import List
 from pydantic import BaseModel
 from app.core.database import get_db
 from app.core.redis_client import redis_client
-from app.models.schemas import StoryCreate, StoryResponse, CharacterCreate, CharacterResponse
-from app.models.db_models import Story, Character, User
+from app.models.schemas import StoryCreate, StoryResponse, CharacterCreate, CharacterResponse, PublicStoryResponse, PublicEntity
+from app.models.db_models import Story, Character, User, NPC, Enemy
 from app.agents.matchmaker import matchmaker_agent
 from app.api.auth import get_current_user, require_admin
 
 router = APIRouter(prefix="/stories", tags=["stories"])
+
+@router.get("/public", response_model=List[PublicStoryResponse])
+async def list_public_stories(db: Session = Depends(get_db)):
+    """List available worlds and their characters for the landing page (No Auth Required)"""
+    stories = db.query(Story).all()
+    results = []
+    
+    for story in stories:
+        # Get NPCs and Enemies with images
+        public_entities = []
+        
+        # Add NPCs with images
+        npcs = db.query(NPC).filter(NPC.story_id == story.id, NPC.image_url.isnot(None)).all()
+        for npc in npcs:
+            public_entities.append(PublicEntity(
+                name=npc.name,
+                description=npc.description,
+                image_url=npc.image_url
+            ))
+            
+        # Add Enemies with images
+        enemies = db.query(Enemy).filter(Enemy.story_id == story.id, Enemy.image_url.isnot(None)).all()
+        for enemy in enemies:
+            public_entities.append(PublicEntity(
+                name=enemy.name,
+                description=enemy.description,
+                image_url=enemy.image_url
+            ))
+            
+        results.append(PublicStoryResponse(
+            id=story.id,
+            title=story.title,
+            world_description=story.world_description,
+            genre=story.genre,
+            title_it=story.title_it,
+            world_description_it=story.world_description_it,
+            genre_it=story.genre_it,
+            entities=public_entities
+        ))
+        
+    return results
 
 @router.post("/", response_model=StoryResponse)
 async def create_story(

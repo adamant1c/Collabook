@@ -45,6 +45,7 @@ docker compose -f docker-compose.prod.yml run --rm --entrypoint certbot -p 80:80
     --email "$EMAIL" \
     --agree-tos \
     --no-eff-email \
+    --expand \
     --non-interactive
 
 if [ $? -ne 0 ]; then

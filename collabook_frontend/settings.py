@@ -27,7 +27,6 @@ DEBUG = ENVIRONMENT == 'development'
 if ENVIRONMENT == 'production':
     ALLOWED_HOSTS = [
         'collabook.click',
-        'www.collabook.click',
         'localhost',
         '127.0.0.1',
     ]
@@ -235,7 +234,6 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Trusted origins for CSRF
 CSRF_TRUSTED_ORIGINS = [
     'https://collabook.click',
-    'https://www.collabook.click',
     'http://localhost:8501',
     'http://127.0.0.1:8501',
 ]

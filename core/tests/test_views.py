@@ -5,6 +5,11 @@ class ViewTests(TestCase):
     def setUp(self):
         self.client = Client()
 
+    def test_landing_page_loads(self):
+        response = self.client.get(reverse('accounts:landing'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'landing.html')
+
     def test_login_page_loads(self):
         response = self.client.get(reverse('accounts:login'))
         self.assertEqual(response.status_code, 200)

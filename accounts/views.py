@@ -6,6 +6,14 @@ from django.utils.translation import gettext as _
 from core.api_client import CollabookAPI
 from .forms import LoginForm, RegisterForm, PasswordResetRequestForm, PasswordResetConfirmForm
 
+class LandingView(TemplateView):
+    template_name = 'landing.html'
+
+    def get(self, request, *args, **kwargs):
+        if 'token' in request.session:
+            return redirect('world:selection')
+        return super().get(request, *args, **kwargs)
+
 class LoginView(FormView):
     template_name = 'accounts/login.html'
     form_class = LoginForm

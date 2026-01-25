@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Collabook - {% trans "Begin Your Adventure" %}{% endblock %}
+
+{% block content %}
+<style>
+    .hero-section {
+        padding: 60px 0;
+        text-align: center;
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+        url('{% static "images/hero-bg.jpg" %}') no-repeat center center;
+        background-size: cover;
+        border-radius: 15px;
+        margin-bottom: 40px;
+        border: 1px solid #333;
+    }
+
+    .hero-title {
+        font-family: 'Cinzel', serif;
+        font-size: 4rem;
+        color: #d4af37;
+        text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+        margin-bottom: 20px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        color: #e0e0e0;
+        max-width: 800px;
+        margin: 0 auto 30px;
+    }
+
+    .feature-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid #444;
+        border-radius: 10px;
+        padding: 30px;
+        height: 100%;
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.08);
+        border-color: #d4af37;
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        color: #d4af37;
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-family: 'Cinzel', serif;
+        color: #d4af37;
+        text-align: center;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .section-title::after {
+        content: '';
+        display: block;
+        width: 100px;
+        height: 3px;
+        background: #d4af37;
+        margin: 15px auto 0;
+    }
+
+    .cta-container {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .btn-lg {
+        padding: 12px 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+</style>
+
+<div class="hero-section">
+    <h1 class="hero-title">COLLABOOK</h1>
+    <p class="hero-subtitle">{% trans "Unleash your imagination in a collaborative RPG world powered by Advanced AI.
+        Your story, your choices, your legend." %}</p>
+    <div class="cta-container">
+        <a href="{% url 'accounts:register' %}" class="btn btn-gold btn-lg">{% trans "Start Playing" %}</a>
+        <a href="{% url 'accounts:login' %}" class="btn btn-outline-light btn-lg">{% trans "Login" %}</a>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="feature-card">
+            <div class="feature-icon">⚔️</div>
+            <h3>{% trans "The Game" %}</h3>
+            <p>{% trans "Collabook is a unique Role-Playing Game where players collaborate to weave epic tales. Unlike
+                traditional games, our AI Dungeon Master responds dynamically to your creative inputs, making every
+                adventure truly one-of-a-kind." %}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card">
+            <div class="feature-icon">📜</div>
+            <h3>{% trans "The Rules" %}</h3>
+            <p>{% trans "Simplicity is key. Describe your actions, manage your character's vitality, and watch the world
+                react. Detailed mechanics for combat, exploration, and survival await you inside the realm." %}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card">
+            <div class="feature-icon">🛡️</div>
+            <h3>{% trans "Privacy First" %}</h3>
+            <p>{% trans "We value your anonymity. No real names required—just pick a username! We only collect your
+                email for account security and respect all GDPR regulations. Your journey is yours alone." %}</p>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mb-5">
+    <h2 class="section-title">{% trans "Join the Community" %}</h2>
+    <p class="mb-4">{% trans "More than just a game, it's a collaborative storytelling experience. Register now and
+        begin your first quest!" %}</p>
+    <a href="{% url 'accounts:register' %}" class="btn btn-gold btn-lg px-5">{% trans "Create Your Hero" %}</a>
+</div>
+{% endblock %}

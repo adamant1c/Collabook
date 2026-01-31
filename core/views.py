@@ -1,12 +1,15 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
 from django.utils.translation import get_language
 
 # Create your views here.
 
-@login_required
 def about(request):
-    return render(request, 'about.html')
+    if 'token' not in request.session:
+        return redirect('accounts:login')
+    
+    lang = get_language()
+    template = 'about_it.html' if lang and lang.startswith('it') else 'about.html'
+    return render(request, template)
 
 def privacy_policy(request):
     lang = get_language()

@@ -802,3 +802,175 @@ msgstr "Dati Tecnici"
 #: templates/privacy_policy.html:79
 msgid "IP address, browser type, and usage statistics for security and service improvement"
 msgstr "Indirizzo IP, tipo di browser e statistiche di utilizzo per la sicurezza e il miglioramento del servizio"
+
+#: templates/privacy_policy.html:102
+msgid "Contract"
+msgstr "Contratto"
+
+#: templates/privacy_policy.html:102
+msgid "Processing necessary to provide our service to you"
+msgstr "Trattamento necessario per fornirti il nostro servizio"
+
+#: templates/privacy_policy.html:104
+msgid "Legitimate Interest"
+msgstr "Legittimo Interesse"
+
+#: templates/privacy_policy.html:104
+msgid "To improve our service and ensure security"
+msgstr "Per migliorare il nostro servizio e garantire la sicurezza"
+
+#: templates/privacy_policy.html:106
+msgid "Consent"
+msgstr "Consenso"
+
+#: templates/privacy_policy.html:106
+msgid "Where you have given explicit consent for specific purposes"
+msgstr "Ove hai fornito il consenso esplicito per scopi specifici"
+
+#: templates/privacy_policy.html:115
+msgid "Right to Access"
+msgstr "Diritto di Accesso"
+
+#: templates/privacy_policy.html:115
+msgid "Request a copy of your personal data"
+msgstr "Richiedi una copia dei tuoi dati personali"
+
+#: templates/privacy_policy.html:117
+msgid "Right to Rectification"
+msgstr "Diritto di Rettifica"
+
+#: templates/privacy_policy.html:117
+msgid "Correct inaccurate or incomplete data"
+msgstr "Correggere dati inesatti o incompleti"
+
+#: templates/privacy_policy.html:119
+msgid "Right to Erasure"
+msgstr "Diritto alla Cancellazione"
+
+#: templates/privacy_policy.html:119
+msgid "Request deletion of your personal data"
+msgstr "Richiedere la cancellazione dei tuoi dati personali"
+
+#: templates/privacy_policy.html:121
+msgid "Right to Data Portability"
+msgstr "Diritto alla Portabilità dei Dati"
+
+#: templates/privacy_policy.html:121
+msgid "Receive your data in a structured, machine-readable format"
+msgstr "Ricevere i tuoi dati in un formato strutturato e leggibile da dispositivo automatico"
+
+#: templates/privacy_policy.html:123
+msgid "Right to Object"
+msgstr "Diritto di Opposizione"
+
+#: templates/privacy_policy.html:123
+msgid "Object to processing of your personal data"
+msgstr "Opporsi al trattamento dei tuoi dati personali"
+
+#: templates/privacy_policy.html:125
+msgid "Right to Withdraw Consent"
+msgstr "Diritto di Revoca del Consenso"
+
+#: templates/privacy_policy.html:4
+msgid "Privacy Policy"
+msgstr "Informativa sulla Privacy"
+
+#: templates/privacy_policy.html:46
+msgid "Last updated"
+msgstr "Ultimo aggiornamento"
+
+#: templates/privacy_policy.html:46
+msgid "January"
+msgstr "Gennaio"
+
+#: templates/privacy_policy.html:51
+msgid "Introduction"
+msgstr "Introduzione"
+
+#: templates/privacy_policy.html:62
+msgid "Data We Collect"
+msgstr "Dati che Raccogliamo"
+
+#: templates/privacy_policy.html:65
+msgid "Important"
+msgstr "Importante"
+
+#: templates/privacy_policy.html:86
+msgid "How We Use Your Data"
+msgstr "Come Utilizziamo i Tuoi Dati"
+
+#: templates/privacy_policy.html:87
+msgid "We use your personal data for the following purposes"
+msgstr "Utilizziamo i tuoi dati personali per i seguenti scopi"
+
+#: templates/privacy_policy.html:89
+msgid "To provide and maintain our service"
+msgstr "Per fornire e mantenere il nostro servizio"
+
+#: templates/privacy_policy.html:90
+msgid "To verify your account and enable password recovery"
+msgstr "Per verificare il tuo account e abilitare il recupero della password"
+
+#: templates/privacy_policy.html:91
+msgid "To save your game progress and preferences"
+msgstr "Per salvare i tuoi progressi di gioco e le preferenze"
+
+#: templates/privacy_policy.html:92
+msgid "To send important service notifications"
+msgstr "Per inviare importanti notifiche di servizio"
+
+#: templates/privacy_policy.html:93
+msgid "To improve our platform and user experience"
+msgstr "Per migliorare la nostra piattaforma e l'esperienza utente"
+
+#: templates/privacy_policy.html:94
+msgid "To ensure security and prevent fraud"
+msgstr "Per garantire la sicurezza e prevenire le frodi"
+
+#: templates/privacy_policy.html:99
+msgid "Legal Basis for Processing (GDPR)"
+msgstr "Base Giuridica per il Trattamento (GDPR)"
+
+#: templates/privacy_policy.html:100
+msgid "Under GDPR, we process your personal data based on"
+msgstr "Ai sensi del GDPR, trattiamo i tuoi dati personali in base a"
+
+#: templates/privacy_policy.html:112
+msgid "Your Rights Under GDPR"
+msgstr "I Tuoi Diritti ai Sensi del GDPR"
+
+#: templates/privacy_policy.html:113
+msgid "As a user, you have the following rights"
+msgstr "Come utente, hai i seguenti diritti"
+
+#: templates/privacy_policy.html:136
+msgid "Data Storage and Security"
+msgstr "Archiviazione e Sicurezza dei Dati"
+
+#: templates/privacy_policy.html:147
+msgid "Data Retention"
+msgstr "Conservazione dei Dati"
+
+#: templates/privacy_policy.html:158
+msgid "Third-Party Services"
+msgstr "Servizi di Terze Parti"
+
+#: templates/privacy_policy.html:169
+msgid "Cookies"
+msgstr "Cookie"
+
+#: templates/privacy_policy.html:179
+msgid "Changes to This Policy"
+msgstr "Modifiche a Questa Informativa"
+
+#: templates/privacy_policy.html:190
+msgid "Contact Us"
+msgstr "Contattaci"
+
+#: templates/privacy_policy.html:198
+msgid "Email"
+msgstr "Email"
+
+#: templates/privacy_policy.html:199
+msgid "Website"
+msgstr "Sito Web"

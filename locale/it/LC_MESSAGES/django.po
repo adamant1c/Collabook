@@ -967,10 +967,6 @@ msgstr "Modifiche a Questa Informativa"
 msgid "Contact Us"
 msgstr "Contattaci"
 
-#: templates/privacy_policy.html:198
-msgid "Email"
-msgstr "Email"
-
 #: templates/privacy_policy.html:199
 msgid "Website"
 msgstr "Sito Web"

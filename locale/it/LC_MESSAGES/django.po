@@ -770,3 +770,35 @@ msgstr "Esplora i Nostri Mondi"
 
 msgid "Legendary Inhabitants"
 msgstr "Abitanti Leggendari"
+
+#: templates/privacy_policy.html:71
+msgid "The personal information we collect includes"
+msgstr "Le informazioni personali che raccogliamo includono"
+
+#: templates/privacy_policy.html:73
+msgid "A display name of your choice (not your real name)"
+msgstr "Un nome visualizzato a tua scelta (non il tuo vero nome)"
+
+#: templates/privacy_policy.html:75
+msgid "Email Address"
+msgstr "Indirizzo Email"
+
+#: templates/privacy_policy.html:75
+msgid "Used for account verification, password recovery, and important service notifications"
+msgstr "Utilizzato per la verifica dell'account, il recupero della password e importanti notifiche di servizio"
+
+#: templates/privacy_policy.html:77
+msgid "Game Data"
+msgstr "Dati di Gioco"
+
+#: templates/privacy_policy.html:77
+msgid "Your created characters, story choices, and game progress"
+msgstr "I tuoi personaggi creati, le scelte della storia e i progressi di gioco"
+
+#: templates/privacy_policy.html:79
+msgid "Technical Data"
+msgstr "Dati Tecnici"
+
+#: templates/privacy_policy.html:79
+msgid "IP address, browser type, and usage statistics for security and service improvement"
+msgstr "Indirizzo IP, tipo di browser e statistiche di utilizzo per la sicurezza e il miglioramento del servizio"

@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Termini di Servizio - Collabook{% endblock %}
+
+{% block content %}
+<style>
+    .terms-header {
+        border-bottom: 3px solid #d4af37;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        color: #d4af37;
+        border-bottom: 1px solid #444;
+        padding-bottom: 5px;
+        margin-top: 35px;
+        font-family: 'Cinzel', serif;
+    }
+
+    .terms-content {
+        line-height: 1.8;
+    }
+
+    .terms-content ul {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+
+    .terms-content li {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <header class="terms-header text-center">
+        <h1 style="font-family: 'Cinzel', serif;">Termini di Servizio</h1>
+        <p class="text-secondary">Ultimo aggiornamento: 27 gennaio 2026</p>
+    </header>
+
+    <div class="terms-content">
+        <section>
+            <h2 class="section-title">Accettazione dei Termini</h2>
+            <p>
+                Accedendo e utilizzando Collabook, accetti e acconsenti di essere vincolato dai termini e
+                dalle disposizioni di questo accordo. Se non accetti questi termini, ti preghiamo di non utilizzare il
+                nostro servizio.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Descrizione del Servizio</h2>
+            <p>
+                Collabook è una piattaforma di narrazione interattiva dove gli utenti possono creare personaggi,
+                selezionare mondi narrativi e partecipare a esperienze narrative collaborative. Il servizio
+                è fornito "così com'è" e ci riserviamo il diritto di modificare o interrompere il servizio in qualsiasi
+                momento.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Account Utente</h2>
+            <p>Creando un account, accetti di:</p>
+            <ul>
+                <li>Fornire informazioni accurate e complete</li>
+                <li>Mantenere la sicurezza delle credenziali del tuo account</li>
+                <li>Accettare la responsabilità per tutte le attività svolte con il tuo account</li>
+                <li>Notificarci immediatamente di qualsiasi uso non autorizzato del tuo account</li>
+            </ul>
+            <p>
+                Devi avere almeno 13 anni per utilizzare questo servizio. Se hai meno di 18 anni,
+                dovresti avere il consenso dei genitori per utilizzare Collabook.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Condotta dell'Utente</h2>
+            <p>Accetti di NON:</p>
+            <ul>
+                <li>Utilizzare il servizio per scopi illegali o non autorizzati</li>
+                <li>Molestare, abusare o danneggiare altri utenti</li>
+                <li>Pubblicare contenuti offensivi, inappropriati o dannosi</li>
+                <li>Tentare di ottenere accesso non autorizzato ai nostri sistemi</li>
+                <li>Interferire con o interrompere il servizio o i server</li>
+                <li>Utilizzare sistemi automatizzati per accedere al servizio senza autorizzazione</li>
+                <li>Impersonare qualsiasi persona o entità</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="section-title">Proprietà Intellettuale</h2>
+            <p>
+                Tutti i contenuti forniti su Collabook, inclusi testo, grafica, loghi e software,
+                sono proprietà di Collabook o dei suoi fornitori di contenuti e sono protetti dalle
+                leggi internazionali sul copyright.
+            </p>
+            <p>
+                I contenuti generati dagli utenti (personaggi, scelte narrative) rimangono di tua proprietà, ma
+                concedi a Collabook una licenza per utilizzare, visualizzare e archiviare questi contenuti come
+                necessario per fornire il servizio.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Moderazione dei Contenuti</h2>
+            <p>
+                Ci riserviamo il diritto di rivedere, monitorare e rimuovere qualsiasi contenuto generato dagli utenti
+                che
+                violi questi termini o sia altrimenti discutibile. Potremmo sospendere o terminare
+                account che violano ripetutamente le nostre politiche.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Esclusione di Garanzie</h2>
+            <p>
+                Il servizio è fornito "così com'è" senza garanzie di alcun tipo, esplicite o implicite.
+                Non garantiamo che il servizio sarà ininterrotto, sicuro o privo di errori.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Limitazione di Responsabilità</h2>
+            <p>
+                Collabook non sarà responsabile per danni indiretti, incidentali, speciali, consequenziali
+                o punitivi derivanti dal tuo utilizzo o dall'impossibilità di utilizzare il servizio.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Risoluzione</h2>
+            <p>
+                Ci riserviamo il diritto di terminare o sospendere il tuo account e l'accesso al servizio
+                a nostra esclusiva discrezione, senza preavviso, per condotta che riteniamo violi questi
+                Termini di Servizio o sia dannosa per altri utenti, per noi o per terze parti.
+            </p>
+            <p>
+                Puoi terminare il tuo account in qualsiasi momento contattandoci. Al momento della risoluzione,
+                il tuo diritto di utilizzare il servizio cesserà immediatamente.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Modifiche ai Termini</h2>
+            <p>
+                Ci riserviamo il diritto di modificare questi termini in qualsiasi momento. Informeremo gli utenti di
+                modifiche significative pubblicando un avviso sul nostro sito web. Il tuo uso continuato del
+                servizio dopo tali modifiche costituisce accettazione dei termini aggiornati.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Legge Applicabile</h2>
+            <p>
+                Questi Termini di Servizio saranno regolati e interpretati in conformità con le
+                leggi italiane, senza riguardo alle sue disposizioni sui conflitti di legge.
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">Informazioni di Contatto</h2>
+            <p>
+                Se hai domande su questi Termini di Servizio, contattaci a:
+            </p>
+            <p>
+                <strong>Email</strong>: palexander82@gmail.com<br>
+                <strong>Sito Web</strong>: <a href="/" class="text-warning">https://collabook.click</a>
+            </p>
+        </section>
+    </div>
+</div>
+{% endblock %}

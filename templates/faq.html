@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "FAQ" %} - Collabook{% endblock %}
+
+{% block content %}
+<style>
+    .faq-header {
+        border-bottom: 3px solid #d4af37;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .faq-item {
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-left: 3px solid #d4af37;
+        border-radius: 5px;
+    }
+
+    .faq-question {
+        color: #d4af37;
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+        font-family: 'Cinzel', serif;
+    }
+
+    .faq-answer {
+        line-height: 1.8;
+        color: #e0e0e0;
+    }
+
+    .faq-category {
+        color: #d4af37;
+        border-bottom: 2px solid #444;
+        padding-bottom: 10px;
+        margin-top: 40px;
+        margin-bottom: 25px;
+        font-family: 'Cinzel', serif;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <header class="faq-header text-center">
+        <h1 style="font-family: 'Cinzel', serif;">{% trans "Frequently Asked Questions" %}</h1>
+        <p class="text-secondary">{% trans "Find answers to common questions about Collabook" %}</p>
+    </header>
+
+    <div class="faq-content">
+        <h2 class="faq-category">{% trans "Getting Started" %}</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "What is Collabook?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Collabook is an interactive storytelling platform where you can create unique characters,
+                choose from various story worlds, and embark on collaborative narrative adventures.
+                Your choices shape the story and determine your character's journey.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "How do I get started?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Simply create an account, design your character with unique attributes and background,
+                select a story world that interests you, and begin your adventure. The platform will
+                guide you through each step.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "Is Collabook free to use?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Yes, Collabook is currently free to use. You can create characters, explore worlds,
+                and participate in stories without any cost.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <h2 class="faq-category">{% trans "Characters and Gameplay" %}</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "Can I create multiple characters?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Yes, you can create multiple characters, each with their own unique attributes,
+                backgrounds, and story progression. This allows you to explore different playstyles
+                and narrative paths.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "What are the different story worlds available?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Collabook offers various story worlds spanning different genres including fantasy,
+                sci-fi, mystery, and more. Each world has its own unique setting, challenges, and
+                narrative possibilities. Visit the world selection page to explore all available options.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "How do choices affect my story?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Your choices directly influence the narrative direction, character relationships,
+                and story outcomes. Different decisions lead to different paths, making each
+                playthrough unique.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <h2 class="faq-category">{% trans "Account and Privacy" %}</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "What information do you collect?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                We only collect your username (not your real name) and email address. We are
+                GDPR compliant and take your privacy seriously. For more details, please read
+                our Privacy Policy.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "Can I delete my account?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Yes, you can request account deletion at any time by contacting us at
+                palexander82@gmail.com. We will permanently delete your account and associated
+                data in accordance with GDPR regulations.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "How do I reset my password?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Click on the "Forgot Password" link on the login page. Enter your email address,
+                and we'll send you instructions to reset your password.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <h2 class="faq-category">{% trans "Technical Support" %}</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "What browsers are supported?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Collabook works best on modern browsers including Chrome, Firefox, Safari, and Edge.
+                We recommend keeping your browser updated to the latest version for the best experience.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "I found a bug. How do I report it?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Please contact us at palexander82@gmail.com with a detailed description of the issue,
+                including what you were doing when the bug occurred and any error messages you received.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "Is there a mobile app?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                Currently, Collabook is a web-based platform accessible through your browser.
+                While we don't have a dedicated mobile app yet, the website is mobile-friendly
+                and works on smartphones and tablets.
+                {% endblocktrans %}
+            </div>
+        </div>
+
+        <h2 class="faq-category">{% trans "Contact" %}</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">{% trans "How can I contact support?" %}</div>
+            <div class="faq-answer">
+                {% blocktrans %}
+                For any questions, suggestions, or support requests, please email us at
+                palexander82@gmail.com. We typically respond within 24-48 hours.
+                {% endblocktrans %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

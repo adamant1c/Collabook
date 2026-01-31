@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Privacy Policy" %} - Collabook{% endblock %}
+
+{% block content %}
+<style>
+    .policy-header {
+        border-bottom: 3px solid #d4af37;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        color: #d4af37;
+        border-bottom: 1px solid #444;
+        padding-bottom: 5px;
+        margin-top: 35px;
+        font-family: 'Cinzel', serif;
+    }
+
+    .policy-content {
+        line-height: 1.8;
+    }
+
+    .policy-content ul {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+
+    .policy-content li {
+        margin-bottom: 10px;
+    }
+
+    .highlight-box {
+        background-color: rgba(212, 175, 55, 0.1);
+        border-left: 3px solid #d4af37;
+        padding: 15px;
+        margin: 20px 0;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <header class="policy-header text-center">
+        <h1 style="font-family: 'Cinzel', serif;">{% trans "Privacy Policy" %}</h1>
+        <p class="text-secondary">{% trans "Last updated" %}: {% trans "January" %} 27, 2026</p>
+    </header>
+
+    <div class="policy-content">
+        <section>
+            <h2 class="section-title">{% trans "Introduction" %}</h2>
+            <p>
+                {% blocktrans %}
+                Welcome to Collabook. We are committed to protecting your privacy and ensuring transparency
+                about the data we collect and how we use it. This Privacy Policy explains our practices
+                in accordance with the General Data Protection Regulation (GDPR) and other applicable privacy laws.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Data We Collect" %}</h2>
+
+            <div class="highlight-box">
+                <strong>{% trans "Important" %}:</strong>
+                {% blocktrans %}
+                We do NOT collect your real name. We only ask for a username and your email address.
+                {% endblocktrans %}
+            </div>
+
+            <p>{% trans "The personal information we collect includes" %}:</p>
+            <ul>
+                <li><strong>{% trans "Username" %}</strong>: {% trans "A display name of your choice (not your real
+                    name)" %}</li>
+                <li><strong>{% trans "Email Address" %}</strong>: {% trans "Used for account verification, password
+                    recovery, and important service notifications" %}</li>
+                <li><strong>{% trans "Game Data" %}</strong>: {% trans "Your created characters, story choices, and game
+                    progress" %}</li>
+                <li><strong>{% trans "Technical Data" %}</strong>: {% trans "IP address, browser type, and usage
+                    statistics for security and service improvement" %}</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "How We Use Your Data" %}</h2>
+            <p>{% trans "We use your personal data for the following purposes" %}:</p>
+            <ul>
+                <li>{% trans "To provide and maintain our service" %}</li>
+                <li>{% trans "To verify your account and enable password recovery" %}</li>
+                <li>{% trans "To save your game progress and preferences" %}</li>
+                <li>{% trans "To send important service notifications" %}</li>
+                <li>{% trans "To improve our platform and user experience" %}</li>
+                <li>{% trans "To ensure security and prevent fraud" %}</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Legal Basis for Processing (GDPR)" %}</h2>
+            <p>{% trans "Under GDPR, we process your personal data based on" %}:</p>
+            <ul>
+                <li><strong>{% trans "Contract" %}</strong>: {% trans "Processing necessary to provide our service to
+                    you" %}</li>
+                <li><strong>{% trans "Legitimate Interest" %}</strong>: {% trans "To improve our service and ensure
+                    security" %}</li>
+                <li><strong>{% trans "Consent" %}</strong>: {% trans "Where you have given explicit consent for specific
+                    purposes" %}</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Your Rights Under GDPR" %}</h2>
+            <p>{% trans "As a user, you have the following rights" %}:</p>
+            <ul>
+                <li><strong>{% trans "Right to Access" %}</strong>: {% trans "Request a copy of your personal data" %}
+                </li>
+                <li><strong>{% trans "Right to Rectification" %}</strong>: {% trans "Correct inaccurate or incomplete
+                    data" %}</li>
+                <li><strong>{% trans "Right to Erasure" %}</strong>: {% trans "Request deletion of your personal data"
+                    %}</li>
+                <li><strong>{% trans "Right to Data Portability" %}</strong>: {% trans "Receive your data in a
+                    structured, machine-readable format" %}</li>
+                <li><strong>{% trans "Right to Object" %}</strong>: {% trans "Object to processing of your personal
+                    data" %}</li>
+                <li><strong>{% trans "Right to Withdraw Consent" %}</strong>: {% trans "Withdraw consent at any time" %}
+                </li>
+            </ul>
+            <p>
+                {% blocktrans %}
+                To exercise any of these rights, please contact us at palexander82@gmail.com
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Data Storage and Security" %}</h2>
+            <p>
+                {% blocktrans %}
+                We implement appropriate technical and organizational measures to protect your personal data
+                against unauthorized access, alteration, disclosure, or destruction. Your data is stored
+                securely and is only accessible to authorized personnel.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Data Retention" %}</h2>
+            <p>
+                {% blocktrans %}
+                We retain your personal data only for as long as necessary to provide our services and
+                fulfill the purposes outlined in this Privacy Policy. You may request deletion of your
+                account and associated data at any time.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Third-Party Services" %}</h2>
+            <p>
+                {% blocktrans %}
+                We do not sell or share your personal data with third parties for marketing purposes.
+                We may use third-party services for hosting and analytics, which are bound by their
+                own privacy policies and GDPR compliance requirements.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Cookies" %}</h2>
+            <p>
+                {% blocktrans %}
+                We use essential cookies to maintain your session and preferences. These cookies are
+                necessary for the proper functioning of our service.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Changes to This Policy" %}</h2>
+            <p>
+                {% blocktrans %}
+                We may update this Privacy Policy from time to time. We will notify you of any
+                significant changes by posting the new Privacy Policy on this page and updating
+                the "Last updated" date.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Contact Us" %}</h2>
+            <p>
+                {% blocktrans %}
+                If you have any questions about this Privacy Policy or our data practices,
+                please contact us at:
+                {% endblocktrans %}
+            </p>
+            <p>
+                <strong>{% trans "Email" %}:</strong> palexander82@gmail.com<br>
+                <strong>{% trans "Website" %}:</strong> <a href="/" class="text-warning">https://collabook.click</a>
+            </p>
+        </section>
+    </div>
+</div>
+{% endblock %}

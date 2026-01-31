@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Terms of Service" %} - Collabook{% endblock %}
+
+{% block content %}
+<style>
+    .terms-header {
+        border-bottom: 3px solid #d4af37;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        color: #d4af37;
+        border-bottom: 1px solid #444;
+        padding-bottom: 5px;
+        margin-top: 35px;
+        font-family: 'Cinzel', serif;
+    }
+
+    .terms-content {
+        line-height: 1.8;
+    }
+
+    .terms-content ul {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+
+    .terms-content li {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <header class="terms-header text-center">
+        <h1 style="font-family: 'Cinzel', serif;">{% trans "Terms of Service" %}</h1>
+        <p class="text-secondary">{% trans "Last updated" %}: {% trans "January" %} 27, 2026</p>
+    </header>
+
+    <div class="terms-content">
+        <section>
+            <h2 class="section-title">{% trans "Acceptance of Terms" %}</h2>
+            <p>
+                {% blocktrans %}
+                By accessing and using Collabook, you accept and agree to be bound by the terms and
+                provisions of this agreement. If you do not agree to these terms, please do not use our service.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Description of Service" %}</h2>
+            <p>
+                {% blocktrans %}
+                Collabook is an interactive storytelling platform where users can create characters,
+                select story worlds, and participate in collaborative narrative experiences. The service
+                is provided "as is" and we reserve the right to modify or discontinue the service at any time.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "User Accounts" %}</h2>
+            <p>{% trans "When creating an account, you agree to" %}:</p>
+            <ul>
+                <li>{% trans "Provide accurate and complete information" %}</li>
+                <li>{% trans "Maintain the security of your account credentials" %}</li>
+                <li>{% trans "Accept responsibility for all activities under your account" %}</li>
+                <li>{% trans "Notify us immediately of any unauthorized use of your account" %}</li>
+            </ul>
+            <p>
+                {% blocktrans %}
+                You must be at least 13 years old to use this service. If you are under 18,
+                you should have parental consent to use Collabook.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "User Conduct" %}</h2>
+            <p>{% trans "You agree NOT to" %}:</p>
+            <ul>
+                <li>{% trans "Use the service for any illegal or unauthorized purpose" %}</li>
+                <li>{% trans "Harass, abuse, or harm other users" %}</li>
+                <li>{% trans "Post offensive, inappropriate, or harmful content" %}</li>
+                <li>{% trans "Attempt to gain unauthorized access to our systems" %}</li>
+                <li>{% trans "Interfere with or disrupt the service or servers" %}</li>
+                <li>{% trans "Use automated systems to access the service without permission" %}</li>
+                <li>{% trans "Impersonate any person or entity" %}</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Intellectual Property" %}</h2>
+            <p>
+                {% blocktrans %}
+                All content provided on Collabook, including text, graphics, logos, and software,
+                is the property of Collabook or its content suppliers and is protected by
+                international copyright laws.
+                {% endblocktrans %}
+            </p>
+            <p>
+                {% blocktrans %}
+                User-generated content (characters, story choices) remains your property, but you
+                grant Collabook a license to use, display, and store this content as necessary to
+                provide the service.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Content Moderation" %}</h2>
+            <p>
+                {% blocktrans %}
+                We reserve the right to review, monitor, and remove any user-generated content that
+                violates these terms or is otherwise objectionable. We may suspend or terminate
+                accounts that repeatedly violate our policies.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Disclaimer of Warranties" %}</h2>
+            <p>
+                {% blocktrans %}
+                The service is provided "as is" without warranties of any kind, either express or implied.
+                We do not guarantee that the service will be uninterrupted, secure, or error-free.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Limitation of Liability" %}</h2>
+            <p>
+                {% blocktrans %}
+                Collabook shall not be liable for any indirect, incidental, special, consequential,
+                or punitive damages resulting from your use or inability to use the service.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Termination" %}</h2>
+            <p>
+                {% blocktrans %}
+                We reserve the right to terminate or suspend your account and access to the service
+                at our sole discretion, without notice, for conduct that we believe violates these
+                Terms of Service or is harmful to other users, us, or third parties.
+                {% endblocktrans %}
+            </p>
+            <p>
+                {% blocktrans %}
+                You may terminate your account at any time by contacting us. Upon termination,
+                your right to use the service will immediately cease.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Changes to Terms" %}</h2>
+            <p>
+                {% blocktrans %}
+                We reserve the right to modify these terms at any time. We will notify users of
+                significant changes by posting a notice on our website. Your continued use of the
+                service after such modifications constitutes acceptance of the updated terms.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Governing Law" %}</h2>
+            <p>
+                {% blocktrans %}
+                These Terms of Service shall be governed by and construed in accordance with the
+                laws of Italy, without regard to its conflict of law provisions.
+                {% endblocktrans %}
+            </p>
+        </section>
+
+        <section>
+            <h2 class="section-title">{% trans "Contact Information" %}</h2>
+            <p>
+                {% blocktrans %}
+                If you have any questions about these Terms of Service, please contact us at:
+                {% endblocktrans %}
+            </p>
+            <p>
+                <strong>{% trans "Email" %}:</strong> palexander82@gmail.com<br>
+                <strong>{% trans "Website" %}:</strong> <a href="/" class="text-warning">https://collabook.click</a>
+            </p>
+        </section>
+    </div>
+</div>
+{% endblock %}

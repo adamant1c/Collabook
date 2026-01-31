@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 
 from django.http import HttpResponse
 from core import views as core_views
@@ -38,21 +39,63 @@ def sitemap_xml(request):
                     <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
                       <url>
                         <loc>https://collabook.click/</loc>
-                        <lastmod>2026-01-24</lastmod>
+                        <lastmod>2026-01-27</lastmod>
                         <changefreq>weekly</changefreq>
                         <priority>1.0</priority>
                       </url>
                       <url>
                         <loc>https://collabook.click/about/</loc>
-                        <lastmod>2026-01-24</lastmod>
+                        <lastmod>2026-01-27</lastmod>
                         <changefreq>monthly</changefreq>
                         <priority>0.8</priority>
                       </url>
                       <url>
                         <loc>https://collabook.click/game/rules/</loc>
-                        <lastmod>2026-01-24</lastmod>
+                        <lastmod>2026-01-27</lastmod>
                         <changefreq>monthly</changefreq>
                         <priority>0.8</priority>
+                      </url>
+                      <url>
+                        <loc>https://collabook.click/world/selection/</loc>
+                        <lastmod>2026-01-27</lastmod>
+                        <changefreq>weekly</changefreq>
+                        <priority>0.9</priority>
+                      </url>
+                      <url>
+                        <loc>https://collabook.click/character/sheet/</loc>
+                        <lastmod>2026-01-27</lastmod>
+                        <changefreq>weekly</changefreq>
+                        <priority>0.9</priority>
+                      </url>
+                      <url>
+                        <loc>https://collabook.click/privacy-policy</loc>
+                        <lastmod>2026-01-27</lastmod>
+                        <changefreq>monthly</changefreq>
+                        <priority>0.6</priority>
+                      </url>
+                      <url>
+                        <loc>https://collabook.click/terms</loc>
+                        <lastmod>2026-01-27</lastmod>
+                        <changefreq>monthly</changefreq>
+                        <priority>0.6</priority>
+                      </url>
+                      <url>
+                        <loc>https://collabook.click/faq</loc>
+                        <lastmod>2026-01-27</lastmod>
+                        <changefreq>monthly</changefreq>
+                        <priority>0.7</priority>
+                      </url>
+                      <url>
+                        <loc>https://collabook.click/contact</loc>
+                        <lastmod>2026-01-27</lastmod>
+                        <changefreq>monthly</changefreq>
+                        <priority>0.6</priority>
+                      </url>
+                      <url>
+                        <loc>https://collabook.click/how-it-works</loc>
+                        <lastmod>2026-01-27</lastmod>
+                        <changefreq>monthly</changefreq>
+                        <priority>0.7</priority>
                       </url>
                     </urlset>
                     """
@@ -70,4 +113,9 @@ urlpatterns = [
     path('world/', include('world.urls')),
     path('game/', include('game.urls')),
     path('about/', core_views.about, name='about'),
+    path('privacy-policy', core_views.privacy_policy, name='privacy_policy'),
+    path('terms', core_views.terms, name='terms'),
+    path('faq', core_views.faq, name='faq'),
+    path('contact', RedirectView.as_view(url='/about/', permanent=True), name='contact'),
+    path('how-it-works', RedirectView.as_view(url='/game/rules/', permanent=True), name='how_it_works'),
 ]

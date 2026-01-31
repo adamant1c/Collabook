@@ -23,6 +23,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-9-ku)dot=(5*jp@az3gh7@_bh=
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
 DEBUG = ENVIRONMENT == 'development'
 
+# AdSense Configuration
+ADSENSE_ENABLED = os.getenv('ADSENSE_ENABLED', 'False').lower() == 'true'
+
 # ALLOWED_HOSTS based on environment
 if ENVIRONMENT == 'production':
     ALLOWED_HOSTS = [
@@ -86,6 +89,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n',
                 'core.context_processors.character_info',
+                'core.context_processors.adsense_settings',
             ],
         },
     },

@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}Domande Frequenti - Collabook{% endblock %}
+
+{% block content %}
+<style>
+    .faq-header {
+        border-bottom: 3px solid #d4af37;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .faq-item {
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-left: 3px solid #d4af37;
+        border-radius: 5px;
+    }
+
+    .faq-question {
+        color: #d4af37;
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-bottom: 10px;
+        font-family: 'Cinzel', serif;
+    }
+
+    .faq-answer {
+        line-height: 1.8;
+        color: #e0e0e0;
+    }
+
+    .faq-category {
+        color: #d4af37;
+        border-bottom: 2px solid #444;
+        padding-bottom: 10px;
+        margin-top: 40px;
+        margin-bottom: 25px;
+        font-family: 'Cinzel', serif;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <header class="faq-header text-center">
+        <h1 style="font-family: 'Cinzel', serif;">Domande Frequenti</h1>
+        <p class="text-secondary">Trova risposte alle domande più comuni su Collabook</p>
+    </header>
+
+    <div class="faq-content">
+        <h2 class="faq-category">Per Iniziare</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">Cos'è Collabook?</div>
+            <div class="faq-answer">
+                Collabook è una piattaforma di narrazione interattiva dove puoi creare personaggi unici,
+                scegliere tra vari mondi narrativi e intraprendere avventure narrative collaborative.
+                Le tue scelte plasmano la storia e determinano il viaggio del tuo personaggio.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Come posso iniziare?</div>
+            <div class="faq-answer">
+                Semplicemente crea un account, progetta il tuo personaggio con attributi e background unici,
+                seleziona un mondo narrativo che ti interessa e inizia la tua avventura. La piattaforma
+                ti guiderà attraverso ogni passaggio.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Collabook è gratuito?</div>
+            <div class="faq-answer">
+                Sì, Collabook è attualmente gratuito. Puoi creare personaggi, esplorare mondi
+                e partecipare a storie senza alcun costo.
+            </div>
+        </div>
+
+        <h2 class="faq-category">Personaggi e Gameplay</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">Posso creare più personaggi?</div>
+            <div class="faq-answer">
+                Sì, puoi creare più personaggi, ognuno con i propri attributi unici,
+                background e progressione narrativa. Questo ti permette di esplorare diversi stili di gioco
+                e percorsi narrativi.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Quali sono i diversi mondi narrativi disponibili?</div>
+            <div class="faq-answer">
+                Collabook offre vari mondi narrativi che spaziano tra diversi generi tra cui fantasy,
+                fantascienza, mistero e altro. Ogni mondo ha il proprio setting unico, sfide e
+                possibilità narrative. Visita la pagina di selezione dei mondi per esplorare tutte le opzioni
+                disponibili.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Come influiscono le scelte sulla mia storia?</div>
+            <div class="faq-answer">
+                Le tue scelte influenzano direttamente la direzione narrativa, le relazioni tra personaggi
+                e gli esiti della storia. Decisioni diverse portano a percorsi diversi, rendendo ogni
+                partita unica.
+            </div>
+        </div>
+
+        <h2 class="faq-category">Account e Privacy</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">Quali informazioni raccogliete?</div>
+            <div class="faq-answer">
+                Raccogliamo solo il tuo nome utente (non il tuo nome reale) e l'indirizzo email. Siamo
+                conformi al GDPR e prendiamo sul serio la tua privacy. Per maggiori dettagli, leggi
+                la nostra Informativa sulla Privacy.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Posso eliminare il mio account?</div>
+            <div class="faq-answer">
+                Sì, puoi richiedere l'eliminazione dell'account in qualsiasi momento contattandoci all'indirizzo
+                palexander82@gmail.com. Elimineremo permanentemente il tuo account e i dati associati
+                in conformità con le normative GDPR.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Come posso reimpostare la mia password?</div>
+            <div class="faq-answer">
+                Clicca sul link "Password Dimenticata" nella pagina di login. Inserisci il tuo indirizzo email
+                e ti invieremo le istruzioni per reimpostare la tua password.
+            </div>
+        </div>
+
+        <h2 class="faq-category">Supporto Tecnico</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">Quali browser sono supportati?</div>
+            <div class="faq-answer">
+                Collabook funziona meglio sui browser moderni tra cui Chrome, Firefox, Safari ed Edge.
+                Raccomandiamo di mantenere il browser aggiornato all'ultima versione per la migliore esperienza.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">Ho trovato un bug. Come posso segnalarlo?</div>
+            <div class="faq-answer">
+                Contattaci all'indirizzo palexander82@gmail.com con una descrizione dettagliata del problema,
+                includendo cosa stavi facendo quando si è verificato il bug e eventuali messaggi di errore ricevuti.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">C'è un'app mobile?</div>
+            <div class="faq-answer">
+                Attualmente, Collabook è una piattaforma basata sul web accessibile tramite il tuo browser.
+                Anche se non abbiamo ancora un'app mobile dedicata, il sito web è ottimizzato per dispositivi mobili
+                e funziona su smartphone e tablet.
+            </div>
+        </div>
+
+        <h2 class="faq-category">Contatti</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">Come posso contattare il supporto?</div>
+            <div class="faq-answer">
+                Per qualsiasi domanda, suggerimento o richiesta di supporto, inviaci un'email a
+                palexander82@gmail.com. Rispondiamo tipicamente entro 24-48 ore.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

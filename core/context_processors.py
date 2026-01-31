@@ -37,3 +37,13 @@ def character_info(request):
     
     return context
 
+
+def adsense_settings(request):
+    """
+    Inject AdSense configuration into all templates.
+    Allows templates to conditionally show ads based on ADSENSE_ENABLED setting.
+    """
+    from django.conf import settings
+    return {
+        'adsense_enabled': settings.ADSENSE_ENABLED,
+    }

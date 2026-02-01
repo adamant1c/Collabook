@@ -29,24 +29,62 @@ def clean_narration(text):
     if not text:
         return text
     
-    # Step 1: Try to parse as JSON if it looks like one
-    trimmed = text.strip()
-    if trimmed.startswith('{') and trimmed.endswith('}'):
+    # Step 1: Remove Markdown code blocks if present
+    # Matches ```json { ... } ``` or just ``` { ... } ```
+    text = re.sub(r'```(?:json)?\s*(\{.*?\})\s*```', r'\1', text, flags=re.DOTALL).strip()
+
+    # Step 2: Try to parse as JSON if it looks like one
+    if (text.startswith('{') and text.endswith('}')) or (text.startswith('[') and text.endswith(']')):
         try:
-            data = json.loads(trimmed)
+            # Clean up potential trailing commas and newlines before parsing
+            # This is a bit risky but helps with slightly malformed LLM JSON
+            json_text = re.sub(r',\s*\}', '}', text)
+            json_text = re.sub(r',\s*\]', ']', json_text)
+            
+            data = json.loads(json_text)
+            
+            def extract_from_dict(d):
+                if not isinstance(d, dict):
+                    return None
+                
+                # Check for common wrappers or fields
+                # "response" -> { "message": "..." } is common
+                if "response" in d:
+                    res = d["response"]
+                    if isinstance(res, str):
+                        return res
+                    if isinstance(res, dict):
+                        # Recursive check in nested response
+                        nested = extract_from_dict(res)
+                        if nested: return nested
+                
+                # Priority list of fields
+                for field in ['narration', 'message', 'description', 'text', 'content']:
+                    if field in d and d[field] and isinstance(d[field], str):
+                        return d[field]
+                return None
+
             if isinstance(data, dict):
-                # Priortize common fields that might contain the narration
-                for field in ['narration', 'description', 'text', 'message']:
-                    if field in data and data[field]:
-                        return data[field]
+                extracted = extract_from_dict(data)
+                if extracted:
+                    return extracted.strip()
+            elif isinstance(data, list) and data:
+                # If it's a list, check the first element
+                if isinstance(data[0], dict):
+                    extracted = extract_from_dict(data[0])
+                    if extracted:
+                        return extracted.strip()
+                    
         except (json.JSONDecodeError, ValueError):
             pass
 
-    # Step 2: Handle mixed strings where JSON is appended or embedded
-    # Remove common JSON keys and their values
+    # Step 3: Handle mixed strings or legacy cleanup
+    # Remove common JSON keys and their values if parsing failed
     cleanup_patterns = [
         r',?\s*"suggested_actions":\s*\[.*?\]',
         r',?\s*"suggested_actions":\s*\{.*?\}',
+        r',?\s*"player_stats":\s*\{.*?\}',
+        r',?\s*"world":\s*\{.*?\}',
         r',?\s*"event":\s*[^,}\]]+',
         r',?\s*"enemy":\s*[^,}\]]+',
         r',?\s*"status":\s*[^,}\]]+',
@@ -57,22 +95,29 @@ def clean_narration(text):
     for pattern in cleanup_patterns:
         cleaned_text = re.sub(pattern, '', cleaned_text, flags=re.DOTALL)
     
-    # Step 3: Clean up resulting punctuation/whitespace
-    # Remove empty braces if they were left over
+    # Step 4: Final cleanup of punctuation/whitespace
+    # Remove empty braces/brackets if they were left over
     cleaned_text = re.sub(r'\{\s*\}', '', cleaned_text)
+    cleaned_text = re.sub(r'\[\s*\]', '', cleaned_text)
     
-    # Remove trailing braces, stray commas, and extra whitespace
+    # Remove wrapping braces if they still exist (often found in "mixed" responses)
     cleaned_text = cleaned_text.strip()
-    if cleaned_text.endswith('}') or cleaned_text.endswith(']'):
-        cleaned_text = cleaned_text[:-1].strip()
-    if cleaned_text.startswith('{') or cleaned_text.startswith('['):
-        cleaned_text = cleaned_text[1:].strip()
+    if cleaned_text.startswith('{') and cleaned_text.endswith('}'):
+        cleaned_text = cleaned_text[1:-1].strip()
         
-    cleaned_text = re.sub(r',\s*$', '', cleaned_text) # Remove trailing comma
-    cleaned_text = re.sub(r'\s+', ' ', cleaned_text) # Normalize whitespace
-    cleaned_text = cleaned_text.strip()
+    # Remove lingering JSON keys like "narration": or "message":
+    cleaned_text = re.sub(r'^\s*"(?:narration|message|description|response)"\s*:\s*', '', cleaned_text)
     
-    return cleaned_text
+    # Remove trailing/leading quotes if they were part of a JSON value
+    if (cleaned_text.startswith('"') and cleaned_text.endswith('"')) or \
+       (cleaned_text.startswith("'") and cleaned_text.endswith("'")):
+        cleaned_text = cleaned_text[1:-1].strip()
+
+    # Remove trailing commas and normalize whitespace
+    cleaned_text = re.sub(r',\s*$', '', cleaned_text)
+    cleaned_text = re.sub(r'\s+', ' ', cleaned_text)
+    
+    return cleaned_text.strip()
 
 def translate_story_data(story):
     """Translate story title, genre and description if in known list or if DB has translation"""

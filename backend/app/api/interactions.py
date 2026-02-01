@@ -205,22 +205,48 @@ async def create_interaction(
             json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
             if json_match:
                 try:
-                    response_data = json.loads(json_match.group(0))
+                    # Clean up the match to handle common LLM errors
+                    json_str = json_match.group(0)
+                    # Remove potential trailing commas before closing braces/brackets
+                    json_str = re.sub(r',\s*\}', '}', json_str)
+                    json_str = re.sub(r',\s*\]', ']', json_str)
+                    response_data = json.loads(json_str)
                 except json.JSONDecodeError:
-                    # If direct parsing fails, try cleaning the match
-                    cleaned_json = json_match.group(0).replace('\n', '').replace('\r', '')
-                    # Remove potential trailing commas before closing braces
-                    cleaned_json = re.sub(r',\s*\}', '}', cleaned_json)
-                    cleaned_json = re.sub(r',\s*\]', ']', cleaned_json)
+                    # Final attempt: very aggressive cleanup
+                    cleaned_json = json_match.group(0).replace('\n', ' ').replace('\r', ' ')
                     response_data = json.loads(cleaned_json)
 
-                narration = response_data.get("narration", raw_response)
-                suggested_actions = response_data.get("suggested_actions", [])
-                event = response_data.get("event")
-                enemy_name = response_data.get("enemy")
+                # Robust extraction of narration and other fields
+                def get_narration(d):
+                    if not isinstance(d, dict): return None
+                    
+                    # Check for nested "response" wrapper
+                    if "response" in d:
+                        res = d["response"]
+                        if isinstance(res, str): return res
+                        if isinstance(res, dict):
+                            nested = get_narration(res)
+                            if nested: return nested
+                            
+                    # Priority keys
+                    for k in ["narration", "message", "description", "text", "content"]:
+                        if k in d and d[k] and isinstance(d[k], str):
+                            return d[k]
+                    return None
+
+                narration = get_narration(response_data) or raw_response
+                
+                # Check for other fields (suggested_actions, rewards, etc.) in top level or nested
+                suggested_actions = response_data.get("suggested_actions")
+                if not suggested_actions and isinstance(response_data.get("response"), dict):
+                    suggested_actions = response_data["response"].get("suggested_actions")
+                suggested_actions = suggested_actions or []
+                
+                event = response_data.get("event") or (response_data.get("response", {}).get("event") if isinstance(response_data.get("response"), dict) else None)
+                enemy_name = response_data.get("enemy") or (response_data.get("response", {}).get("enemy") if isinstance(response_data.get("response"), dict) else None)
                 
                 # Apply JSON rewards if any
-                rewards = response_data.get("rewards", {})
+                rewards = response_data.get("rewards") or (response_data.get("response", {}).get("rewards") if isinstance(response_data.get("response"), dict) else {})
                 if rewards:
                     if rewards.get("gold"):
                         character.gold += int(rewards.get("gold"))

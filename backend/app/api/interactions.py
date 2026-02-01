@@ -37,117 +37,15 @@ async def create_interaction(
     max_turn = db.query(Turn).filter(Turn.character_id == character.id).count()
     turn_number = max_turn + 1
     
-    # Initialize response variables
-    suggested_actions = []
-    
     # Verify ownership
     if character.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your character")
     
     # ------------------------------------------------------------------
-    # PHASE 1: COMBAT INTERCEPTION (Backend Authority)
+    # PHASE 1: PRE-PROCESSING
     # ------------------------------------------------------------------
-    combat_log = []
     directive_prompt = ""
     combat_active = False
-    
-    # Check if character is currently in combat
-    if character.combat_state:
-        combat_active = True
-        state = character.combat_state
-        enemy_id = state.get('enemy_id')
-        enemy = db.query(Enemy).filter(Enemy.id == enemy_id).first()
-        
-        if not enemy:
-            # Fallback if enemy deleted
-            character.combat_state = None
-            combat_active = False
-        else:
-            # Resolve Combat Round
-            # 1. Parse User Action (basic keyword matching for now)
-            action_type = "attack"
-            if "fuga" in interaction.user_action.lower() or "flee" in interaction.user_action.lower():
-                action_type = "flee"
-            elif "pozione" in interaction.user_action.lower() or "potion" in interaction.user_action.lower():
-                action_type = "heal"
-                
-            # 2. Execute Rules
-            # Reconstruct temporary stats for calculation
-            player_stats = {
-                "attack_bonus": current_user.strength // 2, # Simplified D&D mod
-                "ac": 10 + (current_user.dexterity // 2),
-                "dmg_bonus": current_user.strength // 2
-            }
-            # Use enemy current HP from state, or max if not set
-            current_enemy_hp = state.get('enemy_hp', enemy.hp)
-            
-            enemy_stats = {
-                "name": enemy.name,
-                "ac": enemy.ac,
-                "hp": current_enemy_hp,
-                "attack_bonus": enemy.attack_bonus
-            }
-            
-            round_result = GameRules.resolve_combat_round(player_stats, enemy_stats, action_type)
-            
-            # 3. Apply Results to DB/State
-            # Player Damage
-            if round_result['enemy_dmg'] > 0:
-                current_user.hp = max(0, current_user.hp - round_result['enemy_dmg'])
-            
-            # Enemy Damage
-            if round_result['player_dmg'] > 0:
-                current_enemy_hp -= round_result['player_dmg']
-                state['enemy_hp'] = current_enemy_hp
-            
-            # 4. Check for Win/Loss
-            if current_user.hp <= 0:
-                # Player Died
-                character.combat_state = None # End combat
-                character.deaths += 1
-                character.status = "dead" # Or handle resurrection logic
-                directive_prompt = f"""
-                SYSTEM DIRECTIVE: The player has DIED in combat against {enemy.name}.
-                Enemy HP remaining: {current_enemy_hp}.
-                Narrate the hero's tragic fall.
-                """
-            elif current_enemy_hp <= 0:
-                # Victory!
-                character.combat_state = None
-                xp_gain = enemy.xp_reward
-                current_user.xp += xp_gain
-                
-                # Check Level Up
-                new_level = GameRules.get_level_from_xp(current_user.xp)
-                level_up_msg = ""
-                if new_level > current_user.level:
-                    current_user.level = new_level
-                    current_user.max_hp += 10 # Simple level up bonus
-                    current_user.hp = current_user.max_hp # Full heal on level up? Or just increase cap? Let's full heal.
-                    level_up_msg = f"LEVEL UP! You are now level {new_level}!"
-                
-                directive_prompt = f"""
-                SYSTEM DIRECTIVE: Information provided by Game Engine.
-                Player DEFEATED the {enemy.name}!
-                Combat Log: {'. '.join(round_result['log'])}
-                Rewards: +{xp_gain} XP. {level_up_msg}
-                
-                Narrate the victory and the loot found.
-                """
-            else:
-                # Fight continues
-                character.combat_state = state # Save updated state
-                # db_models_Enemy = enemy # Keep reference if needed
-                directive_prompt = f"""
-                SYSTEM DIRECTIVE: COMBAT ROUND RESOLVED BY ENGINE.
-                Player Status: {current_user.hp}/{current_user.max_hp} HP
-                Enemy Status: {enemy.name} has {current_enemy_hp} HP left.
-                
-                Round Details:
-                {'. '.join(round_result['log'])}
-                
-                Narrate this specific exchange of blows based on the logs above. Do NOT invent new damage.
-                """
     
     # Phase 6: Content moderation - validate user input
     validation_result = validate_user_input(interaction.user_action)
@@ -206,12 +104,13 @@ async def create_interaction(
     if interaction.language and interaction.language.lower().startswith("it"):
         json_desc = """
         IMPORTANTE: Rispondi SOLO in formato JSON valido.
-        Struttura:
+        Struttura JSON:
         {
             "narration": "testo della storia...",
             "event": "start_combat" | null,
             "enemy": "nome_nemico" | null,
-            "suggested_actions": ["azione 1", "azione 2"]
+            "suggested_actions": ["azione 1", "azione 2"],
+            "rewards": {"gold": 0, "xp": 0}
         }
         """
         system_prompt = f"""Sei un Dungeon Master italiano. {json_desc}
@@ -223,8 +122,77 @@ async def create_interaction(
         4. Includi SEMPRE 2 azioni suggerite plausibili nel campo 'suggested_actions'.
         5. NON inventare stats del giocatore nella narrazione, usa quelle fornite nel contesto.
         """
-    
-    # Generate narration with minimal tokens
+
+    # --- COMBAT RESOLUTION (If active) ---
+    combat_active = False
+    combat_data = None
+    if character.combat_state:
+        combat_active = True
+        enemy_id = character.combat_state.get('enemy_id')
+        current_enemy = db.query(Enemy).filter(Enemy.id == enemy_id).first()
+        
+        if current_enemy:
+            # Prepare stats for GameRules (authoritative resolution)
+            p_stats = {
+                'ac': (current_user.defense or 5) + 10,
+                'attack_bonus': (current_user.strength or 5) // 2,
+                'dmg_bonus': (current_user.strength or 5) // 3
+            }
+            e_stats = {
+                'ac': current_enemy.ac,
+                'hp': character.combat_state.get('enemy_hp'),
+                'attack_bonus': current_enemy.attack_bonus,
+                'dmg_bonus': 2
+            }
+            
+            # Simple keyword matching for action type
+            combat_action = "attack"
+            if "fuga" in interaction.user_action.lower() or "flee" in interaction.user_action.lower():
+                combat_action = "flee"
+            elif "pozione" in interaction.user_action.lower() or "potion" in interaction.user_action.lower() or "cura" in interaction.user_action.lower():
+                combat_action = "heal"
+                
+            combat_data = GameRules.resolve_combat_round(p_stats, e_stats, combat_action)
+            
+            # Apply Damage to Enemy
+            if combat_data['player_dmg'] > 0:
+                character.combat_state['enemy_hp'] = max(0, character.combat_state['enemy_hp'] - combat_data['player_dmg'])
+            
+            # Apply Damage to Player
+            if combat_data['enemy_dmg'] > 0:
+                current_user.hp = max(0, current_user.hp - combat_data['enemy_dmg'])
+            
+            # Check for death/victory
+            if character.combat_state['enemy_hp'] <= 0:
+                reward_msg = f"Enemy defeated! +{current_enemy.xp_reward} XP, +{current_enemy.gold_min} Gold."
+                current_user.xp += current_enemy.xp_reward
+                character.gold += current_enemy.gold_min
+                character.combat_state = None
+                combat_active = False
+                directive_prompt = f"SYSTEM DIRECTIVE: Enemy defeated. Details: {reward_msg}. Narrate the victory and loot."
+                
+                # Check for Level Up
+                new_level = GameRules.get_level_from_xp(current_user.xp)
+                if new_level > current_user.level:
+                    current_user.level = new_level
+                    current_user.max_hp += 10
+                    current_user.hp = current_user.max_hp # Full heal on level up
+                    directive_prompt += f" LEVEL UP TO {new_level}!"
+            elif current_user.hp <= 0:
+                character.status = "dead"
+                character.combat_state = None
+                combat_active = False
+                directive_prompt = "SYSTEM DIRECTIVE: Player died in combat. Narrate the tragic end."
+            else:
+                round_log = "; ".join(combat_data['log'])
+                directive_prompt = f"SYSTEM DIRECTIVE: Combat ongoing. Result: {round_log}. Status: Player {current_user.hp}/{current_user.max_hp} HP, Enemy {character.combat_state['enemy_hp']}/{current_enemy.max_hp}. Narrate this round."
+            
+            db.flush()
+
+    # Re-create optimized prompt if combat modified it
+    optimized_prompt = create_optimized_prompt(compact_context, interaction.user_action)
+
+    # Generate narration with results already in prompt
     try:
         raw_response = await llm_client.generate(
             system_prompt=system_prompt,
@@ -251,6 +219,20 @@ async def create_interaction(
                 event = response_data.get("event")
                 enemy_name = response_data.get("enemy")
                 
+                # Apply JSON rewards if any
+                rewards = response_data.get("rewards", {})
+                if rewards:
+                    if rewards.get("gold"):
+                        character.gold += int(rewards.get("gold"))
+                    if rewards.get("xp"):
+                        current_user.xp += int(rewards.get("xp"))
+                        # Level up check for narration-based XP
+                        new_level = GameRules.get_level_from_xp(current_user.xp)
+                        if new_level > current_user.level:
+                             current_user.level = new_level
+                             current_user.max_hp += 10
+                             current_user.hp = current_user.max_hp
+
                 # Handle Start Combat Trigger
                 if event == "start_combat" and enemy_name and not character.combat_state:
                     template = EnemyTemplates.get_template(enemy_name)
@@ -263,6 +245,7 @@ async def create_interaction(
                         attack_bonus=template['attack_bonus'],
                         xp_reward=template['xp_reward'],
                         level=template['level'],
+                        image_url=template.get('image_url'),
                         damage_dice="1d6", attack=0, defense=0
                     )
                     db.add(new_enemy)
@@ -302,9 +285,6 @@ async def create_interaction(
     
     # Check for quest completion hints
     quest_hint = None
-    if "✨" in narration or "quest" in narration.lower() and "complete" in narration.lower():
-        quest_hint = "Quest progress detected! Check your active quests."
-    
     # Turn creation logic proceeds...
     
     # Create turn
@@ -337,7 +317,14 @@ async def create_interaction(
                 turn_id=db_turn.id,
                 narration=f"CONGRATULATIONS! You have survived {goal} days! You have won the Survival Mode!",
                 turn_number=turn_number,
-                quest_hint="SURVIVAL COMPLETED!"
+                quest_hint="SURVIVAL COMPLETED!",
+                player_stats={
+                    "hp": current_user.hp,
+                    "max_hp": current_user.max_hp,
+                    "xp": current_user.xp,
+                    "level": current_user.level,
+                    "gold": character.gold
+                }
             )
             
         # Add a notification about the new day
@@ -360,7 +347,14 @@ async def create_interaction(
             turn_id=db_turn.id,
             narration=death_result["message"],
             turn_number=turn_number,
-            critical_warning=True
+            critical_warning=True,
+            player_stats={
+                "hp": current_user.hp,
+                "max_hp": current_user.max_hp,
+                "xp": current_user.xp,
+                "level": current_user.level,
+                "gold": character.gold
+            }
         )
     
     # Update character current_state (compact summary)
@@ -383,6 +377,7 @@ async def create_interaction(
                 "hp": character.combat_state.get('enemy_hp'), 
                 "max_hp": current_enemy.max_hp,
                 "ac": current_enemy.ac,
+                "image_url": current_enemy.image_url,
                 "active": True
             })
 
@@ -394,5 +389,12 @@ async def create_interaction(
         survival_warnings=survival_result.get("warnings", []),
         critical_condition=survival_result.get("critical", False),
         detected_entities=detected_entities,
-        suggested_actions=suggested_actions
+        suggested_actions=suggested_actions,
+        player_stats={
+            "hp": current_user.hp,
+            "max_hp": current_user.max_hp,
+            "xp": current_user.xp,
+            "level": current_user.level,
+            "gold": character.gold
+        }
     )

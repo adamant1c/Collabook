@@ -14,13 +14,13 @@ def initialize_character_stats(user: User) -> None:
     All stats start random to make each character unique!
     """
     
-    # Random initial stats (1-10)
-    user.hp = random.randint(1, 10)
-    user.max_hp = 200  # Maximum HP possible
-    user.strength = random.randint(1, 10)
-    user.magic = random.randint(1, 10)
-    user.dexterity = random.randint(1, 10)
-    user.defense = random.randint(1, 10)
+    # Initial stats
+    user.hp = 100
+    user.max_hp = 100
+    user.strength = random.randint(5, 15)
+    user.magic = random.randint(5, 15)
+    user.dexterity = random.randint(5, 15)
+    user.defense = random.randint(5, 15)
     
     # Starting values
     user.xp = 0

@@ -22,6 +22,10 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
         description=user.description,
         avatar_description=user.avatar_description
     )
+    # Initialize RPG stats
+    from app.core.rpg_stats import initialize_character_stats
+    initialize_character_stats(db_user)
+    
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

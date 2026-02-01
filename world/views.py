@@ -193,7 +193,8 @@ class JourneyView(View):
             history.append({
                 'action': user_action,
                 'narration': response['narration'],
-                'entities': entities
+                'entities': entities,
+                'player_stats': response.get('player_stats')
             })
             request.session['history'] = history
             request.session['suggested_actions'] = response.get('suggested_actions', [])

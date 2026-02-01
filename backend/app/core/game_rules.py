@@ -126,7 +126,8 @@ class EnemyTemplates:
             "ac": 12,
             "attack_bonus": 4,
             "xp_reward": 50,
-            "level": 1
+            "level": 1,
+            "image_url": "alien_mercenary.png" # Fallback for now
         },
         "goblin": {
             "name": "Goblin",
@@ -134,7 +135,8 @@ class EnemyTemplates:
             "ac": 11,
             "attack_bonus": 3,
             "xp_reward": 25,
-            "level": 1
+            "level": 1,
+            "image_url": "goblin.png"
         },
         "orco": {
             "name": "Orco",
@@ -142,7 +144,8 @@ class EnemyTemplates:
             "ac": 14,
             "attack_bonus": 6,
             "xp_reward": 100,
-            "level": 3
+            "level": 3,
+            "image_url": "ai_warlord.png"
         },
         "drago": {
             "name": "Drago Giovane",
@@ -150,7 +153,26 @@ class EnemyTemplates:
             "ac": 17,
             "attack_bonus": 9,
             "xp_reward": 1000,
-            "level": 8
+            "level": 8,
+            "image_url": "Ancient_dragon.png"
+        },
+        "dark mage": {
+            "name": "Dark Mage",
+            "hp": 60,
+            "ac": 13,
+            "attack_bonus": 5,
+            "xp_reward": 200,
+            "level": 4,
+            "image_url": "Dark_mage.png"
+        },
+        "mago": {
+            "name": "Dark Mage",
+            "hp": 60,
+            "ac": 13,
+            "attack_bonus": 5,
+            "xp_reward": 200,
+            "level": 4,
+            "image_url": "Dark_mage.png"
         }
     }
     

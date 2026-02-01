@@ -78,6 +78,19 @@
                 </div>
             </div>
 
+            {% if turn.player_stats %}
+            <div class="turn-stats-snapshot mt-3 p-2 rounded"
+                style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.1);">
+                <div class="d-flex flex-wrap gap-3 small text-secondary align-items-center">
+                    <span class="text-gold">📊 {% trans "Snapshot" %}:</span>
+                    <span>❤️ HP: {{ turn.player_stats.hp }}/{{ turn.player_stats.max_hp }}</span>
+                    <span>🎖️ LVL: {{ turn.player_stats.level }}</span>
+                    <span>✨ XP: {{ turn.player_stats.xp }}</span>
+                    <span>💰 {% trans "Gold" %}: {{ turn.player_stats.gold }}</span>
+                </div>
+            </div>
+            {% endif %}
+
             {% if turn.entities %}
             <div class="detected-entities mt-3 d-flex flex-wrap gap-4 justify-content-center">
                 {% for entity in turn.entities %}
@@ -88,6 +101,10 @@
                         <img src="{% if '/static/' in entity.image_url %}{{ entity.image_url }}{% else %}{% static 'images/' %}{{ entity.image_url }}{% endif %}"
                             alt="{{ entity.name }}" class="entity-image shadow">
                     </div>
+                    {% else %}
+                    <div class="entity-image-container d-flex align-items-center justify-content-center bg-dark">
+                        <span class="h1">{% if entity.type == 'enemy' %}💀{% else %}👤{% endif %}</span>
+                    </div>
                     {% endif %}
                     <div class="entity-label mt-2 text-center">
                         <span class="badge {% if entity.type == 'enemy' %}badge-enemy{% else %}badge-npc{% endif %}">
@@ -95,14 +112,19 @@
                             {{ entity.name }}
                         </span>
                     </div>
-                    {% if entity.type == 'enemy' and entity.hp is not None %}
+                    {% if entity.hp is not None %}
                     <div class="entity-hp mt-2">
-                        <small class="text-secondary">HP: {{ entity.hp }}/{{ entity.max_hp }}</small>
+                        <small class="text-secondary">HP: {{ entity.hp }}/{{ entity.max_hp|default:entity.hp }}</small>
                         <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
                             <div class="progress-bar bg-danger"
-                                style="width: {% if entity.max_hp > 0 %}{% widthratio entity.hp entity.max_hp 100 %}{% else %}0{% endif %}%">
+                                style="width: {% if entity.max_hp > 0 %}{% widthratio entity.hp entity.max_hp 100 %}{% else %}100{% endif %}%">
                             </div>
                         </div>
+                    </div>
+                    {% endif %}
+                    {% if entity.ac %}
+                    <div class="entity-ac mt-1 small text-secondary">
+                        🛡️ AC: {{ entity.ac }}
                     </div>
                     {% endif %}
                 </div>
@@ -149,7 +171,8 @@
                         <form method="post" id="action-form">
                             {% csrf_token %}
                             <div class="form-group mb-3">
-                                <label for="user_action" class="text-secondary small mb-2">{% trans "Option 3: Describe your own action" %}</label>
+                                <label for="user_action" class="text-secondary small mb-2">{% trans "Option 3: Describe
+                                    your own action" %}</label>
                                 <textarea name="user_action" id="user_action"
                                     class="form-control bg-black text-light border-gold-dim" rows="3"
                                     placeholder="{% trans 'e.g., I cautiously approach the ancient door...' %}"
@@ -180,14 +203,14 @@
                         <div class="stat-group">
                             <h6 class="text-gold mb-2">{{ user.name }} ({% trans "You" %})</h6>
                             <div class="d-flex justify-content-center gap-3 mb-2 small text-secondary">
-                                <span>HP: {{ user.hp }}/{{ user.max_hp }}</span>
-                                <span>XP: {{ user.xp }}</span>
-                                <span>LVL: {{ user.level }}</span>
+                                <span>HP: {{ user.character.hp }}/{{ user.character.max_hp }}</span>
+                                <span>XP: {{ user.character.xp }}</span>
+                                <span>LVL: {{ user.character.level }}</span>
                             </div>
                             <div class="progress mb-2"
                                 style="height: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
                                 <div class="progress-bar bg-success shadow-sm"
-                                    style="width: {% widthratio user.hp user.max_hp 100 %}%"></div>
+                                    style="width: {% widthratio user.character.hp user.character.max_hp 100 %}%"></div>
                             </div>
                         </div>
                     </div>
@@ -199,24 +222,26 @@
 
                     <!-- Enemy Side -->
                     <div class="col-md-5 text-center">
-                        {% with active_enemy=history.last.entities|dictsort:"active"|last %}
-                        {% if active_enemy and active_enemy.type == 'enemy' %}
+                        {% with last_turn=history|last %}
+                        {% for entity in last_turn.entities %}
+                        {% if entity.active and entity.type == 'enemy' %}
                         <div class="stat-group">
-                            <h6 class="text-danger mb-2">{{ active_enemy.name }}</h6>
+                            <h6 class="text-danger mb-2">{{ entity.name }}</h6>
                             <div class="d-flex justify-content-center gap-3 mb-2 small text-secondary">
-                                <span>HP: {{ active_enemy.hp|default:"?" }}/{{ active_enemy.max_hp|default:"?" }}</span>
-                                <span>AC: {{ active_enemy.ac|default:"?" }}</span>
+                                <span>HP: {{ entity.hp|default:"?" }}/{{ entity.max_hp|default:"?" }}</span>
+                                <span>AC: {{ entity.ac|default:"?" }}</span>
                             </div>
                             <div class="progress"
                                 style="height: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
                                 <div class="progress-bar bg-danger shadow-sm"
-                                    style="width: {% if active_enemy.max_hp > 0 %}{% widthratio active_enemy.hp active_enemy.max_hp 100 %}{% else %}0{% endif %}%">
+                                    style="width: {% if entity.max_hp > 0 %}{% widthratio entity.hp entity.max_hp 100 %}{% else %}100{% endif %}%">
                                 </div>
                             </div>
                         </div>
-                        {% else %}
-                        <div class="text-muted italic small">{% trans "No active target..." %}</div>
                         {% endif %}
+                        {% empty %}
+                        <div class="text-muted italic small">{% trans "No active target..." %}</div>
+                        {% endfor %}
                         {% endwith %}
                     </div>
                 </div>

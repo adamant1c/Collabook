@@ -181,6 +181,7 @@ class InteractionResponse(BaseModel):
     critical_condition: bool = False
     detected_entities: List[Dict[str, Any]] = []
     suggested_actions: List[str] = []
+    player_stats: Optional[Dict[str, Any]] = None
     # Phase 3: LLM can suggest quest completion
     
     class Config:

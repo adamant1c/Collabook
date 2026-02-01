@@ -115,6 +115,9 @@ class Character(Base):
     # Game state summary (moved from Story)
     current_state = Column(Text, nullable=True)
     
+    # Combat State (JSON) - Stores current enemy_id, turn count, logs
+    combat_state = Column(JSON, nullable=True)
+    
     # Survival stats (Phase 5)
     hunger = Column(Integer, default=100)
     thirst = Column(Integer, default=100)
@@ -231,8 +234,11 @@ class Enemy(Base):
     level = Column(Integer, default=1)
     hp = Column(Integer, nullable=False)
     max_hp = Column(Integer, nullable=False)  # For display
-    attack = Column(Integer, nullable=False)
-    defense = Column(Integer, nullable=False)
+    ac = Column(Integer, default=10) # Armor Class
+    attack_bonus = Column(Integer, default=0) # To hit bonus
+    damage_dice = Column(String, default="1d6") # e.g. "1d6+2"
+    attack = Column(Integer, nullable=False) # Legacy field (might be deprecated)
+    defense = Column(Integer, nullable=False) # Legacy field
     
     # Loot rewards
     xp_reward = Column(Integer, default=0)

@@ -81,7 +81,8 @@
             {% if turn.entities %}
             <div class="detected-entities mt-3 d-flex flex-wrap gap-4 justify-content-center">
                 {% for entity in turn.entities %}
-                <div class="entity-card animate-pop-in text-center">
+                <div
+                    class="entity-card animate-pop-in text-center {% if entity.active %}active-combat-target{% endif %}">
                     {% if entity.image_url %}
                     <div class="entity-image-container">
                         <img src="{% if '/static/' in entity.image_url %}{{ entity.image_url }}{% else %}{% static 'images/' %}{{ entity.image_url }}{% endif %}"
@@ -94,6 +95,16 @@
                             {{ entity.name }}
                         </span>
                     </div>
+                    {% if entity.type == 'enemy' and entity.hp is not None %}
+                    <div class="entity-hp mt-2">
+                        <small class="text-secondary">HP: {{ entity.hp }}/{{ entity.max_hp }}</small>
+                        <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
+                            <div class="progress-bar bg-danger"
+                                style="width: {% if entity.max_hp > 0 %}{% widthratio entity.hp entity.max_hp 100 %}{% else %}0{% endif %}%">
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -105,32 +116,126 @@
         {% endif %}
     </div>
 
-    <div class="action-section"
-        style="margin-top: 2rem; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 8px;">
-        <h3 style="margin-top: 0;">
-            ✨
-            {% trans "What do you do?" %}
-        </h3>
+    <div class="action-section" style="margin-top: 2rem;">
 
-        <form method="post" id="action-form" class="mt-3">
-            {% csrf_token %}
-            <div class="form-group mb-3">
-                <label for="user_action" class="mb-2">
-                    {% trans "Describe your action" %}
-                </label>
-                <textarea name="user_action" id="user_action" class="form-control" rows="3"
-                    placeholder="{% trans 'e.g., I cautiously approach the ancient door...' %}" required></textarea>
+        <!-- Action Choices Panel -->
+        <div class="card bg-dark text-light border-gold-dim mb-4 shadow">
+            <div class="card-header border-gold-dim py-2">
+                <h5 class="mb-0" style="font-family: 'Cinzel', serif; color: #d4af37;">
+                    ✨ {% trans "Choose Your Path" %}
+                </h5>
             </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <!-- Suggested Action Buttons -->
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <label class="text-secondary small mb-2 d-block">{% trans "Suggested Actions" %}</label>
+                        <div class="d-grid gap-2">
+                            {% if suggested_actions %}
+                            {% for action in suggested_actions|slice:":2" %}
+                            <button type="button" class="btn btn-outline-gold suggested-action-btn text-start p-3"
+                                onclick="submitAction('{{ action|escapejs }}')">
+                                <span class="badge badge-gold me-2">{{ forloop.counter }}</span> {{ action }}
+                            </button>
+                            {% endfor %}
+                            {% else %}
+                            <p class="text-muted small italic">{% trans "No suggestions available..." %}</p>
+                            {% endif %}
+                        </div>
+                    </div>
 
-            <button type="submit" id="submit-btn" class="btn-gold btn-lg w-100 shadow">
-                🎭
-                {% trans "Take Action" %}
-            </button>
-        </form>
+                    <!-- Free Choice Input -->
+                    <div class="col-md-6">
+                        <form method="post" id="action-form">
+                            {% csrf_token %}
+                            <div class="form-group mb-3">
+                                <label for="user_action" class="text-secondary small mb-2">{% trans "Option 3: Describe your own action" %}</label>
+                                <textarea name="user_action" id="user_action"
+                                    class="form-control bg-black text-light border-gold-dim" rows="3"
+                                    placeholder="{% trans 'e.g., I cautiously approach the ancient door...' %}"
+                                    required></textarea>
+                            </div>
+
+                            <button type="submit" id="submit-btn" class="btn btn-gold w-100 shadow py-2">
+                                🎭 {% trans "Take Action" %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combat UI Panel (Only if active) -->
+        {% if combat_active %}
+        <div class="combat-panel card bg-dark border-danger mb-4 shadow animate-pop-in"
+            style="background: linear-gradient(135deg, rgba(40,0,0,0.8), rgba(0,0,0,0.9)) !important;">
+            <div class="card-header border-danger py-2 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-danger" style="font-family: 'Cinzel', serif;">⚔️ {% trans "Combat Status" %}</h5>
+                <span class="badge bg-danger">{% trans "Active Encounter" %}</span>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <!-- Player Side -->
+                    <div class="col-md-5 text-center">
+                        <div class="stat-group">
+                            <h6 class="text-gold mb-2">{{ user.name }} ({% trans "You" %})</h6>
+                            <div class="d-flex justify-content-center gap-3 mb-2 small text-secondary">
+                                <span>HP: {{ user.hp }}/{{ user.max_hp }}</span>
+                                <span>XP: {{ user.xp }}</span>
+                                <span>LVL: {{ user.level }}</span>
+                            </div>
+                            <div class="progress mb-2"
+                                style="height: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+                                <div class="progress-bar bg-success shadow-sm"
+                                    style="width: {% widthratio user.hp user.max_hp 100 %}%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VS Divider -->
+                    <div class="col-md-2 text-center my-3 my-md-0">
+                        <span class="h4 text-danger" style="font-family: 'Cinzel', serif;">VS</span>
+                    </div>
+
+                    <!-- Enemy Side -->
+                    <div class="col-md-5 text-center">
+                        {% with active_enemy=history.last.entities|dictsort:"active"|last %}
+                        {% if active_enemy and active_enemy.type == 'enemy' %}
+                        <div class="stat-group">
+                            <h6 class="text-danger mb-2">{{ active_enemy.name }}</h6>
+                            <div class="d-flex justify-content-center gap-3 mb-2 small text-secondary">
+                                <span>HP: {{ active_enemy.hp|default:"?" }}/{{ active_enemy.max_hp|default:"?" }}</span>
+                                <span>AC: {{ active_enemy.ac|default:"?" }}</span>
+                            </div>
+                            <div class="progress"
+                                style="height: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+                                <div class="progress-bar bg-danger shadow-sm"
+                                    style="width: {% if active_enemy.max_hp > 0 %}{% widthratio active_enemy.hp active_enemy.max_hp 100 %}{% else %}0{% endif %}%">
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-muted italic small">{% trans "No active target..." %}</div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer border-danger bg-transparent py-1 text-center small text-secondary italic">
+                💰 {% trans "Gold" %}: {{ character.gold }}
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 </div>
 
 <script>
+    function submitAction(text) {
+        document.getElementById('user_action').value = text;
+        document.getElementById('action-form').submit();
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const form = document.getElementById('action-form');
         const overlay = document.getElementById('loading-overlay');
@@ -315,6 +420,31 @@
 
     .animate-pop-in {
         animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .btn-outline-gold {
+        color: #d4af37;
+        border-color: rgba(212, 175, 55, 0.4);
+        background: rgba(212, 175, 55, 0.05);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline-gold:hover {
+        background: rgba(212, 175, 55, 0.15);
+        border-color: #d4af37;
+        color: #fff;
+    }
+
+    .badge-gold {
+        background: #d4af37;
+        color: #000;
+        font-weight: bold;
+    }
+
+    .active-combat-target {
+        border-color: #ff4444 !important;
+        box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
     }
 </style>
 {% endblock %}

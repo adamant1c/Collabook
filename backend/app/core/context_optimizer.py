@@ -118,8 +118,8 @@ Context (JSON):
 {context_json}
 
 Player: "{user_action}"
-
-Respond in 2-3 paragraphs. If quest objective done, end with: "✨ Quest progress!"
+ 
+Respond in JSON format as specified by system prompt.
 """
     
     return prompt

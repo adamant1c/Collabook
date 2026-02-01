@@ -158,7 +158,10 @@ class JourneyView(View):
             return render(request, self.template_name, {
                 'history': history,
                 'character': character,
-                'game_ended': game_ended
+                'user': user,
+                'game_ended': game_ended,
+                'suggested_actions': request.session.get('suggested_actions', []),
+                'combat_active': any(e.get('type') == 'enemy' and e.get('active') for e in (history[-1].get('entities', []) if history else []))
             })
         except Exception as e:
             messages.error(request, str(e))
@@ -193,8 +196,8 @@ class JourneyView(View):
                 'entities': entities
             })
             request.session['history'] = history
+            request.session['suggested_actions'] = response.get('suggested_actions', [])
             
-
             return redirect('world:journey')
         except Exception as e:
             messages.error(request, str(e))

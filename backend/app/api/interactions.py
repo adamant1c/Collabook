@@ -10,6 +10,10 @@ from app.core.llm_client import llm_client
 from app.api.auth import get_current_user
 from app.models.schemas import InteractionRequest, InteractionResponse
 from app.models.db_models import Turn, Character, Story, User, PlayerQuest, QuestStatus, Enemy, NPC
+from app.core.game_rules import GameRules, EnemyTemplates
+import json
+import random
+import re
 
 router = APIRouter(prefix="/interact", tags=["interactions"])
 
@@ -26,9 +30,124 @@ async def create_interaction(
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
     
+    # Initialize response variables
+    suggested_actions = []
+    
+    # Calculate turn number early for combat state
+    max_turn = db.query(Turn).filter(Turn.character_id == character.id).count()
+    turn_number = max_turn + 1
+    
+    # Initialize response variables
+    suggested_actions = []
+    
     # Verify ownership
     if character.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not your character")
+    
+    # ------------------------------------------------------------------
+    # PHASE 1: COMBAT INTERCEPTION (Backend Authority)
+    # ------------------------------------------------------------------
+    combat_log = []
+    directive_prompt = ""
+    combat_active = False
+    
+    # Check if character is currently in combat
+    if character.combat_state:
+        combat_active = True
+        state = character.combat_state
+        enemy_id = state.get('enemy_id')
+        enemy = db.query(Enemy).filter(Enemy.id == enemy_id).first()
+        
+        if not enemy:
+            # Fallback if enemy deleted
+            character.combat_state = None
+            combat_active = False
+        else:
+            # Resolve Combat Round
+            # 1. Parse User Action (basic keyword matching for now)
+            action_type = "attack"
+            if "fuga" in interaction.user_action.lower() or "flee" in interaction.user_action.lower():
+                action_type = "flee"
+            elif "pozione" in interaction.user_action.lower() or "potion" in interaction.user_action.lower():
+                action_type = "heal"
+                
+            # 2. Execute Rules
+            # Reconstruct temporary stats for calculation
+            player_stats = {
+                "attack_bonus": current_user.strength // 2, # Simplified D&D mod
+                "ac": 10 + (current_user.dexterity // 2),
+                "dmg_bonus": current_user.strength // 2
+            }
+            # Use enemy current HP from state, or max if not set
+            current_enemy_hp = state.get('enemy_hp', enemy.hp)
+            
+            enemy_stats = {
+                "name": enemy.name,
+                "ac": enemy.ac,
+                "hp": current_enemy_hp,
+                "attack_bonus": enemy.attack_bonus
+            }
+            
+            round_result = GameRules.resolve_combat_round(player_stats, enemy_stats, action_type)
+            
+            # 3. Apply Results to DB/State
+            # Player Damage
+            if round_result['enemy_dmg'] > 0:
+                current_user.hp = max(0, current_user.hp - round_result['enemy_dmg'])
+            
+            # Enemy Damage
+            if round_result['player_dmg'] > 0:
+                current_enemy_hp -= round_result['player_dmg']
+                state['enemy_hp'] = current_enemy_hp
+            
+            # 4. Check for Win/Loss
+            if current_user.hp <= 0:
+                # Player Died
+                character.combat_state = None # End combat
+                character.deaths += 1
+                character.status = "dead" # Or handle resurrection logic
+                directive_prompt = f"""
+                SYSTEM DIRECTIVE: The player has DIED in combat against {enemy.name}.
+                Enemy HP remaining: {current_enemy_hp}.
+                Narrate the hero's tragic fall.
+                """
+            elif current_enemy_hp <= 0:
+                # Victory!
+                character.combat_state = None
+                xp_gain = enemy.xp_reward
+                current_user.xp += xp_gain
+                
+                # Check Level Up
+                new_level = GameRules.get_level_from_xp(current_user.xp)
+                level_up_msg = ""
+                if new_level > current_user.level:
+                    current_user.level = new_level
+                    current_user.max_hp += 10 # Simple level up bonus
+                    current_user.hp = current_user.max_hp # Full heal on level up? Or just increase cap? Let's full heal.
+                    level_up_msg = f"LEVEL UP! You are now level {new_level}!"
+                
+                directive_prompt = f"""
+                SYSTEM DIRECTIVE: Information provided by Game Engine.
+                Player DEFEATED the {enemy.name}!
+                Combat Log: {'. '.join(round_result['log'])}
+                Rewards: +{xp_gain} XP. {level_up_msg}
+                
+                Narrate the victory and the loot found.
+                """
+            else:
+                # Fight continues
+                character.combat_state = state # Save updated state
+                # db_models_Enemy = enemy # Keep reference if needed
+                directive_prompt = f"""
+                SYSTEM DIRECTIVE: COMBAT ROUND RESOLVED BY ENGINE.
+                Player Status: {current_user.hp}/{current_user.max_hp} HP
+                Enemy Status: {enemy.name} has {current_enemy_hp} HP left.
+                
+                Round Details:
+                {'. '.join(round_result['log'])}
+                
+                Narrate this specific exchange of blows based on the logs above. Do NOT invent new damage.
+                """
     
     # Phase 6: Content moderation - validate user input
     validation_result = validate_user_input(interaction.user_action)
@@ -83,27 +202,97 @@ async def create_interaction(
     optimized_prompt = create_optimized_prompt(compact_context, interaction.user_action)
     
     # Determine system prompt based on language
-    system_prompt = "You are a Dungeon Master. Respond in 2-3 paragraphs."
+    system_prompt = "You are a Dungeon Master. Respond in JSON format."
     if interaction.language and interaction.language.lower().startswith("it"):
-        system_prompt = """Sei un Dungeon Master italiano. IMPORTANTE: Devi scrivere SOLO in ITALIANO.
-
-⚠️ ATTENZIONE - REGOLE OBBLIGATORIE:
-- Scrivi ESCLUSIVAMENTE in italiano puro.
-- È VIETATO usare parole o frasi inglesi.
-- NON includere etichette, ritorni a capo per titoli o introduzioni in inglese.
-- La narrazione deve essere coinvolgente e usare il "tu" per il personaggio.
-
-Rispondi direttamente in 2-3 paragrafi."""
+        json_desc = """
+        IMPORTANTE: Rispondi SOLO in formato JSON valido.
+        Struttura:
+        {
+            "narration": "testo della storia...",
+            "event": "start_combat" | null,
+            "enemy": "nome_nemico" | null,
+            "suggested_actions": ["azione 1", "azione 2"]
+        }
+        """
+        system_prompt = f"""Sei un Dungeon Master italiano. {json_desc}
+        
+        REGOLE:
+        1. La narrazione deve essere in ITALIANO puro.
+        2. Se l'utente vuole combattere, usa 'event': 'start_combat' e metti il nome del nemico.
+        3. Se ricevi una 'SYSTEM DIRECTIVE', usala come verità assoluta per la narrazione.
+        4. Includi SEMPRE 2 azioni suggerite plausibili nel campo 'suggested_actions'.
+        5. NON inventare stats del giocatore nella narrazione, usa quelle fornite nel contesto.
+        """
     
     # Generate narration with minimal tokens
     try:
-        narration = await llm_client.generate(
+        raw_response = await llm_client.generate(
             system_prompt=system_prompt,
             user_message=optimized_prompt
         )
+        
+        # Parse JSON response
+        try:
+            # Try to find JSON block
+            json_match = re.search(r'\{.*\}', raw_response, re.DOTALL)
+            if json_match:
+                try:
+                    response_data = json.loads(json_match.group(0))
+                except json.JSONDecodeError:
+                    # If direct parsing fails, try cleaning the match
+                    cleaned_json = json_match.group(0).replace('\n', '').replace('\r', '')
+                    # Remove potential trailing commas before closing braces
+                    cleaned_json = re.sub(r',\s*\}', '}', cleaned_json)
+                    cleaned_json = re.sub(r',\s*\]', ']', cleaned_json)
+                    response_data = json.loads(cleaned_json)
+
+                narration = response_data.get("narration", raw_response)
+                suggested_actions = response_data.get("suggested_actions", [])
+                event = response_data.get("event")
+                enemy_name = response_data.get("enemy")
+                
+                # Handle Start Combat Trigger
+                if event == "start_combat" and enemy_name and not character.combat_state:
+                    template = EnemyTemplates.get_template(enemy_name)
+                    new_enemy = Enemy(
+                        story_id=story.id,
+                        name=template['name'],
+                        hp=template['hp'],
+                        max_hp=template['hp'],
+                        ac=template['ac'],
+                        attack_bonus=template['attack_bonus'],
+                        xp_reward=template['xp_reward'],
+                        level=template['level'],
+                        damage_dice="1d6", attack=0, defense=0
+                    )
+                    db.add(new_enemy)
+                    db.flush()
+                    character.combat_state = {
+                        "enemy_id": new_enemy.id,
+                        "enemy_hp": new_enemy.hp,
+                        "start_turn": turn_number
+                    }
+                    combat_active = True
+                    # Do not append (COMBAT STARTED!) to narration, the UI will handle it
+            else:
+                # If no JSON block but looks like it might be JSON-ish, try to extract narration
+                if '"narration":' in raw_response:
+                    nar_match = re.search(r'"narration":\s*"([^"]*)"', raw_response)
+                    if nar_match:
+                        narration = nar_match.group(1)
+                    else:
+                        narration = raw_response
+                else:
+                    narration = raw_response
+                suggested_actions = ["Attacca", "Difenditi"]
+        except Exception as e:
+            print(f"⚠️ JSON Parsing Error: {e}")
+            narration = raw_response
+            suggested_actions = []
+            
     except Exception as e:
         print(f"❌ Critical LLM Error: {e}")
-        narration = "⚠️ (System) The Dungeon Master is temporarily unavailable. Please try your action again in a moment."
+        narration = "⚠️ (System) The Dungeon Master is temporarily unavailable."
     
     # Phase 6: Sanitize LLM output
     narration, was_sanitized = sanitize_llm_output(narration)
@@ -116,9 +305,7 @@ Rispondi direttamente in 2-3 paragrafi."""
     if "✨" in narration or "quest" in narration.lower() and "complete" in narration.lower():
         quest_hint = "Quest progress detected! Check your active quests."
     
-    # Calculate turn number
-    max_turn = db.query(Turn).filter(Turn.character_id == character.id).count()
-    turn_number = max_turn + 1
+    # Turn creation logic proceeds...
     
     # Create turn
     db_turn = Turn(
@@ -184,27 +371,21 @@ Rispondi direttamente in 2-3 paragrafi."""
     db.commit()
     db.refresh(db_turn)
     
-    # Phase 7: Entity detection in narration
+    # Return Response with Entities (Pre-detected or from state)
     detected_entities = []
-    
-    # Check for Enemies
-    for enemy in story.enemies:
-        if enemy.name.lower() in narration.lower():
+    if combat_active:
+        enemy_id = character.combat_state.get('enemy_id')
+        current_enemy = db.query(Enemy).filter(Enemy.id == enemy_id).first()
+        if current_enemy:
             detected_entities.append({
                 "type": "enemy",
-                "name": enemy.name,
-                "image_url": enemy.image_url
+                "name": current_enemy.name,
+                "hp": character.combat_state.get('enemy_hp'), 
+                "max_hp": current_enemy.max_hp,
+                "ac": current_enemy.ac,
+                "active": True
             })
-            
-    # Check for NPCs
-    for npc in story.npcs:
-        if npc.name.lower() in narration.lower():
-            detected_entities.append({
-                "type": "npc",
-                "name": npc.name,
-                "image_url": npc.image_url
-            })
-    
+
     return InteractionResponse(
         turn_id=db_turn.id,
         narration=narration,
@@ -212,5 +393,6 @@ Rispondi direttamente in 2-3 paragrafi."""
         quest_hint=quest_hint,
         survival_warnings=survival_result.get("warnings", []),
         critical_condition=survival_result.get("critical", False),
-        detected_entities=detected_entities
+        detected_entities=detected_entities,
+        suggested_actions=suggested_actions
     )

@@ -62,7 +62,12 @@ class Character(models.Model):
     user = models.ForeignKey(BackendUser, related_name='characters', db_column='user_id', on_delete=models.DO_NOTHING)
     story = models.ForeignKey(Story, related_name='characters', db_column='story_id', on_delete=models.DO_NOTHING)
     insertion_point = models.TextField(null=True, blank=True)
-    status = models.CharField(max_length=50, default='active')
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('dead', 'Dead'),
+        ('completed', 'Completed'),
+    ]
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='active')
     
     # Game state summary (moved from Story)
     current_state = models.TextField(null=True, blank=True)
@@ -87,6 +92,38 @@ class Character(models.Model):
 
     def __str__(self):
         return f"{self.user.username} in {self.story.title}"
+    def save(self, *args, **kwargs):
+        if self.pk:
+            try:
+                old_instance = Character.objects.get(pk=self.pk)
+                # If status changes from something else to active, cleanup data
+                if old_instance.status != 'active' and self.status == 'active':
+                    self.cleanup_for_restart()
+            except Character.DoesNotExist:
+                # New object being saved with a predefined PK
+                pass
+        super().save(*args, **kwargs)
+
+    def cleanup_for_restart(self):
+        """Delete turns and reset survival stats for a fresh start."""
+        # Delete turns
+        Turn.objects.filter(character=self).delete()
+        # Reset survival stats
+        self.hunger = 100
+        self.thirst = 100
+        self.fatigue = 0
+        self.days_survived = 0
+        self.current_state = None
+        self.insertion_point = None
+        self.gold = 0
+        # XP and Level might also be reset if desired, but request implies starting from zero
+        # Request says "riparte con un'avventura da zero come ora e quindi i dati della vecchia andrebbero cancellati"
+        # Since BackendUser holds stats like hp, xp, level, we might need to reset those too if they are linked.
+        # However, BackendUser seems to be shared across characters? (ForeignKey user_id)
+        # Looking at models.py, stats are in BackendUser.
+        # But wait, Character has hunger/thirst/fatigue.
+        # Let's also check if we should reset the user stats.
+        # For now, let's keep it to character-specific data.
 
 class Turn(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)

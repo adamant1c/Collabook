@@ -44,7 +44,7 @@
     </div>
 
     <div class="journey-content" id="journey-content">
-        {% if not history %}
+        {% if not history and not is_dead %}
         <div class="journey-description">
             <strong>
                 {% trans "Your Arrival" %}
@@ -141,6 +141,7 @@
     <div class="action-section" style="margin-top: 2rem;">
 
         <!-- Action Choices Panel -->
+        {% if not is_dead %}
         <div class="card bg-dark text-light border-gold-dim mb-4 shadow">
             <div class="card-header border-gold-dim py-2">
                 <h5 class="mb-0" style="font-family: 'Cinzel', serif; color: #d4af37;">
@@ -249,6 +250,24 @@
             <div class="card-footer border-danger bg-transparent py-1 text-center small text-secondary italic">
                 💰 {% trans "Gold" %}: {{ character.gold }}
             </div>
+        </div>
+        {% endif %}
+        {% else %}
+        <!-- Restart Request Panel -->
+        <div class="card bg-dark text-light border-gold-dim mb-4 shadow text-center p-4">
+            <h3 style="font-family: 'Cinzel', serif; color: #d4af37;" class="mb-3">
+                ⚖️ {% trans "Adventure Finished" %}
+            </h3>
+            <p class="mb-4">
+                {% trans "Your journey in this world has come to an end. You can request to start a new adventure from
+                the administrator." %}
+            </p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" name="action" value="request_restart" class="btn btn-gold btn-lg shadow">
+                    ✨ {% trans "Richiedi di iniziare una nuova storia in questo mondo" %}
+                </button>
+            </form>
         </div>
         {% endif %}
 

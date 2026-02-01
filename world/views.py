@@ -18,6 +18,62 @@ from core.api_client import CollabookAPI
 # I accessed `character.user.username`. That should work if `BackendUser` is defined in `game.models` which it is.
 
 
+import json
+import re
+
+def clean_narration(text):
+    """
+    Remove JSON metadata and other non-narrative elements from the narration text.
+    Handle cases where the LLM might have returned a raw JSON string or embedded metadata.
+    """
+    if not text:
+        return text
+    
+    # Step 1: Try to parse as JSON if it looks like one
+    trimmed = text.strip()
+    if trimmed.startswith('{') and trimmed.endswith('}'):
+        try:
+            data = json.loads(trimmed)
+            if isinstance(data, dict):
+                # Priortize common fields that might contain the narration
+                for field in ['narration', 'description', 'text', 'message']:
+                    if field in data and data[field]:
+                        return data[field]
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    # Step 2: Handle mixed strings where JSON is appended or embedded
+    # Remove common JSON keys and their values
+    cleanup_patterns = [
+        r',?\s*"suggested_actions":\s*\[.*?\]',
+        r',?\s*"suggested_actions":\s*\{.*?\}',
+        r',?\s*"event":\s*[^,}\]]+',
+        r',?\s*"enemy":\s*[^,}\]]+',
+        r',?\s*"status":\s*[^,}\]]+',
+        r',?\s*"metadata":\s*\{.*?\}',
+    ]
+    
+    cleaned_text = text
+    for pattern in cleanup_patterns:
+        cleaned_text = re.sub(pattern, '', cleaned_text, flags=re.DOTALL)
+    
+    # Step 3: Clean up resulting punctuation/whitespace
+    # Remove empty braces if they were left over
+    cleaned_text = re.sub(r'\{\s*\}', '', cleaned_text)
+    
+    # Remove trailing braces, stray commas, and extra whitespace
+    cleaned_text = cleaned_text.strip()
+    if cleaned_text.endswith('}') or cleaned_text.endswith(']'):
+        cleaned_text = cleaned_text[:-1].strip()
+    if cleaned_text.startswith('{') or cleaned_text.startswith('['):
+        cleaned_text = cleaned_text[1:].strip()
+        
+    cleaned_text = re.sub(r',\s*$', '', cleaned_text) # Remove trailing comma
+    cleaned_text = re.sub(r'\s+', ' ', cleaned_text) # Normalize whitespace
+    cleaned_text = cleaned_text.strip()
+    
+    return cleaned_text
+
 def translate_story_data(story):
     """Translate story title, genre and description if in known list or if DB has translation"""
     from django.utils.translation import get_language
@@ -160,6 +216,7 @@ class JourneyView(View):
                 'character': character,
                 'user': user,
                 'game_ended': game_ended,
+                'is_dead': db_character.status == 'dead' if 'db_character' in locals() else False,
                 'suggested_actions': request.session.get('suggested_actions', []),
                 'combat_active': any(e.get('type') == 'enemy' and e.get('active') for e in (history[-1].get('entities', []) if history else []))
             })
@@ -167,10 +224,48 @@ class JourneyView(View):
             messages.error(request, str(e))
             return redirect('world:selection')
 
+            return redirect('world:journey')
+        except Exception as e:
+            messages.error(request, str(e))
+            return redirect('world:journey')
+
+    def request_restart(self, request):
+        if 'token' not in request.session:
+            return redirect('accounts:login')
+        
+        try:
+            from django.core.mail import send_mail
+            from game.models import Character as DBCharacter
+            character_id = request.session.get('character_id')
+            db_character = DBCharacter.objects.get(id=character_id)
+            user = db_character.user
+            story = db_character.story
+
+            subject = f"Richiesta Nuova Storia: {user.username} - {story.title}"
+            message = f"L'utente {user.username} ({user.email}) ha richiesto di iniziare una nuova storia nel mondo '{story.title}'.\n\nID Personaggio: {character_id}\nID Mondo: {story.id}"
+            
+            send_mail(
+                subject,
+                message,
+                'noreply@collabook.com',
+                ['mycollabook@gmail.com'],
+                fail_silently=False,
+            )
+            
+            messages.success(request, _("Request sent to administrator. You will be notified when the new story is ready."))
+            return redirect('world:journey')
+        except Exception as e:
+            messages.error(request, f"Error sending request: {str(e)}")
+            return redirect('world:journey')
+
     def post(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
         
+        action = request.POST.get('action')
+        if action == 'request_restart':
+            return self.request_restart(request)
+
         user_action = request.POST.get('user_action')
         if not user_action:
             return redirect('world:journey')
@@ -199,6 +294,11 @@ class JourneyView(View):
             request.session['history'] = history
             request.session['suggested_actions'] = response.get('suggested_actions', [])
             
+            # Clean narration in history
+            if history:
+                history[-1]['narration'] = clean_narration(history[-1]['narration'])
+                request.session['history'] = history
+
             return redirect('world:journey')
         except Exception as e:
             messages.error(request, str(e))
@@ -234,6 +334,10 @@ class AdventureSummaryView(View):
             # Fetch turns ordered by turn number
             turns = Turn.objects.filter(character_id=character_id).order_by('turn_number')
             
+            # Clean narration for each turn
+            for turn in turns:
+                turn.narration = clean_narration(turn.narration)
+
             return render(request, self.template_name, {
                 'story': story,
                 'character': character,

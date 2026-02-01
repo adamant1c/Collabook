@@ -72,7 +72,11 @@
 
             {% if story.existing_char %}
             <button type="submit" name="action" value="continue" class="btn-gold shadow">
+                {% if story.existing_char.status == 'dead' %}
+                {% trans "Avventura terminata" %}
+                {% else %}
                 {% trans "Continue Adventure" %}
+                {% endif %}
             </button>
             {% else %}
             <button type="submit" name="action" value="join" class="btn-gold shadow">
@@ -123,7 +127,11 @@
 
             {% if story.existing_char %}
             <button type="submit" name="action" value="continue" class="btn-gold shadow">
+                {% if story.existing_char.status == 'dead' %}
+                {% trans "Avventura terminata" %}
+                {% else %}
                 {% trans "Continue Adventure" %}
+                {% endif %}
             </button>
             {% else %}
             <button type="submit" name="action" value="join" class="btn-gold shadow">

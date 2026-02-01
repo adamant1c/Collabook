@@ -279,3 +279,19 @@ LOGGING = {
         },
     },
 }
+# ========================================
+# Email Configuration
+# ========================================
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('SMTP_PORT', 587))
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('SMTP_USERNAME', 'mycollabook@gmail.com')
+EMAIL_HOST_PASSWORD = os.getenv('SMTP_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('SMTP_SENDER', 'mycollabook@gmail.com')
+
+# If in development, we could use console backend
+if ENVIRONMENT == 'development':
+    # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    pass

@@ -29,17 +29,35 @@ def clean_narration(text):
     if not text:
         return text
     
-    # Step 1: Remove Markdown code blocks if present
-    # Matches ```json { ... } ``` or just ``` { ... } ```
+    # Step 1: Remove Markdown code blocks if present (handle both complete and incomplete)
+    # First try to match complete code blocks
     text = re.sub(r'```(?:json)?\s*(\{.*?\})\s*```', r'\1', text, flags=re.DOTALL).strip()
+    
+    # Handle incomplete code blocks (no closing ```) - strip the opening
+    text = re.sub(r'```(?:json)?\s*', '', text, flags=re.DOTALL).strip()
+    # Also strip any trailing ``` that might be left
+    text = re.sub(r'\s*```\s*$', '', text, flags=re.DOTALL).strip()
 
     # Step 2: Try to parse as JSON if it looks like one
-    if (text.startswith('{') and text.endswith('}')) or (text.startswith('[') and text.endswith(']')):
+    if text.startswith('{'):
         try:
+            # Try to find and extract just the "response" field value directly using regex
+            # This works even if the JSON is truncated after the response field
+            response_match = re.search(r'"response"\s*:\s*"((?:[^"\\]|\\.)*)(?:"|$)', text, flags=re.DOTALL)
+            if response_match:
+                extracted = response_match.group(1)
+                # Unescape common escape sequences
+                extracted = extracted.replace('\\"', '"').replace('\\n', '\n').replace('\\t', '\t')
+                return extracted.strip()
+            
             # Clean up potential trailing commas and newlines before parsing
-            # This is a bit risky but helps with slightly malformed LLM JSON
             json_text = re.sub(r',\s*\}', '}', text)
             json_text = re.sub(r',\s*\]', ']', json_text)
+            
+            # Try to fix truncated JSON by closing open structures
+            open_braces = json_text.count('{') - json_text.count('}')
+            open_brackets = json_text.count('[') - json_text.count(']')
+            json_text = json_text + '}' * max(0, open_braces) + ']' * max(0, open_brackets)
             
             data = json.loads(json_text)
             
@@ -76,19 +94,27 @@ def clean_narration(text):
                         return extracted.strip()
                     
         except (json.JSONDecodeError, ValueError):
-            pass
+            # If JSON parsing fails, try regex extraction as fallback
+            response_match = re.search(r'"response"\s*:\s*"((?:[^"\\]|\\.)*)(?:"|$)', text, flags=re.DOTALL)
+            if response_match:
+                extracted = response_match.group(1)
+                extracted = extracted.replace('\\"', '"').replace('\\n', '\n').replace('\\t', '\t')
+                return extracted.strip()
 
     # Step 3: Handle mixed strings or legacy cleanup
     # Remove common JSON keys and their values if parsing failed
     cleanup_patterns = [
-        r',?\s*"suggested_actions":\s*\[.*?\]',
-        r',?\s*"suggested_actions":\s*\{.*?\}',
-        r',?\s*"player_stats":\s*\{.*?\}',
-        r',?\s*"world":\s*\{.*?\}',
-        r',?\s*"event":\s*[^,}\]]+',
-        r',?\s*"enemy":\s*[^,}\]]+',
-        r',?\s*"status":\s*[^,}\]]+',
-        r',?\s*"metadata":\s*\{.*?\}',
+        r',?\s*"suggested_actions"\s*:\s*\[.*?\]',
+        r',?\s*"suggested_actions"\s*:\s*\{.*?\}',
+        r',?\s*"player_stats"\s*:\s*\{.*?\}',
+        r',?\s*"world"\s*:\s*\{.*?\}',
+        r',?\s*"event"\s*:\s*[^,}\]]+',
+        r',?\s*"enemy"\s*:\s*[^,}\]]+',
+        r',?\s*"status"\s*:\s*[^,}\]]+',
+        r',?\s*"metadata"\s*:\s*\{.*?\}',
+        r',?\s*"char"\s*:\s*\{[^}]*\}',
+        r',?\s*"history"\s*:\s*\[[^\]]*\]',
+        r',?\s*"entities"\s*:\s*\{[^}]*(?:\{[^}]*\}[^}]*)*\}?',
     ]
     
     cleaned_text = text
@@ -102,8 +128,10 @@ def clean_narration(text):
     
     # Remove wrapping braces if they still exist (often found in "mixed" responses)
     cleaned_text = cleaned_text.strip()
-    if cleaned_text.startswith('{') and cleaned_text.endswith('}'):
-        cleaned_text = cleaned_text[1:-1].strip()
+    if cleaned_text.startswith('{') and (cleaned_text.endswith('}') or not '}' in cleaned_text):
+        cleaned_text = re.sub(r'^\{', '', cleaned_text)
+        cleaned_text = re.sub(r'\}$', '', cleaned_text)
+        cleaned_text = cleaned_text.strip()
         
     # Remove lingering JSON keys like "narration": or "message":
     cleaned_text = re.sub(r'^\s*"(?:narration|message|description|response)"\s*:\s*', '', cleaned_text)

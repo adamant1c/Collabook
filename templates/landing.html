@@ -131,6 +131,23 @@
         margin-top: 8px;
         color: #e8d4a0;
     }
+
+    .btn-coffee {
+        background: linear-gradient(135deg, #ff813f, #ffdd00);
+        color: #000;
+        border: none;
+        font-weight: 700;
+        text-shadow: none;
+        box-shadow: 0 4px 15px rgba(255, 129, 63, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .btn-coffee:hover {
+        background: linear-gradient(135deg, #ffdd00, #ff813f);
+        color: #000;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 129, 63, 0.6);
+    }
 </style>
 
 <div class="hero-section">
@@ -293,5 +310,19 @@
         {% endblocktrans %}
     </p>
     <a href="{% url 'accounts:register' %}" class="btn btn-gold btn-lg px-5">{% trans "Create Your Hero" %}</a>
+</div>
+
+<div class="text-center mb-5">
+    <h2 class="section-title">{% trans "Support the Project" %}</h2>
+    <p class="mb-4">
+        {% blocktrans trimmed %}
+        If you enjoy Collabook and want to help keep the servers running, consider buying me a coffee!
+        Your support helps us continue improving the game and creating new adventures.
+        {% endblocktrans %}
+    </p>
+    <a href="https://paypal.me/APerotti563" target="_blank" rel="noopener noreferrer"
+        class="btn btn-coffee btn-lg px-4">
+        ☕ {% trans "Buy Me a Coffee" %}
+    </a>
 </div>
 {% endblock %}

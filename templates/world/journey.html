@@ -43,189 +43,208 @@
         </div>
     </div>
 
-    <div class="journey-content" id="journey-content">
-        {% if not history and not is_dead %}
-        <div class="journey-description">
-            <strong>
-                {% trans "Your Arrival" %}
-            </strong>
-            <div class="mt-2" style="line-height: 1.6;">
-                {% if character.insertion_point %}
-                {{ character.insertion_point }}
+    <div class="row">
+        <!-- Main content column -->
+        <div class="{% if combat_active %}col-lg-8{% else %}col-12{% endif %}">
+            <div class="journey-content" id="journey-content">
+                {% if not history and not is_dead %}
+                <div class="journey-description">
+                    <strong>{% trans "Your Arrival" %}</strong>
+                    <div class="mt-2" style="line-height: 1.6;">
+                        {% if character.insertion_point %}
+                        {{ character.insertion_point }}
+                        {% else %}
+                        {% trans "You enter the world..." %}
+                        {% endif %}
+                    </div>
+                </div>
                 {% else %}
-                {% trans "You enter the world..." %}
+                {% for turn in history %}
+                <div class="turn-container" {% if forloop.last %}id="latest-turn" {% endif %}
+                    style="margin-bottom: 2rem;">
+                    <div style="margin-bottom: 0.5rem;">
+                        <strong>{% trans "Your Action" %}:</strong>
+                        <div
+                            style="font-style: italic; color: var(--text-secondary); padding-left: 1rem; border-left: 2px solid var(--gold-dim); margin-top: 0.5rem;">
+                            {{ turn.action }}
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <strong>{% trans "The World Responds" %}:</strong>
+                        <div class="llm-response mt-2">{{ turn.narration|safe }}</div>
+                    </div>
+
+                    {% if turn.player_stats %}
+                    <div class="turn-stats-snapshot mt-3 p-2 rounded"
+                        style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.1);">
+                        <div class="d-flex flex-wrap gap-3 small text-secondary align-items-center">
+                            <span class="text-gold">📊 {% trans "Snapshot" %}:</span>
+                            <span>❤️ HP: {{ turn.player_stats.hp }}/{{ turn.player_stats.max_hp }}</span>
+                            <span>🎖️ LVL: {{ turn.player_stats.level }}</span>
+                            <span>✨ XP: {{ turn.player_stats.xp }}</span>
+                            <span>💰 {% trans "Gold" %}: {{ turn.player_stats.gold }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if turn.entities %}
+                    <div class="detected-entities mt-3 d-flex flex-wrap gap-4 justify-content-center">
+                        {% for entity in turn.entities %}
+                        <div
+                            class="entity-card animate-pop-in text-center {% if entity.active %}active-combat-target{% endif %}">
+                            {% if entity.image_url %}
+                            <div class="entity-image-container">
+                                <img src="{% if '/static/' in entity.image_url %}{{ entity.image_url }}{% else %}{% static 'images/' %}{{ entity.image_url }}{% endif %}"
+                                    alt="{{ entity.name }}" class="entity-image shadow">
+                            </div>
+                            {% else %}
+                            <div
+                                class="entity-image-container d-flex align-items-center justify-content-center bg-dark">
+                                <span class="h1">{% if entity.type == 'enemy' %}💀{% else %}👤{% endif %}</span>
+                            </div>
+                            {% endif %}
+                            <div class="entity-label mt-2 text-center">
+                                <span
+                                    class="badge {% if entity.type == 'enemy' %}badge-enemy{% else %}badge-npc{% endif %}">
+                                    {% if entity.type == 'enemy' %}💀{% else %}👤{% endif %} {{ entity.name }}
+                                </span>
+                            </div>
+                            {% if entity.hp is not None %}
+                            <div class="entity-hp mt-2">
+                                <small class="text-secondary">HP: {{ entity.hp }}/{{ entity.max_hp|default:entity.hp
+                                    }}</small>
+                                <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
+                                    <div class="progress-bar bg-danger"
+                                        style="width: {% if entity.max_hp > 0 %}{% widthratio entity.hp entity.max_hp 100 %}{% else %}100{% endif %}%">
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if entity.ac %}
+                            <div class="entity-ac mt-1 small text-secondary">🛡️ AC: {{ entity.ac }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;">
+                </div>
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="action-section" style="margin-top: 2rem;">
+                {% if not is_dead %}
+                <div class="card bg-dark text-light border-gold-dim mb-4 shadow">
+                    <div class="card-header border-gold-dim py-2">
+                        <h5 class="mb-0" style="font-family: 'Cinzel', serif; color: #d4af37;">✨ {% trans "Choose Your
+                            Path" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                <label class="text-secondary small mb-2 d-block">{% trans "Suggested Actions" %}</label>
+                                <div class="d-grid gap-2">
+                                    {% if suggested_actions %}
+                                    {% for action in suggested_actions|slice:":2" %}
+                                    <button type="button"
+                                        class="btn btn-outline-gold suggested-action-btn text-start p-3"
+                                        onclick="submitAction('{{ action|escapejs }}')">
+                                        <span class="badge badge-gold me-2">{{ forloop.counter }}</span> {{ action }}
+                                    </button>
+                                    {% endfor %}
+                                    {% else %}
+                                    <p class="text-muted small italic">{% trans "No suggestions available..." %}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <form method="post" id="action-form">
+                                    {% csrf_token %}
+                                    <div class="form-group mb-3">
+                                        <label for="user_action" class="text-secondary small mb-2">{% trans "Option 3:
+                                            Describe your own action" %}</label>
+                                        <textarea name="user_action" id="user_action"
+                                            class="form-control bg-black text-light border-gold-dim" rows="3"
+                                            placeholder="{% trans 'e.g., I cautiously approach the ancient door...' %}"
+                                            required></textarea>
+                                    </div>
+                                    <button type="submit" id="submit-btn" class="btn btn-gold w-100 shadow py-2">🎭 {%
+                                        trans "Take Action" %}</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="card bg-dark text-light border-gold-dim mb-4 shadow text-center p-4">
+                    <h3 style="font-family: 'Cinzel', serif; color: #d4af37;" class="mb-3">⚖️ {% trans "Adventure
+                        Finished" %}</h3>
+                    <p class="mb-4">{% trans "Your journey in this world has come to an end. You can request to start a
+                        new adventure from the administrator." %}</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="request_restart" class="btn btn-gold btn-lg shadow">✨
+                            {% trans "Richiedi di iniziare una nuova storia in questo mondo" %}</button>
+                    </form>
+                </div>
                 {% endif %}
             </div>
         </div>
-        {% else %}
-        {% for turn in history %}
-        <div class="turn-container" {% if forloop.last %}id="latest-turn" {% endif %} style="margin-bottom: 2rem;">
-            <div style="margin-bottom: 0.5rem;">
-                <strong>
-                    {% trans "Your Action" %}:
-                </strong>
-                <div
-                    style="font-style: italic; color: var(--text-secondary); padding-left: 1rem; border-left: 2px solid var(--gold-dim); margin-top: 0.5rem;">
-                    {{ turn.action }}
-                </div>
-            </div>
-            <div class="mt-3">
-                <strong>
-                    {% trans "The World Responds" %}:
-                </strong>
-                <div class="llm-response mt-2">
-                    {{ turn.narration|safe }}
-                </div>
-            </div>
 
-            {% if turn.player_stats %}
-            <div class="turn-stats-snapshot mt-3 p-2 rounded"
-                style="background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.1);">
-                <div class="d-flex flex-wrap gap-3 small text-secondary align-items-center">
-                    <span class="text-gold">📊 {% trans "Snapshot" %}:</span>
-                    <span>❤️ HP: {{ turn.player_stats.hp }}/{{ turn.player_stats.max_hp }}</span>
-                    <span>🎖️ LVL: {{ turn.player_stats.level }}</span>
-                    <span>✨ XP: {{ turn.player_stats.xp }}</span>
-                    <span>💰 {% trans "Gold" %}: {{ turn.player_stats.gold }}</span>
-                </div>
-            </div>
-            {% endif %}
-
-            {% if turn.entities %}
-            <div class="detected-entities mt-3 d-flex flex-wrap gap-4 justify-content-center">
-                {% for entity in turn.entities %}
-                <div
-                    class="entity-card animate-pop-in text-center {% if entity.active %}active-combat-target{% endif %}">
-                    {% if entity.image_url %}
-                    <div class="entity-image-container">
-                        <img src="{% if '/static/' in entity.image_url %}{{ entity.image_url }}{% else %}{% static 'images/' %}{{ entity.image_url }}{% endif %}"
-                            alt="{{ entity.name }}" class="entity-image shadow">
-                    </div>
-                    {% else %}
-                    <div class="entity-image-container d-flex align-items-center justify-content-center bg-dark">
-                        <span class="h1">{% if entity.type == 'enemy' %}💀{% else %}👤{% endif %}</span>
-                    </div>
-                    {% endif %}
-                    <div class="entity-label mt-2 text-center">
-                        <span class="badge {% if entity.type == 'enemy' %}badge-enemy{% else %}badge-npc{% endif %}">
-                            {% if entity.type == 'enemy' %}💀{% else %}👤{% endif %}
-                            {{ entity.name }}
-                        </span>
-                    </div>
-                    {% if entity.hp is not None %}
-                    <div class="entity-hp mt-2">
-                        <small class="text-secondary">HP: {{ entity.hp }}/{{ entity.max_hp|default:entity.hp }}</small>
-                        <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
-                            <div class="progress-bar bg-danger"
-                                style="width: {% if entity.max_hp > 0 %}{% widthratio entity.hp entity.max_hp 100 %}{% else %}100{% endif %}%">
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
-                    {% if entity.ac %}
-                    <div class="entity-ac mt-1 small text-secondary">
-                        🛡️ AC: {{ entity.ac }}
-                    </div>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            <hr style="border-color: rgba(255,255,255,0.1); margin: 1.5rem 0;">
-        </div>
-        {% endfor %}
-        {% endif %}
-    </div>
-
-    <div class="action-section" style="margin-top: 2rem;">
-
-        <!-- Action Choices Panel -->
-        {% if not is_dead %}
-        <div class="card bg-dark text-light border-gold-dim mb-4 shadow">
-            <div class="card-header border-gold-dim py-2">
-                <h5 class="mb-0" style="font-family: 'Cinzel', serif; color: #d4af37;">
-                    ✨ {% trans "Choose Your Path" %}
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <!-- Suggested Action Buttons -->
-                    <div class="col-md-6 mb-3 mb-md-0">
-                        <label class="text-secondary small mb-2 d-block">{% trans "Suggested Actions" %}</label>
-                        <div class="d-grid gap-2">
-                            {% if suggested_actions %}
-                            {% for action in suggested_actions|slice:":2" %}
-                            <button type="button" class="btn btn-outline-gold suggested-action-btn text-start p-3"
-                                onclick="submitAction('{{ action|escapejs }}')">
-                                <span class="badge badge-gold me-2">{{ forloop.counter }}</span> {{ action }}
-                            </button>
-                            {% endfor %}
-                            {% else %}
-                            <p class="text-muted small italic">{% trans "No suggestions available..." %}</p>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Free Choice Input -->
-                    <div class="col-md-6">
-                        <form method="post" id="action-form">
-                            {% csrf_token %}
-                            <div class="form-group mb-3">
-                                <label for="user_action" class="text-secondary small mb-2">{% trans "Option 3: Describe your own action" %}</label>
-                                <textarea name="user_action" id="user_action"
-                                    class="form-control bg-black text-light border-gold-dim" rows="3"
-                                    placeholder="{% trans 'e.g., I cautiously approach the ancient door...' %}"
-                                    required></textarea>
-                            </div>
-
-                            <button type="submit" id="submit-btn" class="btn btn-gold w-100 shadow py-2">
-                                🎭 {% trans "Take Action" %}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Combat UI Panel (Only if active) -->
+        <!-- Sidebar column (Only visible during combat) -->
         {% if combat_active %}
-        <div class="combat-panel card bg-dark border-danger mb-4 shadow animate-pop-in"
-            style="background: linear-gradient(135deg, rgba(40,0,0,0.8), rgba(0,0,0,0.9)) !important;">
-            <div class="card-header border-danger py-2 d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 text-danger" style="font-family: 'Cinzel', serif;">⚔️ {% trans "Combat Status" %}</h5>
-                <span class="badge bg-danger">{% trans "Active Encounter" %}</span>
-            </div>
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <!-- Player Side -->
-                    <div class="col-md-5 text-center">
-                        <div class="stat-group">
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="sticky-sidebar">
+                <div class="combat-panel card bg-dark border-danger shadow animate-pop-in"
+                    style="background: linear-gradient(135deg, rgba(40,0,0,0.8), rgba(0,0,0,0.9)) !important;">
+                    <div class="card-header border-danger py-2 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-danger" style="font-family: 'Cinzel', serif;">⚔️ {% trans "Combat Status"
+                            %}</h5>
+                        <span class="badge bg-danger">{% trans "Active Encounter" %}</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Player Side -->
+                        <div class="stat-group text-center mb-4">
                             <h6 class="text-gold mb-2">{{ user.name }} ({% trans "You" %})</h6>
                             <div class="d-flex justify-content-center gap-3 mb-2 small text-secondary">
                                 <span>HP: {{ user.character.hp }}/{{ user.character.max_hp }}</span>
-                                <span>XP: {{ user.character.xp }}</span>
-                                <span>LVL: {{ user.character.level }}</span>
                             </div>
                             <div class="progress mb-2"
                                 style="height: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
                                 <div class="progress-bar bg-success shadow-sm"
                                     style="width: {% widthratio user.character.hp user.character.max_hp 100 %}%"></div>
                             </div>
+                            <div class="d-flex justify-content-center gap-3 small text-secondary">
+                                <span>XP: {{ user.character.xp }}</span>
+                                <span>LVL: {{ user.character.level }}</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- VS Divider -->
-                    <div class="col-md-2 text-center my-3 my-md-0">
-                        <span class="h4 text-danger" style="font-family: 'Cinzel', serif;">VS</span>
-                    </div>
+                        <!-- VS Divider -->
+                        <div class="text-center my-3">
+                            <span class="h4 text-danger" style="font-family: 'Cinzel', serif;">VS</span>
+                        </div>
 
-                    <!-- Enemy Side -->
-                    <div class="col-md-5 text-center">
-                        {% with last_turn=history|last %}
-                        {% for entity in last_turn.entities %}
-                        {% if entity.active and entity.type == 'enemy' %}
-                        <div class="stat-group">
+                        <!-- Enemy Side -->
+                        <div class="stat-group text-center">
+                            {% if active_enemy %}
+                            <h6 class="text-danger mb-2">{{ active_enemy.name }}</h6>
+                            <div class="d-flex justify-content-center gap-3 mb-2 small text-secondary">
+                                <span>HP: {{ active_enemy.hp|default:"?" }}/{{ active_enemy.max_hp|default:"?" }}</span>
+                                <span>AC: {{ active_enemy.ac|default:"?" }}</span>
+                            </div>
+                            <div class="progress"
+                                style="height: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);">
+                                <div class="progress-bar bg-danger shadow-sm"
+                                    style="width: {% if active_enemy.max_hp > 0 %}{% widthratio active_enemy.hp active_enemy.max_hp 100 %}{% else %}100{% endif %}%">
+                                </div>
+                            </div>
+                            {% else %}
+                            {% with last_turn=history|last %}
+                            {% for entity in last_turn.entities %}
+                            {% if entity.active and entity.type == 'enemy' %}
                             <h6 class="text-danger mb-2">{{ entity.name }}</h6>
                             <div class="d-flex justify-content-center gap-3 mb-2 small text-secondary">
                                 <span>HP: {{ entity.hp|default:"?" }}/{{ entity.max_hp|default:"?" }}</span>
@@ -237,39 +256,21 @@
                                     style="width: {% if entity.max_hp > 0 %}{% widthratio entity.hp entity.max_hp 100 %}{% else %}100{% endif %}%">
                                 </div>
                             </div>
+                            {% endif %}
+                            {% empty %}
+                            <div class="text-muted italic small">{% trans "No active target..." %}</div>
+                            {% endfor %}
+                            {% endwith %}
+                            {% endif %}
                         </div>
-                        {% endif %}
-                        {% empty %}
-                        <div class="text-muted italic small">{% trans "No active target..." %}</div>
-                        {% endfor %}
-                        {% endwith %}
+                    </div>
+                    <div class="card-footer border-danger bg-transparent py-1 text-center small text-secondary italic">
+                        💰 {% trans "Gold" %}: {{ character.gold }}
                     </div>
                 </div>
             </div>
-            <div class="card-footer border-danger bg-transparent py-1 text-center small text-secondary italic">
-                💰 {% trans "Gold" %}: {{ character.gold }}
-            </div>
         </div>
         {% endif %}
-        {% else %}
-        <!-- Restart Request Panel -->
-        <div class="card bg-dark text-light border-gold-dim mb-4 shadow text-center p-4">
-            <h3 style="font-family: 'Cinzel', serif; color: #d4af37;" class="mb-3">
-                ⚖️ {% trans "Adventure Finished" %}
-            </h3>
-            <p class="mb-4">
-                {% trans "Your journey in this world has come to an end. You can request to start a new adventure from
-                the administrator." %}
-            </p>
-            <form method="post">
-                {% csrf_token %}
-                <button type="submit" name="action" value="request_restart" class="btn btn-gold btn-lg shadow">
-                    ✨ {% trans "Richiedi di iniziare una nuova storia in questo mondo" %}
-                </button>
-            </form>
-        </div>
-        {% endif %}
-
     </div>
 </div>
 
@@ -488,6 +489,19 @@
     .active-combat-target {
         border-color: #ff4444 !important;
         box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+    }
+
+    .sticky-sidebar {
+        position: sticky;
+        top: 2rem;
+        z-index: 100;
+    }
+
+    @media (max-width: 991.98px) {
+        .sticky-sidebar {
+            position: static;
+            margin-top: 2rem;
+        }
     }
 </style>
 {% endblock %}

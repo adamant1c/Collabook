@@ -970,3 +970,13 @@ msgstr "Contattaci"
 #: templates/privacy_policy.html:199
 msgid "Website"
 msgstr "Sito Web"
+
+#: templates/landing.html - Support section
+msgid "Support the Project"
+msgstr "Supporta il Progetto"
+
+msgid "If you enjoy Collabook and want to help keep the servers running, consider buying me a coffee! Your support helps us continue improving the game and creating new adventures."
+msgstr "Se ti piace Collabook e vuoi aiutarci a mantenere i server attivi, considera di offrirmi un caffè! Il tuo supporto ci aiuta a continuare a migliorare il gioco e a creare nuove avventure."
+
+msgid "Buy Me a Coffee"
+msgstr "Offrimi un Caffè"

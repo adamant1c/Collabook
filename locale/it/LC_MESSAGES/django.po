@@ -395,8 +395,6 @@ msgstr ""
 "azioni e il mondo risponderà attraverso il nostro avanzato AI Dungeon Master."
 
 #: templates/game/rules.html:40
-#, fuzzy
-#| msgid "Roll Dice"
 msgid "Rolling Dice"
 msgstr "Tira i Dadi"
 
@@ -412,6 +410,9 @@ msgstr ""
 msgid "Taking Action"
 msgstr "Agire"
 
+msgid "Combat & Challenges"
+msgstr "Combattimento e Sfide"
+
 #: templates/game/rules.html:57
 msgid ""
 "Be descriptive! The more detail you provide about your intent, the more "
@@ -421,10 +422,8 @@ msgstr ""
 "mondo reagirà."
 
 #: templates/game/rules.html:69
-#, fuzzy
-#| msgid "Character Sheet"
 msgid "Character Stats"
-msgstr "Scheda Personaggio"
+msgstr "Statistiche Personaggio"
 
 #: templates/game/rules.html:80
 msgid "Influences physical damage and hits with melee weapons."
@@ -443,8 +442,6 @@ msgid "Reduces the damage you take from incoming attacks."
 msgstr "Riduce il danno subito dagli attacchi in arrivo."
 
 #: templates/game/rules.html:126
-#, fuzzy
-#| msgid "Return to Worlds"
 msgid "Return to Worlds"
 msgstr "Torna ai Mondi"
 
@@ -1077,5 +1074,15 @@ msgstr "Incontro Attivo"
 msgid "You"
 msgstr "Tu"
 
+msgid "Adventure Summary"
+msgstr "Riepilogo Avventura"
+
 msgid "Adventure Finished"
 msgstr "Avventura Terminata"
+
+msgid "The Arrival"
+msgstr "L'Arrivo"
+
+msgid "You stepped into the world, ready for destiny..."
+msgstr "Sei entrato nel mondo, pronto per il destino..."
+

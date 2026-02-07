@@ -272,14 +272,21 @@ class JourneyView(View):
             
             # Check if game has ended (for PDF download button visibility)
             game_ended = False
+            is_victory = False
+            is_defeat = False
+            db_character = None
             try:
                 from game.models import Character as DBCharacter, Story as DBStory
                 db_character = DBCharacter.objects.get(id=request.session['character_id'])
                 db_story = db_character.story
                 
                 # Game ends if character is dead OR survival goal reached
-                if db_character.status == 'dead' or db_character.days_survived >= db_story.survival_goal_days:
+                if db_character.status == 'dead':
                     game_ended = True
+                    is_defeat = True
+                elif db_character.days_survived >= db_story.survival_goal_days:
+                    game_ended = True
+                    is_victory = True
             except Exception:
                 # If we can't check, default to False (hide button)
                 pass
@@ -289,7 +296,9 @@ class JourneyView(View):
                 'character': character,
                 'user': user,
                 'game_ended': game_ended,
-                'is_dead': db_character.status == 'dead' if 'db_character' in locals() else False,
+                'is_dead': db_character.status == 'dead' if db_character else False,
+                'is_victory': is_victory,
+                'is_defeat': is_defeat,
                 'suggested_actions': request.session.get('suggested_actions', []),
                 'combat_active': any(e.get('type') == 'enemy' and e.get('active') for e in (history[-1].get('entities', []) if history else []))
             })

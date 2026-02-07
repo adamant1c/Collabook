@@ -980,3 +980,43 @@ msgstr "Se ti piace Collabook e vuoi aiutarci a mantenere i server attivi, consi
 
 msgid "Buy Me a Coffee"
 msgstr "Offrimi un Caffè"
+
+#: templates/world/journey.html - Victory/Defeat messages
+msgid "Victory"
+msgstr "Vittoria"
+
+msgid "Defeat"
+msgstr "Sconfitta"
+
+msgid "Victory!"
+msgstr "Vittoria!"
+
+msgid "Congratulations! You have survived all the days required and completed this adventure with glory. Your story will be remembered among the legends."
+msgstr "Congratulazioni! Hai superato tutti i giorni richiesti e completato questa avventura con gloria. La tua storia sarà ricordata tra le leggende."
+
+msgid "You faced this adventure with valor, but unfortunately you could not bring it to completion. Your courage will not be forgotten."
+msgstr "Hai affrontato questa avventura con valore ma purtroppo non sei riuscito a portarla a termine. Il tuo coraggio non sarà dimenticato."
+
+msgid "Request to start a new story in this world"
+msgstr "Richiedi di iniziare una nuova storia in questo mondo"
+
+msgid "Choose Your Path"
+msgstr "Scegli il Tuo Sentiero"
+
+msgid "Option 3: Describe your own action"
+msgstr "Opzione 3: Descrivi la tua azione"
+
+msgid "Suggested Actions"
+msgstr "Azioni Suggerite"
+
+msgid "Combat Status"
+msgstr "Stato Combattimento"
+
+msgid "Active Encounter"
+msgstr "Incontro Attivo"
+
+msgid "You"
+msgstr "Tu"
+
+msgid "Adventure Finished"
+msgstr "Avventura Terminata"

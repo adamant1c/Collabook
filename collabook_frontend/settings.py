@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'blog',
 ]
 
 MIDDLEWARE = [
@@ -195,6 +196,10 @@ LANGUAGE_COOKIE_HTTPONLY = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # WhiteNoise storage to compress and cache static files
 STORAGES = {

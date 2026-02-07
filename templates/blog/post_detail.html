@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ post.title }} | Collabook Blog{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'blog:home' %}"
+                        class="text-secondary text-decoration-none">Blog</a></li>
+                <li class="breadcrumb-item active text-gold" aria-current="page">{{ post.title }}</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <header class="mb-5">
+            <h1 class="display-4 fw-bold text-white mb-3" style="font-family: 'Cinzel', serif;">{{ post.title }}</h1>
+            <div class="d-flex align-items-center text-secondary">
+                <span class="me-3">
+                    👤 {{ post.author.username }}
+                </span>
+                <span class="me-3">
+                    📅 {{ post.created_on|date:"F d, Y" }}
+                </span>
+                <span class="badge bg-gold text-dark">
+                    {{ post.category.name|default:"General" }}
+                </span>
+            </div>
+        </header>
+
+        {% if post.image %}
+        <div class="mb-5">
+            <img src="{{ post.image.url }}" class="img-fluid rounded shadow-lg" alt="{{ post.title }}"
+                style="width: 100%; max-height: 500px; object-fit: cover;">
+        </div>
+        {% endif %}
+
+        <!-- AdSense Top -->
+        {% if ADSENSE_ENABLED %}
+        <div class="my-4 text-center">
+            <ins class="adsbygoogle" style="display:block; text-align:center;" data-ad-layout="in-article"
+                data-ad-format="fluid" data-ad-client="ca-pub-9623905672643205" data-ad-slot="9876543210"></ins>
+            <!-- Format: In-article -->
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+
+        <!-- Content -->
+        <article class="blog-content text-justify" style="font-size: 1.1rem; line-height: 1.8; color: #d0d0d0;">
+            {{ post.content|linebreaks }}
+        </article>
+
+        <!-- AdSense Bottom -->
+        {% if ADSENSE_ENABLED %}
+        <div class="my-5 text-center">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9623905672643205"
+                data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        {% endif %}
+
+        <hr class="border-secondary my-5">
+
+        <!-- Share / Navigate -->
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{% url 'blog:home' %}" class="btn btn-outline-secondary">
+                ← {% trans "Back to Blog" %}
+            </a>
+            <!-- Social Share (Placeholder) -->
+            <div>
+                <span class="text-secondary me-2">{% trans "Share:" %}</span>
+                <button class="btn btn-sm btn-dark border-secondary">FB</button>
+                <button class="btn btn-sm btn-dark border-secondary">X</button>
+                <button class="btn btn-sm btn-dark border-secondary">IN</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .text-gold {
+        color: #d4af37;
+    }
+
+    .blog-content h2,
+    .blog-content h3 {
+        color: #fff;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-family: 'Cinzel', serif;
+    }
+
+    .blog-content a {
+        color: #d4af37;
+    }
+</style>
+{% endblock %}

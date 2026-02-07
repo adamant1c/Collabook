@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n %}
 
-{% block title %}{% trans "FAQ" %} - Collabook{% endblock %}
+{% block title %}FAQ - Collabook{% endblock %}
 
 {% block content %}
 <style>
@@ -13,189 +13,222 @@
 
     .faq-item {
         margin-bottom: 30px;
-        padding: 20px;
-        background-color: rgba(255, 255, 255, 0.05);
+        padding: 25px;
+        background-color: rgba(20, 20, 20, 0.8);
         border-left: 3px solid #d4af37;
-        border-radius: 5px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        transition: transform 0.2s;
+    }
+
+    .faq-item:hover {
+        transform: translateX(5px);
+        background-color: rgba(30, 30, 30, 0.9);
     }
 
     .faq-question {
         color: #d4af37;
         font-weight: bold;
-        font-size: 1.1em;
-        margin-bottom: 10px;
+        font-size: 1.25em;
+        margin-bottom: 15px;
         font-family: 'Cinzel', serif;
     }
 
     .faq-answer {
         line-height: 1.8;
         color: #e0e0e0;
+        font-size: 1.05em;
     }
 
     .faq-category {
-        color: #d4af37;
-        border-bottom: 2px solid #444;
+        color: #fff;
+        border-bottom: 1px solid #444;
         padding-bottom: 10px;
-        margin-top: 40px;
-        margin-bottom: 25px;
+        margin-top: 50px;
+        margin-bottom: 30px;
         font-family: 'Cinzel', serif;
+        font-weight: bold;
     }
 </style>
 
 <div class="container mt-5 mb-5">
     <header class="faq-header text-center">
-        <h1 style="font-family: 'Cinzel', serif;">{% trans "Frequently Asked Questions" %}</h1>
-        <p class="text-secondary">{% trans "Find answers to common questions about Collabook" %}</p>
+        <h1 class="display-4" style="font-family: 'Cinzel', serif;">Frequently Asked Questions</h1>
+        <p class="lead text-secondary">Everything you need to know to start your legend in Collabook.</p>
     </header>
 
     <div class="faq-content">
-        <h2 class="faq-category">{% trans "Getting Started" %}</h2>
+        <!-- General -->
+        <h2 class="faq-category">🛡️ General & Accessibility</h2>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "What is Collabook?" %}</div>
+            <div class="faq-question">1. What exactly is Collabook?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                Collabook is an interactive storytelling platform where you can create unique characters,
-                choose from various story worlds, and embark on collaborative narrative adventures.
-                Your choices shape the story and determine your character's journey.
-                {% endblocktrans %}
+                Collabook is a next-generation text-based RPG powered by advanced artificial intelligence. Unlike
+                traditional games with pre-set dialogues, here you can type *any* action, and the AI will narrate the
+                consequences in real-time. It's a cross between a gamebook, a text adventure, and a D&D session with an
+                always-available Dungeon Master.
             </div>
         </div>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "How do I get started?" %}</div>
+            <div class="faq-question">2. Is it free? Are there hidden costs?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                Simply create an account, design your character with unique attributes and background,
-                select a story world that interests you, and begin your adventure. The platform will
-                guide you through each step.
-                {% endblocktrans %}
+                The core experience of Collabook is completely free. You can create an account, generate unlimited
+                characters, and play in all available worlds without spending a dime. We support the project through
+                non-intrusive ads (AdSense) to cover server and AI API costs.
             </div>
         </div>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "Is Collabook free to use?" %}</div>
+            <div class="faq-question">3. Do I need to install anything to play?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                Yes, Collabook is currently free to use. You can create characters, explore worlds,
-                and participate in stories without any cost.
-                {% endblocktrans %}
-            </div>
-        </div>
-
-        <h2 class="faq-category">{% trans "Characters and Gameplay" %}</h2>
-
-        <div class="faq-item">
-            <div class="faq-question">{% trans "Can I create multiple characters?" %}</div>
-            <div class="faq-answer">
-                {% blocktrans %}
-                Yes, you can create multiple characters, each with their own unique attributes,
-                backgrounds, and story progression. This allows you to explore different playstyles
-                and narrative paths.
-                {% endblocktrans %}
+                No, Collabook is entirely browser-based. You can play from a PC, Mac, tablet, or smartphone without
+                downloading anything. All you need is a stable internet connection. Your progress is saved to the cloud,
+                so you can start on your computer and continue on your phone while traveling.
             </div>
         </div>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "What are the different story worlds available?" %}</div>
+            <div class="faq-question">4. Can I play offline?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                Collabook offers various story worlds spanning different genres including fantasy,
-                sci-fi, mystery, and more. Each world has its own unique setting, challenges, and
-                narrative possibilities. Visit the world selection page to explore all available options.
-                {% endblocktrans %}
+                Since the core of the game relies on an AI processing your responses in real-time on our servers, an
+                active internet connection is required to receive the Narrator's replies. However, data data usage is
+                very low as it is primarily text.
+            </div>
+        </div>
+
+        <!-- Gameplay -->
+        <h2 class="faq-category">⚔️ Gameplay & Mechanics</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">5. How does the combat system work?</div>
+            <div class="faq-answer">
+                Combat uses a turn-based system based on the D20 (a 20-sided die), similar to classic tabletop RPGs.
+                When you attack, the system rolls a virtual die and adds your modifiers (Strength, Agility, etc.). If
+                the total beats the enemy's Armor Class, you hit. The AI then describes the action cinematically. You
+                can choose to attack, defend, use items, or attempt creative actions like "flipping the table on the
+                orc".
             </div>
         </div>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "How do choices affect my story?" %}</div>
+            <div class="faq-question">6. What are Stats and how do they affect the game?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                Your choices directly influence the narrative direction, character relationships,
-                and story outcomes. Different decisions lead to different paths, making each
-                playthrough unique.
-                {% endblocktrans %}
-            </div>
-        </div>
-
-        <h2 class="faq-category">{% trans "Account and Privacy" %}</h2>
-
-        <div class="faq-item">
-            <div class="faq-question">{% trans "What information do you collect?" %}</div>
-            <div class="faq-answer">
-                {% blocktrans %}
-                We only collect your username (not your real name) and email address. We are
-                GDPR compliant and take your privacy seriously. For more details, please read
-                our Privacy Policy.
-                {% endblocktrans %}
+                You have 4 main stats: <strong>Strength</strong> (physical damage, feats of strength),
+                <strong>Agility</strong> (initiative, dodging, aim), <strong>Intelligence</strong> (magic, hacking,
+                knowledge), and <strong>Charisma</strong> (persuasion, deception). High Charisma might let you talk your
+                way out of a fight, while high Strength lets you smash through a locked door. Your choices should
+                reflect your character's strengths.
             </div>
         </div>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "Can I delete my account?" %}</div>
+            <div class="faq-question">7. How does saving work? Can I lose progress?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                Yes, you can request account deletion at any time by contacting us at
-                mycollabook@gmail.com. We will permanently delete your account and associated
-                data in accordance with GDPR regulations.
-                {% endblocktrans %}
+                Saving is completely automatic. Every action you take is recorded in the database instantly. You don't
+                need to worry about saving manually. If you close the browser or lose connection, you'll be right back
+                at the last message received when you return.
             </div>
         </div>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "How do I reset my password?" %}</div>
+            <div class="faq-question">8. What happens if my character dies?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                Click on the "Forgot Password" link on the login page. Enter your email address,
-                and we'll send you instructions to reset your password.
-                {% endblocktrans %}
-            </div>
-        </div>
-
-        <h2 class="faq-category">{% trans "Technical Support" %}</h2>
-
-        <div class="faq-item">
-            <div class="faq-question">{% trans "What browsers are supported?" %}</div>
-            <div class="faq-answer">
-                {% blocktrans %}
-                Collabook works best on modern browsers including Chrome, Firefox, Safari, and Edge.
-                We recommend keeping your browser updated to the latest version for the best experience.
-                {% endblocktrans %}
+                Death in Collabook is part of the journey, not the end. Currently, if your character is defeated in
+                combat, they will be "resurrected" at the nearest safe hub (or adventure start) with a penalty to
+                Experience (XP) and gold. In the future, we will introduce an optional "Hardcore" mode with Permadeath
+                for the bravest players.
             </div>
         </div>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "I found a bug. How do I report it?" %}</div>
+            <div class="faq-question">9. How do I earn Experience (XP) and Gold?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                Please contact us at mycollabook@gmail.com with a detailed description of the issue,
-                including what you were doing when the bug occurred and any error messages you received.
-                {% endblocktrans %}
+                You earn XP by overcoming challenges, defeating enemies, and most importantly, progressing the story.
+                Gold is found as loot on enemies or as rewards for completing Quests. Use gold to buy better gear that
+                will increase your chances of survival.
+            </div>
+        </div>
+
+        <!-- Content -->
+        <h2 class="faq-category">🌍 Worlds & Lore</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">10. Are the worlds connected?</div>
+            <div class="faq-answer">
+                Currently, the three worlds (Fantasy, Sci-Fi, Cyberpunk) are separate universes. Your character exists
+                within the world they were created in. However, we are working on special "Crossover" events and a
+                "Portal" system that might allow travelers to jump between dimensions in the future.
             </div>
         </div>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "Is there a mobile app?" %}</div>
+            <div class="faq-question">11. Does the AI always repeat the same things?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                Currently, Collabook is a web-based platform accessible through your browser.
-                While we don't have a dedicated mobile app yet, the website is mobile-friendly
-                and works on smartphones and tablets.
-                {% endblocktrans %}
+                We use advanced language models (LLM) designed to avoid repetition. However, if you notice the narrator
+                getting stuck or repeating a phrase, try taking a drastically different action to "unstick" the
+                situation. We are constantly updating our models to improve variety and creativity.
             </div>
         </div>
-
-        <h2 class="faq-category">{% trans "Contact" %}</h2>
 
         <div class="faq-item">
-            <div class="faq-question">{% trans "How can I contact support?" %}</div>
+            <div class="faq-question">12. Can I create my own content or worlds?</div>
             <div class="faq-answer">
-                {% blocktrans %}
-                For any questions, suggestions, or support requests, please email us at
-                mycollabook@gmail.com. We typically respond within 24-48 hours.
-                {% endblocktrans %}
+                At the moment, worlds are curated by our team to ensure consistency and balance. However, we encourage
+                players to submit their ideas for new factions, items, or scenarios via our Blog or by contacting us.
+                The best ideas are often integrated into the official game!
             </div>
         </div>
+
+        <!-- Account & Safety -->
+        <h2 class="faq-category">🔒 Account, Safety & More</h2>
+
+        <div class="faq-item">
+            <div class="faq-question">13. Is my data safe?</div>
+            <div class="faq-answer">
+                Absolutely. We collect only the essentials (email and username) to manage your account. We do not sell
+                your data to third parties. We use encrypted connections (HTTPS) and follow GDPR guidelines for data
+                protection. You can download or delete your data at any time.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">14. Is it suitable for children?</div>
+            <div class="faq-answer">
+                Collabook is designed for a general audience, but given the generative nature of AI and themes of
+                combat/adventure, we recommend supervision for users under 13. We have safety filters to prevent
+                explicit content or excessive violence, but free interaction means results can vary.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">15. How can I support Collabook?</div>
+            <div class="faq-answer">
+                The best way to support us is to play and share the game with friends! If you want to do more, disabling
+                AdBlock on our site helps us keep the servers running. In the future, we will introduce donation options
+                or Premium accounts with cosmetic perks.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">16. How can I report a bug?</div>
+            <div class="faq-answer">
+                If you encounter a technical error or strange AI behavior, please use the contact form on the "Contacts"
+                page or email us directly at mycollabook@gmail.com. Include as many details as possible (what you were
+                doing, which browser you use) to help us solve the problem quickly.
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">17. What is the cookie policy?</div>
+            <div class="faq-answer">
+                We use essential technical cookies to keep your login active and third-party cookies (Google
+                AdSense/Analytics) to show relevant ads and analyze traffic. You can manage your cookie preferences from
+                your browser settings. Read our Privacy Policy for full details.
+            </div>
+        </div>
+
     </div>
 </div>
 {% endblock %}

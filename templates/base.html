@@ -85,6 +85,16 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'blog:home' %}">
+                            📖 {% trans "Blog" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'how_it_works' %}">
+                            ❓ {% trans "How It Works" %}
+                        </a>
+                    </li>
                     {% if request.session.token %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'world:selection' %}">
@@ -113,7 +123,8 @@
                     <div class="me-3 px-3 py-1 rounded border border-warning"
                         style="background-color: rgba(212, 175, 55, 0.1);">
                         <span class="text-warning" style="font-weight: 600;">
-                            🕐 {% blocktrans with days=character_survival.days_survived goal=character_survival.survival_goal %}Day {{ days }}/{{ goal }}{% endblocktrans %}
+                            🕐 {% blocktrans with days=character_survival.days_survived
+                            goal=character_survival.survival_goal %}Day {{ days }}/{{ goal }}{% endblocktrans %}
                         </span>
                     </div>
                     {% endif %}
@@ -171,6 +182,12 @@
                     <span class="text-secondary">© 2026 Collabook</span>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
+                    <a href="{% url 'blog:home' %}" class="text-secondary text-decoration-none me-3 hover-gold">
+                        Blog
+                    </a>
+                    <a href="{% url 'how_it_works' %}" class="text-secondary text-decoration-none me-3 hover-gold">
+                        How It Works
+                    </a>
                     <a href="{% url 'privacy_policy' %}" class="text-secondary text-decoration-none me-3 hover-gold">
                         Privacy Policy
                     </a>

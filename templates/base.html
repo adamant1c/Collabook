@@ -139,8 +139,7 @@
                         </span>
                     </div>
                     {% endif %}
-                    <div
-                        class="me-3 d-flex align-items-center bg-dark-subtle rounded-pill px-2 py-1 border border-secondary shadow-sm">
+                    <div class="me-3 d-flex align-items-center bg-dark-subtle rounded-pill px-2 py-1 shadow-sm">
                         <form action="{% url 'set_language' %}" method="post" class="m-0">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.path }}">

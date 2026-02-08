@@ -10,7 +10,7 @@ from sqlalchemy.inspection import inspect
 # 🔧 Backend root (./backend mounted as /app)
 sys.path.append("/app")
 
-from app.core.database import engine, Base
+from app.core.database import engine, Base, wait_for_db
 from app.models.db_models import (
     User,
     Story,
@@ -39,17 +39,25 @@ def serialize_value(value):
 def export_table(session, model, filename):
     # Use reflection to get the actual columns in the database
     # This matches the DB schema, not the potentially newer code model
-    table_name = model.__tablename__
+    table_name = getattr(model, "__tablename__", None)
+    if not table_name:
+        print(f"⚠️  Skipping {model}: No __tablename__ defined")
+        return
+
     metadata = MetaData()
     try:
         table = Table(table_name, metadata, autoload_with=engine)
     except Exception as e:
-        print(f"⚠️  Skipping {model.__name__}: Table '{table_name}' lookup failed ({e})")
+        print(f"⚠️  Skipping {model}: Table '{table_name}' lookup failed ({e})")
         return
 
     # Select all columns from the reflected table
     stmt = select(table)
-    result = session.execute(stmt)
+    try:
+        result = session.execute(stmt)
+    except Exception as e:
+        print(f"❌ ERROR: Failed to execute select on {table_name}: {e}")
+        return
     
     output = []
     for row in result:
@@ -63,11 +71,18 @@ def export_table(session, model, filename):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2, ensure_ascii=False)
 
-    print(f"✅ {model.__name__}: {len(output)} records → {path.name}")
+    print(f"✅ {table_name}: {len(output)} records → {path.name}")
 
 
 def main():
     print("📤 Exporting database...")
+    
+    try:
+        wait_for_db()
+    except Exception as e:
+        print(f"❌ Aborting export: {e}")
+        sys.exit(1)
+
     # Define plain classes for reflection of Django tables (avoid Mapper exceptions)
     class AuthUser: __tablename__ = "auth_user"
     class Site: __tablename__ = "django_site"
@@ -79,6 +94,7 @@ def main():
     class Post:     __tablename__ = "blog_post"
 
     with Session(engine) as session:
+        # Core Game Tables
         export_table(session, User, "users.json")
         export_table(session, Story, "stories.json")
         export_table(session, Character, "characters.json")
@@ -90,7 +106,7 @@ def main():
         export_table(session, Inventory, "inventory.json")
         export_table(session, Turn, "turns.json")
         
-        # Export blog data
+        # Django / Auth / Blog Tables
         export_table(session, AuthUser, "auth_users.json")
         export_table(session, Site, "django_sites.json")
         export_table(session, SocialApp, "social_apps.json")

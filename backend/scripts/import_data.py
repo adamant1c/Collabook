@@ -9,7 +9,7 @@ from sqlalchemy import Table, text
 # 🔧 Backend root (./backend mounted as /app)
 sys.path.append("/app")
 
-from app.core.database import engine, Base
+from app.core.database import engine, Base, wait_for_db
 from app.models.db_models import (
     User,
     Story,
@@ -45,58 +45,96 @@ def import_table(session, model, filename, user_map=None):
     path = EXPORT_DIR / filename
     
     if not path.exists():
-        print(f"⚠️  Skipping {model.__name__}: {path.name} not found")
+        print(f"⚠️  Skipping {model.__name__ if hasattr(model, '__name__') else model}: {path.name} not found")
         return 0
     
     with open(path, "r", encoding="utf-8") as f:
         records = json.load(f)
     
     if not records:
-        print(f"ℹ️  {model.__name__}: 0 records in {path.name}")
+        print(f"ℹ️  {model.__name__ if hasattr(model, '__name__') else model}: 0 records in {path.name}")
         return 0
     
     from sqlalchemy.inspection import inspect
-    mapper = inspect(model)
-    columns = {col.key: col for col in mapper.columns}
-    table_name = mapper.local_table.name
+    try:
+        mapper = inspect(model)
+        columns = {col.key: col for col in mapper.columns}
+        table_name = mapper.local_table.name
+        pk_cols = [col.name for col in mapper.primary_key]
+    except Exception:
+        # Fallback for plain classes used for reflection
+        table_name = getattr(model, "__tablename__", None)
+        if not table_name:
+             print(f"⚠️  Skipping {model}: No __tablename__ defined")
+             return 0
+        
+        metadata = Base.metadata
+        try:
+            table = Table(table_name, metadata, autoload_with=engine)
+            columns = {col.name: col for col in table.columns}
+            pk_cols = [col.name for col in table.primary_key]
+        except Exception as e:
+            print(f"⚠️  Skipping {model}: Table '{table_name}' lookup failed ({e})")
+            return 0
     
     imported_count = 0
     skipped_count = 0
-    pk_cols = [col.name for col in mapper.primary_key]
     
-    for record_data in records:
-        # Special User ID mapping for foreign keys
-        if user_map:
-            if table_name == "characters" and "user_id" in record_data:
-                old_id = record_data["user_id"]
-                if old_id in user_map:
-                    record_data["user_id"] = user_map[old_id]
-            if table_name == "stories" and "created_by" in record_data:
-                old_id = record_data["created_by"]
-                if old_id in user_map:
-                    record_data["created_by"] = user_map[old_id]
+    try:
+        for record_data in records:
+            # Special User ID mapping for foreign keys
+            if user_map:
+                if table_name == "characters" and "user_id" in record_data:
+                    old_id = record_data["user_id"]
+                    if old_id in user_map:
+                        record_data["user_id"] = user_map[old_id]
+                if table_name == "stories" and "created_by" in record_data:
+                    old_id = record_data["created_by"]
+                    if old_id in user_map:
+                        record_data["created_by"] = user_map[old_id]
 
-        # Check if record already exists
-        if pk_cols:
-            filter_kwargs = {col: record_data.get(col) for col in pk_cols if col in record_data}
-            if filter_kwargs:
-                exists = session.query(model).filter_by(**filter_kwargs).first()
-                if exists:
-                    skipped_count += 1
-                    continue
+            # Check if record already exists
+            if pk_cols:
+                filter_kwargs = {col: record_data.get(col) for col in pk_cols if col in record_data}
+                if filter_kwargs:
+                    # For declarative models, check existence
+                    if hasattr(model, "id") and hasattr(session, "query"):
+                        try:
+                            exists = session.query(model).filter_by(**filter_kwargs).first()
+                            if exists:
+                                skipped_count += 1
+                                continue
+                        except Exception:
+                            # If query fails, session might be poisoned, but we are inside a try block
+                            # and we'll rollback anyway if anything fails.
+                            pass
+            
+            processed_data = {}
+            for key, value in record_data.items():
+                if key in columns:
+                    column_type = columns[key].type
+                    processed_data[key] = deserialize_value(value, column_type)
+            
+            if hasattr(model, "id"): # Declarative model
+                instance = model(**processed_data)
+                session.add(instance)
+            else: # Table reflection / plain class
+                 from sqlalchemy import insert
+                 # Note: Table reflection here might be slow if done per record, 
+                 # but for smaller tables it's okay. Better to move out of loop.
+                 table = Table(table_name, Base.metadata, autoload_with=engine)
+                 stmt = insert(table).values(**processed_data)
+                 session.execute(stmt)
+                 
+            imported_count += 1
         
-        processed_data = {}
-        for key, value in record_data.items():
-            if key in columns:
-                column_type = columns[key].type
-                processed_data[key] = deserialize_value(value, column_type)
-        
-        instance = model(**processed_data)
-        session.add(instance)
-        imported_count += 1
-    
-    session.commit()
-    msg = f"✅ {model.__name__}: {imported_count} records imported"
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        print(f"❌ ERROR: Failed to import table {table_name}: {e}")
+        return 0
+
+    msg = f"✅ {table_name}: {imported_count} records imported"
     if skipped_count:
         msg += f" ({skipped_count} already existed)"
     print(msg + f" from {path.name}")
@@ -196,6 +234,13 @@ def migrate_users(session):
 
 def main():
     print("📥 Importing unified database from JSON exports...")
+    
+    try:
+        wait_for_db()
+    except Exception as e:
+        print(f"❌ Aborting import: {e}")
+        sys.exit(1)
+
     # Ensure all Backend tables exist (stories, characters, etc.)
     Base.metadata.create_all(bind=engine)
     print(f"📂 Reading from: {EXPORT_DIR}")
@@ -213,21 +258,17 @@ def main():
             
             # Reflect other Django tables
             try:
-                class Site(Base): __table__ = Table("django_site", Base.metadata, autoload_with=engine)
-                class SocialApp(Base): __table__ = Table("socialaccount_socialapp", Base.metadata, autoload_with=engine)
-                class SocialAccount(Base): __table__ = Table("socialaccount_socialaccount", Base.metadata, autoload_with=engine)
-                class SocialToken(Base): __table__ = Table("socialaccount_socialtoken", Base.metadata, autoload_with=engine)
-                class EmailAddress(Base): __table__ = Table("account_emailaddress", Base.metadata, autoload_with=engine)
-                class Category(Base): __table__ = Table("blog_category", Base.metadata, autoload_with=engine)
-                class Post(Base): __table__ = Table("blog_post", Base.metadata, autoload_with=engine)
+                class Site: __tablename__ = "django_site"
+                class SocialApp: __tablename__ = "socialaccount_socialapp"
+                class SocialAccount: __tablename__ = "socialaccount_socialaccount"
+                class SocialToken: __tablename__ = "socialaccount_socialtoken"
+                class EmailAddress: __tablename__ = "account_emailaddress"
+                class Category: __tablename__ = "blog_category"
+                class Post:     __tablename__ = "blog_post"
                 
                 total += import_table(session, Site, "django_sites.json")
                 total += import_table(session, EmailAddress, "email_addresses.json")
                 total += import_table(session, SocialApp, "social_apps.json")
-                # SocialAccount might need user_id mapping too if it uses UUID currently?
-                # Actually Allauth social accounts link to auth_user table which now has integer IDs.
-                # Since auth_users.json was exported from a DB where auth_user had integer IDs, 
-                # social_accounts.json should also have integer user_ids that MATCH.
                 total += import_table(session, SocialAccount, "social_accounts.json")
                 total += import_table(session, SocialToken, "social_tokens.json")
                 total += import_table(session, Category, "blog_categories.json")

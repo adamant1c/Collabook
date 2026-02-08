@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Come Funziona | Collabook{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="display-3 text-center mb-5 fw-bold" style="font-family: 'Cinzel', serif; color: #d4af37;">Come
+                Funziona Collabook</h1>
+
+            <div class="lead text-secondary text-center mb-5">
+                Benvenuto su Collabook, il gioco di ruolo interattivo definitivo dove le tue scelte plasmano la
+                narrazione.
+                Che tu sia un giocatore di ruolo esperto o un novizio nel mondo della narrativa interattiva,
+                questa guida ti illustrerà ogni aspetto del gioco, dalla creazione del personaggio alla padronanza delle
+                meccaniche dei nostri tre mondi unici.
+            </div>
+
+            <hr class="border-secondary mb-5">
+
+            <!-- Table of Contents -->
+            <div class="card bg-dark border-secondary mb-5">
+                <div class="card-body">
+                    <h4 class="text-white mb-3">Indice dei Contenuti</h4>
+                    <ul class="list-unstyled text-gold">
+                        <li><a href="#getting-started" class="text-decoration-none text-gold">1. Per Iniziare</a></li>
+                        <li><a href="#character-creation" class="text-decoration-none text-gold">2. Creazione del
+                                Personaggio e Statistiche</a></li>
+                        <li><a href="#worlds" class="text-decoration-none text-gold">3. Esplorare i Mondi</a></li>
+                        <li><a href="#mechanics" class="text-decoration-none text-gold">4. Meccaniche di Gioco
+                                (Combattimento, Bottino, XP)</a></li>
+                        <li><a href="#interactive-storytelling" class="text-decoration-none text-gold">5. Narrazione
+                                Interattiva e AI</a></li>
+                        <li><a href="#community" class="text-decoration-none text-gold">6. Community e Sicurezza</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Sections -->
+            <section id="getting-started" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">1. Per Iniziare</h2>
+                <p>
+                    Collabook è progettato per essere accessibile direttamente dal tuo browser. Nessun download
+                    richiesto.
+                    Crea semplicemente un account usando la tua email o il login di Google, e sei pronto per iniziare la
+                    tua avventura.
+                    I tuoi progressi vengono salvati automaticamente nel cloud, permettendoti di riprendere la tua
+                    storia esattamente dove l'avevi lasciata, su qualsiasi dispositivo.
+                </p>
+                <p>
+                    Al tuo primo accesso, verrai accolto dalla schermata di Selezione del Mondo. Attualmente offriamo
+                    tre ambientazioni distinte:
+                    <strong>Fantasy</strong> (alta magia, draghi, regni), <strong>Sci-Fi</strong> (esplorazione
+                    spaziale, cibernetica, diplomazia aliena),
+                    e <strong>Cyberpunk</strong> (città al neon, spionaggio corporativo, hacker). Ogni mondo ha le sue
+                    regole uniche, la sua storia e le sue sfide.
+                </p>
+            </section>
+
+            <section id="character-creation" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">2. Creazione del Personaggio e
+                    Statistiche</h2>
+                <p>
+                    Il tuo avatar è la tua connessione con il mondo. Nella fase di Creazione del Personaggio, definirai
+                    non solo le tue statistiche, ma la tua identità.
+                    Sceglierai un nome, una storia di background e assegnerai punti agli attributi principali:
+                </p>
+                <ul>
+                    <li><strong>Forza:</strong> Determina la tua potenza fisica e il danno in mischia.</li>
+                    <li><strong>Agilità:</strong> Influenza la tua velocità, l'evasione e la precisione a distanza.</li>
+                    <li><strong>Intelligenza:</strong> Governa le tue abitudini magiche, le abilità di hacking e la
+                        risoluzione dei problemi.</li>
+                    <li><strong>Carisma:</strong> Cruciale per la diplomazia, la persuasione e la leadership.</li>
+                </ul>
+                <p>
+                    Queste statistiche non sono solo numeri; alterano fondamentalmente le scelte disponibili per te. Un
+                    personaggio con alta forza potrebbe essere in grado di
+                    intimidire una guardia, mentre un personaggio con alta intelligenza potrebbe hackerare il sistema di
+                    sicurezza per aggirarla completamente.
+                </p>
+            </section>
+
+            <section id="worlds" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">3. Esplorare i Mondi</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="p-3 border border-secondary rounded h-100">
+                            <h5 class="text-gold">Regno della Magia Eterna</h5>
+                            <p class="small text-secondary">Un regno dove antichi draghi dominano i cieli e i maghi
+                                studiano in torri di cristallo. La politica è spietata e i mostri vagano per le terre
+                                selvagge.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border border-secondary rounded h-100">
+                            <h5 class="text-gold">Federazione Galattica</h5>
+                            <p class="small text-secondary">Esplora le stelle come capitano della tua nave. Commercia
+                                con specie aliene, combatti i pirati spaziali e scopri i misteri del cosmo.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border border-secondary rounded h-100">
+                            <h5 class="text-gold">Neon City 2099</h5>
+                            <p class="small text-secondary">Alta tecnologia, vita bassa. Sopravvivi in una metropoli
+                                tentacolare gestita da mega-corporazioni. Potenzia il tuo corpo e combatti per la
+                                libertà nelle ombre digitali.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="mechanics" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">4. Meccaniche di Gioco</h2>
+                <p>
+                    <strong>Combattimento:</strong> Quando la diplomazia fallisce, inizia il combattimento. Il nostro
+                    sistema a turni ti permette di scegliere la tua strategia. Attacca, difendi, usa oggetti o fuggi.
+                    Il successo dipende dalle tue statistiche e da un lancio casuale (sistema D20). Il narratore AI
+                    descrive l'esito delle tue azioni in dettagli vividi.
+                </p>
+                <p>
+                    <strong>Bottino e Inventario:</strong> I nemici sconfitti lasciano oro e oggetti. Puoi usare l'oro
+                    per acquistare equipaggiamento migliore negli hub cittadini. Pozioni, armi e armature
+                    sono essenziali per sopravvivere agli incontri più difficili.
+                </p>
+                <p>
+                    <strong>Esperienza (XP):</strong> Ogni azione di successo ti guadagna XP. Salire di livello ti
+                    garantisce nuovi punti statistica, rendendo il tuo personaggio più forte e sbloccando nuove abilità.
+                </p>
+            </section>
+
+            <!-- AdSense Middle -->
+            {% if ADSENSE_ENABLED %}
+            <div class="my-5 text-center">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9623905672643205"
+                    data-ad-slot="5678901234" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            {% endif %}
+
+            <section id="interactive-storytelling" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">5. Narrazione Interattiva e AI</h2>
+                <p>
+                    Al centro di Collabook c'è il nostro narratore AI avanzato. A differenza dei giochi tradizionali con
+                    dialoghi pre-scritti, Collabook genera la storia
+                    dinamicamente basandosi sui tuoi input. Se vuoi provare qualcosa di non convenzionale—come cercare
+                    di domare un drago con una canzone invece che con una spada—puoi farlo!
+                    Scrivi la tua azione personalizzata, e l'AI determinerà l'esito basandosi sulle tue statistiche e
+                    sul contesto.
+                </p>
+                <p>
+                    Questo motore di possibilità infinite assicura che nessuna partita sia mai la stessa. Le tue scelte
+                    hanno conseguenze reali che si ripercuotono sulla storia.
+                    Salva un villaggio, e potrebbero venire in tuo aiuto più tardi. Tradisci una fazione, e ti daranno
+                    la caccia.
+                </p>
+            </section>
+
+            <section id="community" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">6. Community e Sicurezza</h2>
+                <p>
+                    Crediamo in un ambiente di gioco sicuro e inclusivo. La nostra AI è regolata per prevenire contenuti
+                    espliciti, e il nostro team di moderazione rivede attivamente gli incidenti segnalati.
+                    Puoi condividere le tue avventure sul nostro blog o sui social media. Unisciti ai nostri forum della
+                    community per discutere strategie, condividere storie e incontrare altri avventurieri.
+                </p>
+            </section>
+
+            <div class="text-center mt-5">
+                <a href="{% url 'accounts:register' %}"
+                    class="btn btn-gold btn-lg px-5 py-3 rounded-pill shadow-lg">Inizia la Tua Avventura Ora</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    section p {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: #d0d0d0;
+        margin-bottom: 1.5rem;
+    }
+
+    .text-gold {
+        color: #d4af37 !important;
+    }
+</style>
+{% endblock %}

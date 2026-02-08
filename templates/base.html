@@ -56,19 +56,29 @@
         .lang-btn {
             background: none;
             border: none;
-            padding: 0.25rem 0.5rem;
+            padding: 2px;
             color: #aaa;
-            transition: 0.3s;
-            font-size: 0.85rem;
+            transition: transform 0.2s, opacity 0.2s;
+            opacity: 0.6;
+            display: flex;
+            align-items: center;
         }
 
         .lang-btn.active {
-            color: #fff;
-            font-weight: bold;
+            opacity: 1;
+            transform: scale(1.1);
         }
 
         .lang-btn:hover {
-            color: #fff;
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        .flag-icon {
+            width: 24px;
+            height: auto;
+            border-radius: 2px;
+            box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
@@ -85,6 +95,23 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'blog:home' %}">
+                            📖 {% trans "Blog" %}
+                        </a>
+                    </li>
+                    {% if request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" href="{% url 'blog:dashboard' %}">
+                            ✍️ {% trans "Blog Admin" %}
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'game:rules' %}">
+                            📜 {% trans "Rules" %}
+                        </a>
+                    </li>
                     {% if request.session.token %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'world:selection' %}">
@@ -94,11 +121,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'character:sheet' %}">
                             👤 {% trans "Character" %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'game:rules' %}">
-                            📜 {% trans "Rules" %}
                         </a>
                     </li>
                     <li class="nav-item">
@@ -113,25 +135,44 @@
                     <div class="me-3 px-3 py-1 rounded border border-warning"
                         style="background-color: rgba(212, 175, 55, 0.1);">
                         <span class="text-warning" style="font-weight: 600;">
-                            🕐 {% blocktrans with days=character_survival.days_survived goal=character_survival.survival_goal %}Day {{ days }}/{{ goal }}{% endblocktrans %}
+                            🕐 {% blocktranslate with days=character_survival.days_survived goal=character_survival.survival_goal %}Day {{ days }}/{{ goal }}{% endblocktranslate %}
                         </span>
                     </div>
                     {% endif %}
-                    <div class="me-3 d-flex border rounded border-secondary p-1">
+                    <div class="me-3 d-flex align-items-center bg-dark-subtle rounded-pill px-2 py-1 shadow-sm">
                         <form action="{% url 'set_language' %}" method="post" class="m-0">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.path }}">
                             <input name="language" type="hidden" value="en">
-                            <button type="submit"
-                                class="lang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}">EN</button>
+                            <button type="submit" class="lang-btn {% if LANGUAGE_CODE == 'en' %}active{% endif %}"
+                                title="English">
+                                <svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 30">
+                                    <clipPath id="s">
+                                        <path d="M0,0 v30 h60 v-30 z" />
+                                    </clipPath>
+                                    <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+                                    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6" />
+                                    <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#s)" stroke="#C8102E"
+                                        stroke-width="4" />
+                                    <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10" />
+                                    <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" stroke-width="6" />
+                                </svg>
+                            </button>
                         </form>
-                        <span class="text-secondary mx-1">|</span>
+                        <div class="vr mx-2 bg-secondary" style="height: 16px; opacity: 0.3;"></div>
                         <form action="{% url 'set_language' %}" method="post" class="m-0">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.path }}">
                             <input name="language" type="hidden" value="it">
                             <button type="submit"
-                                class="lang-btn {% if LANGUAGE_CODE|slice:':2' == 'it' %}active{% endif %}">IT</button>
+                                class="lang-btn {% if LANGUAGE_CODE|slice:':2' == 'it' %}active{% endif %}"
+                                title="Italiano">
+                                <svg class="flag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2">
+                                    <rect width="1" height="2" fill="#009246" />
+                                    <rect width="1" height="2" x="1" fill="#fff" />
+                                    <rect width="1" height="2" x="2" fill="#ce2b37" />
+                                </svg>
+                            </button>
                         </form>
                     </div>
                     {% if request.path != '/' and request.path != '/register/' %}
@@ -171,6 +212,9 @@
                     <span class="text-secondary">© 2026 Collabook</span>
                 </div>
                 <div class="col-md-6 text-center text-md-end">
+                    <a href="{% url 'blog:home' %}" class="text-secondary text-decoration-none me-3 hover-gold">
+                        Blog
+                    </a>
                     <a href="{% url 'privacy_policy' %}" class="text-secondary text-decoration-none me-3 hover-gold">
                         Privacy Policy
                     </a>

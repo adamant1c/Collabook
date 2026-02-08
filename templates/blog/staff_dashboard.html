@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Blog Dashboard" %} | Collabook{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1 class="display-4 fw-bold text-white" style="font-family: 'Cinzel', serif;">
+            <span style="color: #d4af37;">{% trans "My" %}</span> {% trans "Articles" %}
+        </h1>
+        <a href="{% url 'blog:post_create' %}" class="btn btn-gold btn-lg">
+            ➕ {% trans "Create New Post" %}
+        </a>
+    </div>
+</div>
+
+<div class="card bg-dark border-secondary shadow">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0">
+                <thead class="text-secondary">
+                    <tr>
+                        <th class="px-4">{% trans "Title" %}</th>
+                        <th>{% trans "Category" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Created" %}</th>
+                        <th class="text-end px-4">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                    <tr>
+                        <td class="px-4">
+                            <span class="text-white fw-bold">{{ post.title }}</span>
+                            {% if post.title_it %}
+                            <br><small class="text-secondary">🇮🇹 {{ post.title_it }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge border border-warning text-warning">
+                                {{ post.category.name }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if post.status == 1 %}
+                            <span class="text-success">● {% trans "Published" %}</span>
+                            {% else %}
+                            <span class="text-secondary">○ {% trans "Draft" %}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary">{{ post.created_on|date:"M d, Y" }}</td>
+                        <td class="text-end px-4">
+                            <a href="{% url 'blog:post_edit' post.slug %}" class="btn btn-outline-warning btn-sm">
+                                📝 {% trans "Edit" %}
+                            </a>
+                            <a href="{% url 'blog:post_detail' post.slug %}" class="btn btn-outline-light btn-sm ms-2">
+                                👁️ {% trans "View" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-secondary">
+                            {% trans "No articles written yet." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-gold {
+        background-color: #d4af37;
+        color: #1a1a1a;
+        font-weight: 600;
+        border: none;
+    }
+
+    .btn-gold:hover {
+        background-color: #f1c40f;
+        color: #000;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(212, 175, 55, 0.05) !important;
+    }
+</style>
+{% endblock %}

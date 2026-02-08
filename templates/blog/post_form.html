@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}
+{% if object %} {% trans "Edit Post" %} {% else %} {% trans "New Post" %} {% endif %} | Collabook
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <h1 class="h2 text-white mb-0" style="font-family: 'Cinzel', serif;">
+                {% if object %}
+                <span class="text-warning">{% trans "Editing" %}:</span> {{ object.title }}
+                {% else %}
+                <span class="text-gold">{% trans "Create New" %}</span> {% trans "Post" %}
+                {% endif %}
+            </h1>
+            <a href="{% url 'blog:dashboard' %}" class="btn btn-outline-secondary">
+                &lsaquo; {% trans "Back to Dashboard" %}
+            </a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="needs-validation">
+            {% csrf_token %}
+
+            <div class="row g-4">
+                <!-- English Content -->
+                <div class="col-md-6">
+                    <div class="card bg-dark border-secondary h-100">
+                        <div class="card-header border-secondary bg-secondary bg-opacity-10 text-white fw-bold">
+                            🇬🇧 English Version
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label text-secondary">{% trans "Title" %}</label>
+                                {{ form.title }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-secondary">{% trans "Content (HTML allowed)" %}</label>
+                                {{ form.content }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-secondary">{% trans "Meta Description" %}</label>
+                                {{ form.meta_description }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Italian Content -->
+                <div class="col-md-6">
+                    <div class="card bg-dark border-secondary h-100">
+                        <div class="card-header border-secondary bg-warning bg-opacity-10 text-white fw-bold">
+                            🇮🇹 Versione Italiana
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label text-secondary">{% trans "Titolo" %}</label>
+                                {{ form.title_it }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-secondary">{% trans "Contenuto" %}</label>
+                                {{ form.content_it }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-secondary">{% trans "Meta Descrizione" %}</label>
+                                {{ form.meta_description_it }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div class="col-12">
+                    <div class="card bg-dark border-secondary">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label text-secondary">{% trans "Category" %}</label>
+                                    {{ form.category }}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-secondary">{% trans "Status" %}</label>
+                                    {{ form.status }}
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label text-secondary">{% trans "Static Image Path" %}</label>
+                                    {{ form.static_image }}
+                                    <small class="text-muted">e.g., images/blog/narrative.png</small>
+                                </div>
+                                <div class="col-12 mt-3">
+                                    <label class="form-label text-secondary">{% trans "Upload Image" %}</label>
+                                    {{ form.image }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-5 text-center">
+                <button type="submit" class="btn btn-gold btn-lg px-5">
+                    💾 {% trans "Save Article" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .text-gold {
+        color: #d4af37;
+    }
+
+    .btn-gold {
+        background-color: #d4af37;
+        color: #1a1a1a;
+        font-weight: 600;
+        border: none;
+    }
+
+    .btn-gold:hover {
+        background-color: #f1c40f;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+</style>
+{% endblock %}

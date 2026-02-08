@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}How It Works | Collabook{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="display-3 text-center mb-5 fw-bold" style="font-family: 'Cinzel', serif; color: #d4af37;">How
+                Collabook Works</h1>
+
+            <div class="lead text-secondary text-center mb-5">
+                Welcome to Collabook, the ultimate interactive RPG where your choices shape the narrative.
+                Whether you are a seasoned role-player or a newcomer to the world of interactive fiction,
+                this guide will walk you through every aspect of the game, from character creation to mastering the
+                mechanics of our three unique worlds.
+            </div>
+
+            <hr class="border-secondary mb-5">
+
+            <!-- Table of Contents -->
+            <div class="card bg-dark border-secondary mb-5">
+                <div class="card-body">
+                    <h4 class="text-white mb-3">Table of Contents</h4>
+                    <ul class="list-unstyled text-gold">
+                        <li><a href="#getting-started" class="text-decoration-none text-gold">1. Getting Started</a>
+                        </li>
+                        <li><a href="#character-creation" class="text-decoration-none text-gold">2. Character Creation &
+                                Stats</a></li>
+                        <li><a href="#worlds" class="text-decoration-none text-gold">3. Exploring the Worlds</a></li>
+                        <li><a href="#mechanics" class="text-decoration-none text-gold">4. Game Mechanics (Combat, Loot,
+                                XP)</a></li>
+                        <li><a href="#interactive-storytelling" class="text-decoration-none text-gold">5. Interactive
+                                Storytelling & AI</a></li>
+                        <li><a href="#community" class="text-decoration-none text-gold">6. Community & Safety</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Sections -->
+            <section id="getting-started" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">1. Getting Started</h2>
+                <p>
+                    Collabook is designed to be accessible directly from your browser. No downloads are required.
+                    Simply create an account using your email or Google login, and you are ready to embark on your
+                    adventure.
+                    Your progress is saved automatically to the cloud, allowing you to pick up your story exactly where
+                    you left off, on any device.
+                </p>
+                <p>
+                    Upon your first login, you will be greeted by the World Selection screen. Currently, we offer three
+                    distinct settings:
+                    <strong>Fantasy</strong> (high magic, dragons, kingdoms), <strong>Sci-Fi</strong> (space
+                    exploration, cybernetics, alien diplomacy),
+                    and <strong>Cyberpunk</strong> (neon cities, corporate espionage, hackers). Each world has its own
+                    unique rules, lore, and challenges.
+                </p>
+            </section>
+
+            <section id="character-creation" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">2. Character Creation & Stats</h2>
+                <p>
+                    Your avatar is your connection to the world. In the Character Creation phase, you will define not
+                    just your stats, but your identity.
+                    You will choose a name, a backstory, and allocate points to core attributes:
+                </p>
+                <ul>
+                    <li><strong>Strength:</strong> Determines your physical power and melee damage.</li>
+                    <li><strong>Agility:</strong> Affects your speed, evasion, and ranged accuracy.</li>
+                    <li><strong>Intelligence:</strong> Governs your magical aptitude, hacking skills, and
+                        problem-solving.</li>
+                    <li><strong>Charisma:</strong> Crucial for diplomacy, persuasion, and leadership.</li>
+                </ul>
+                <p>
+                    These stats are not just numbers; they fundamentally alter the choices available to you. A
+                    high-strength character might be able to
+                    intimidate a guard, whereas a high-intelligence character could hack the security system to bypass
+                    them entirely.
+                </p>
+            </section>
+
+            <section id="worlds" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">3. Exploring the Worlds</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="p-3 border border-secondary rounded h-100">
+                            <h5 class="text-gold">Kingdom of Eternal Magic</h5>
+                            <p class="small text-secondary">A realm where ancient dragons rule the skies and mages study
+                                in crystal towers. Politics are cutthroat, and monsters roam the wildlands.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border border-secondary rounded h-100">
+                            <h5 class="text-gold">Galactic Federation</h5>
+                            <p class="small text-secondary">Explore the stars as a captain of your own ship. Trade with
+                                alien species, fight space pirates, and uncover the mysteries of the cosmos.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 border border-secondary rounded h-100">
+                            <h5 class="text-gold">Neon City 2099</h5>
+                            <p class="small text-secondary">High tech, low life. Survive in a sprawling metropolis run
+                                by mega-corporations. Augment your body and fight for freedom in the digital shadows.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="mechanics" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">4. Game Mechanics</h2>
+                <p>
+                    <strong>Combat:</strong> When diplomacy fails, combat begins. Our turn-based system allows you to
+                    choose your strategy. Attack, defend, use items, or flee.
+                    Success depends on your stats and a random roll (D20 system). The AI narrator describes the outcome
+                    of your actions in vivid detail.
+                </p>
+                <p>
+                    <strong>Loot & Inventory:</strong> Defeated enemies drop gold and items. You can use gold to buy
+                    better gear in town hubs. Potions, weapons, and armor
+                    are essential for surviving tougher encounters.
+                </p>
+                <p>
+                    <strong>Experience (XP):</strong> Every successful action earns you XP. Leveling up grants you new
+                    stat points, making your character stronger and unlocking new abilities.
+                </p>
+            </section>
+
+            <!-- AdSense Middle -->
+            {% if ADSENSE_ENABLED %}
+            <div class="my-5 text-center">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9623905672643205"
+                    data-ad-slot="5678901234" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
+            </div>
+            {% endif %}
+
+            <section id="interactive-storytelling" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">5. Interactive Storytelling & AI</h2>
+                <p>
+                    At the heart of Collabook is our advanced AI storyteller. Unlike traditional games with pre-written
+                    dialogue, Collabook generates the story
+                    dynamically based on your inputs. If you want to try something unconventional—like trying to tame a
+                    dragon with a song instead of a sword—you can!
+                    Type your custom action, and the AI will determine the outcome based on your stats and the context.
+                </p>
+                <p>
+                    This infinite possibility engine ensures that no two playthroughs are ever the same. Your choices
+                    have real consequences that ripple through the story.
+                    Save a village, and they might come to your aid later. Betray a faction, and they will hunt you
+                    down.
+                </p>
+            </section>
+
+            <section id="community" class="mb-5">
+                <h2 class="text-white mb-3" style="font-family: 'Cinzel', serif;">6. Community & Safety</h2>
+                <p>
+                    We believe in a safe and inclusive gaming environment. Our AI is tuned to prevent explicit content,
+                    and our moderation team actively reviews reported incidents.
+                    You can share your adventures on our blog or social media. Join our community forums to discuss
+                    strategies, share lore, and meet fellow adventurers.
+                </p>
+            </section>
+
+            <div class="text-center mt-5">
+                <a href="{% url 'accounts:register' %}"
+                    class="btn btn-gold btn-lg px-5 py-3 rounded-pill shadow-lg">Start Your Adventure Now</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    section p {
+        font-size: 1.1rem;
+        line-height: 1.7;
+        color: #d0d0d0;
+        margin-bottom: 1.5rem;
+    }
+
+    .text-gold {
+        color: #d4af37 !important;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Collabook Blog{% endblock %}
+
+{% block content %}
+<div class="row mb-5">
+    <div class="col-12 text-center">
+        <h1 class="display-4 fw-bold text-white mb-3" style="font-family: 'Cinzel', serif;">
+            <span style="color: #d4af37;">Collabook</span> {% trans "Chronicles" %}
+        </h1>
+        <p class="lead text-secondary">
+            {% trans "Explore the art of storytelling, RPG guides, and the future of AI gaming." %}
+        </p>
+        {% if request.user.is_staff %}
+        <div class="mt-4">
+            <a href="{% url 'blog:post_create' %}" class="btn btn-outline-warning">
+                ➕ {% trans "Create New Post" %}
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- AdSense Banner -->
+{% if ADSENSE_ENABLED %}
+<div class="row mb-5">
+    <div class="col-12 text-center">
+        <!-- Ad slot placeholder -->
+        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-9623905672643205"
+            data-ad-slot="1234567890" <!-- Replace with actual slot ID -->
+            data-ad-format="auto"
+            data-full-width-responsive="true"></ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    {% for post in object_list %}
+    <div class="col-md-4">
+        <div class="card h-100 bg-dark border-secondary shadow-sm hover-elevate">
+            {% if post.image %}
+            <img src="{{ post.image.url }}" class="card-img-top"
+                alt="{% if LANGUAGE_CODE|slice:':2' == 'it' and post.title_it %}{{ post.title_it }}{% else %}{{ post.title }}{% endif %}"
+                style="height: 200px; object-fit: cover; opacity: 0.8;">
+            {% elif post.static_image %}
+            <img src="{% static post.static_image %}" class="card-img-top"
+                alt="{% if LANGUAGE_CODE|slice:':2' == 'it' and post.title_it %}{{ post.title_it }}{% else %}{{ post.title }}{% endif %}"
+                style="height: 200px; object-fit: cover; opacity: 0.8;">
+            {% else %}
+            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
+                style="height: 200px;">
+                <span class="text-muted fa-2x">⚔️</span>
+            </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+                <div class="mb-2">
+                    <span class="badge bg-gold text-dark">
+                        {% if LANGUAGE_CODE|slice:":2" == "it" and post.category.name_it %}
+                        {{ post.category.name_it }}
+                        {% else %}
+                        {{ post.category.name|default:"General" }}
+                        {% endif %}
+                    </span>
+                    <small class="text-secondary ms-2">{{ post.created_on|date:"M d, Y" }}</small>
+                </div>
+                <h5 class="card-title text-white mb-3" style="font-family: 'Cinzel', serif;">
+                    <a href="{% url 'blog:post_detail' post.slug %}"
+                        class="text-decoration-none text-white stretched-link">
+                        {% if LANGUAGE_CODE|slice:":2" == "it" and post.title_it %}
+                        {{ post.title_it }}
+                        {% else %}
+                        {{ post.title }}
+                        {% endif %}
+                    </a>
+                </h5>
+                <p class="card-text text-secondary flex-grow-1">
+                    {% if LANGUAGE_CODE|slice:":2" == "it" and post.content_it %}
+                    {{ post.content_it|striptags|truncatewords:20 }}
+                    {% else %}
+                    {{ post.content|striptags|truncatewords:20 }}
+                    {% endif %}
+                </p>
+                <div class="mt-3">
+                    <span class="text-gold fw-bold">{% trans "Read Article" %} &rarr;</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <p class="text-secondary">{% trans "No scrolls written yet. Check back soon!" %}</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<nav class="mt-5" aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link bg-dark text-secondary border-secondary"
+                href="?page={{ page_obj.previous_page_number }}">
+                &laquo; {% trans "Previous" %}
+            </a>
+        </li>
+        {% endif %}
+
+        <li class="page-item disabled">
+            <span class="page-link bg-dark text-gold border-secondary">
+                {% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link bg-dark text-secondary border-secondary" href="?page={{ page_obj.next_page_number }}">
+                {% trans "Next" %} &raquo;
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<style>
+    .bg-gold {
+        background-color: #d4af37;
+    }
+
+    .text-gold {
+        color: #d4af37;
+    }
+
+    .hover-elevate {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-elevate:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    }
+</style>
+{% endblock %}

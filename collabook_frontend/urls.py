@@ -117,5 +117,13 @@ urlpatterns = [
     path('terms', core_views.terms, name='terms'),
     path('faq', core_views.faq, name='faq'),
     path('contact', RedirectView.as_view(url='/about/', permanent=True), name='contact'),
-    path('how-it-works', RedirectView.as_view(url='/game/rules/', permanent=True), name='how_it_works'),
+    path('how-it-works', core_views.how_it_works, name='how_it_works'),
+    path('blog/', include('blog.urls')),
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

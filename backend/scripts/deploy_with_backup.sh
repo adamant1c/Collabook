@@ -87,7 +87,7 @@ fi
 # --------------------------------------------------
 echo ""
 echo "🛑 Stopping containers and removing volumes..."
-$COMPOSE down -v
+$COMPOSE down -v --remove-orphans
 
 echo "🧹 Cleaning up orphaned volumes..."
 docker volume prune -f

@@ -89,11 +89,21 @@ def main():
     
     try:
         with Session(engine) as session:
+            # Define dummy models for import
+            class Category(Base): __tablename__ = "blog_category"
+            class Post(Base): __tablename__ = "blog_post"
+            
             # Import in order respecting foreign key constraints
             total = 0
             
             # Users first (no dependencies)
             total += import_table(session, User, "users.json")
+            
+            # Blog categories
+            total += import_table(session, Category, "blog_categories.json")
+            
+            # Blog posts (depend on Users and Categories)
+            total += import_table(session, Post, "blog_posts.json")
             
             # Stories depend on Users (and possibly Characters, but we'll handle that)
             total += import_table(session, Story, "stories.json")

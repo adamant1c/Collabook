@@ -13,6 +13,13 @@
         <p class="lead text-secondary">
             {% trans "Explore the art of storytelling, RPG guides, and the future of AI gaming." %}
         </p>
+        {% if request.user.is_staff %}
+        <div class="mt-4">
+            <a href="{% url 'blog:post_create' %}" class="btn btn-outline-warning">
+                ➕ {% trans "Create New Post" %}
+            </a>
+        </div>
+        {% endif %}
     </div>
 </div>
 

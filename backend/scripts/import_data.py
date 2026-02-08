@@ -124,18 +124,28 @@ def main():
     
     try:
         with Session(engine) as session:
-            # Reflect blog tables from database
+            # Reflect Django and blog tables from database
             try:
                 class AuthUser(Base):
                     __table__ = Table("auth_user", Base.metadata, autoload_with=engine)
+                class Site(Base):
+                    __table__ = Table("django_site", Base.metadata, autoload_with=engine)
+                class SocialApp(Base):
+                    __table__ = Table("socialaccount_socialapp", Base.metadata, autoload_with=engine)
+                class SocialAccount(Base):
+                    __table__ = Table("socialaccount_socialaccount", Base.metadata, autoload_with=engine)
+                class SocialToken(Base):
+                    __table__ = Table("socialaccount_socialtoken", Base.metadata, autoload_with=engine)
+                class EmailAddress(Base):
+                    __table__ = Table("account_emailaddress", Base.metadata, autoload_with=engine)
                 class Category(Base):
                     __table__ = Table("blog_category", Base.metadata, autoload_with=engine)
                 class Post(Base):
                     __table__ = Table("blog_post", Base.metadata, autoload_with=engine)
-                has_blog = True
+                has_django_tables = True
             except Exception as e:
-                print(f"⚠️  Could not reflect blog tables: {e}")
-                has_blog = False
+                print(f"⚠️  Could not reflect Django/blog tables: {e}")
+                has_django_tables = False
             
             # Import in order respecting foreign key constraints
             total = 0
@@ -143,14 +153,19 @@ def main():
             # Users first (no dependencies)
             total += import_table(session, User, "users.json")
             
-            if has_blog:
-                # Auth users first (blog posts depend on them)
+            if has_django_tables:
+                # Site and Auth data first
+                total += import_table(session, Site, "django_sites.json")
                 total += import_table(session, AuthUser, "auth_users.json")
+                total += import_table(session, EmailAddress, "email_addresses.json")
                 
-                # Blog categories
+                # Social Auth data
+                total += import_table(session, SocialApp, "social_apps.json")
+                total += import_table(session, SocialAccount, "social_accounts.json")
+                total += import_table(session, SocialToken, "social_tokens.json")
+                
+                # Blog data
                 total += import_table(session, Category, "blog_categories.json")
-                
-                # Blog posts (depend on AuthUsers and Categories)
                 total += import_table(session, Post, "blog_posts.json")
             
             # Stories depend on Users (and possibly Characters, but we'll handle that)

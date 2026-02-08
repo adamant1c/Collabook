@@ -90,6 +90,13 @@
                             📖 {% trans "Blog" %}
                         </a>
                     </li>
+                    {% if request.user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" href="{% url 'blog:dashboard' %}">
+                            ✍️ {% trans "Blog Admin" %}
+                        </a>
+                    </li>
+                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'game:rules' %}">
                             📜 {% trans "Rules" %}

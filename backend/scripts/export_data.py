@@ -70,6 +70,11 @@ def main():
     print("📤 Exporting database...")
     # Define plain classes for reflection of Django tables (avoid Mapper exceptions)
     class AuthUser: __tablename__ = "auth_user"
+    class Site: __tablename__ = "django_site"
+    class SocialApp: __tablename__ = "socialaccount_socialapp"
+    class SocialAccount: __tablename__ = "socialaccount_socialaccount"
+    class SocialToken: __tablename__ = "socialaccount_socialtoken"
+    class EmailAddress: __tablename__ = "account_emailaddress"
     class Category: __tablename__ = "blog_category"
     class Post:     __tablename__ = "blog_post"
 
@@ -87,6 +92,11 @@ def main():
         
         # Export blog data
         export_table(session, AuthUser, "auth_users.json")
+        export_table(session, Site, "django_sites.json")
+        export_table(session, SocialApp, "social_apps.json")
+        export_table(session, SocialAccount, "social_accounts.json")
+        export_table(session, SocialToken, "social_tokens.json")
+        export_table(session, EmailAddress, "email_addresses.json")
         export_table(session, Category, "blog_categories.json")
         export_table(session, Post, "blog_posts.json")
 

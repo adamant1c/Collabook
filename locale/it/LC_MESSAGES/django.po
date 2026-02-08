@@ -124,9 +124,11 @@ msgstr ""
 
 #: character/views.py:57
 msgid ""
-"You must roll your dice to determine your hero's destiny before beginning "
-"the adventure!"
+"When words fail, the dice decide. Collabook uses a D&D-inspired system to "
+"resolve combat."
 msgstr ""
+"Quando le parole falliscono, decidono i dadi. Collabook usa un sistema ispirato "
+"a D&D per risolvere i combattimenti."
 
 #: character/views.py:64
 msgid "Character record not found. Please contact support."
@@ -135,8 +137,59 @@ msgstr ""
 #: character/views.py:78
 #, fuzzy
 #| msgid "Character Sheet"
-msgid "Character created!"
-msgstr "Scheda Personaggio"
+msgid "Resolution"
+msgstr "Risoluzione"
+
+msgid ""
+"A d20 roll plus your modifiers determines if you hit. Target must exceed Enemy "
+"AC (Armor Class)."
+msgstr ""
+"Un tiro di d20 più i tuoi modificatori determina se colpisci. Il bersaglio deve "
+"superare la CA (Classe Armatura) nemica."
+
+msgid "Damage"
+msgstr "Danno"
+
+msgid ""
+"Weapon damage varies by type. Critical hits (Natural 20) deal massive damage!"
+msgstr ""
+"Il danno dell'arma varia in base al tipo. I colpi critici (20 Naturale) infliggono "
+"danni enormi!"
+
+msgid "Experience & Leveling"
+msgstr "Esperienza e Livello"
+
+msgid "Experience Points (XP)"
+msgstr "Punti Esperienza (PE)"
+
+msgid ""
+"Defeating enemies and completing quests grants Experience Points (XP)."
+msgstr ""
+"Sconfiggere nemici e completare missioni conferisce Punti Esperienza (PE)."
+
+msgid ""
+"Gain enough XP to Level Up! Each level increases your Maximum HP and "
+"potentially your core attributes, making you stronger for the challenges ahead."
+msgstr ""
+"Guadagna abbastanza PE per salire di livello! Ogni livello aumenta i tuoi PV Massimi "
+"e potenzialmente i tuoi attributi base, rendendoti più forte per le sfide future."
+
+msgid "Choice System"
+msgstr "Sistema di Scelte"
+
+msgid ""
+"For every turn, the Weaver suggests two plausible choices to help you stay in "
+"character and move the story forward."
+msgstr ""
+"Per ogni turno, il Tessitore suggerisce due scelte plausibili per aiutarti a "
+"restare nel personaggio e far avanzare la storia."
+
+msgid ""
+"You can pick one of the suggestions or write your own custom action (Option 3) "
+"to truly forge your own path."
+msgstr ""
+"Puoi scegliere uno dei suggerimenti o scrivere la tua azione personalizzata "
+"(Opzione 3) per forgiare davvero il tuo percorso."
 
 #: character/views.py:98
 msgid "Please create a character first."
@@ -342,8 +395,6 @@ msgstr ""
 "azioni e il mondo risponderà attraverso il nostro avanzato AI Dungeon Master."
 
 #: templates/game/rules.html:40
-#, fuzzy
-#| msgid "Roll Dice"
 msgid "Rolling Dice"
 msgstr "Tira i Dadi"
 
@@ -359,6 +410,9 @@ msgstr ""
 msgid "Taking Action"
 msgstr "Agire"
 
+msgid "Combat & Challenges"
+msgstr "Combattimento e Sfide"
+
 #: templates/game/rules.html:57
 msgid ""
 "Be descriptive! The more detail you provide about your intent, the more "
@@ -368,30 +422,26 @@ msgstr ""
 "mondo reagirà."
 
 #: templates/game/rules.html:69
-#, fuzzy
-#| msgid "Character Sheet"
 msgid "Character Stats"
-msgstr "Scheda Personaggio"
+msgstr "Statistiche Personaggio"
 
 #: templates/game/rules.html:80
-msgid "Physical power and combat prowess."
-msgstr "Potere fisico e abilità in combattimento."
+msgid "Influences physical damage and hits with melee weapons."
+msgstr "Influenza il danno fisico e i colpi con armi da mischia."
 
 #: templates/game/rules.html:92
-msgid "Affinity for the mystical arts and ancient spells."
-msgstr "Affinità per le arti mistiche e gli antichi incantesimi."
+msgid "Determines the power and success of your mystical abilities."
+msgstr "Determina la potenza e il successo delle tue abilità mistiche."
 
 #: templates/game/rules.html:104
-msgid "Agility, speed, and precision in movement."
-msgstr "Agilità, velocità e precisione nei movimenti."
+msgid "Used for defense (AC) and precision-based interactions."
+msgstr "Usata per la difesa (CA) e le interazioni basate sulla precisione."
 
 #: templates/game/rules.html:116
-msgid "Ability to withstand hits and avoid damage."
-msgstr "Capacità di resistere ai colpi ed evitare danni."
+msgid "Reduces the damage you take from incoming attacks."
+msgstr "Riduce il danno subito dagli attacchi in arrivo."
 
 #: templates/game/rules.html:126
-#, fuzzy
-#| msgid "Return to Worlds"
 msgid "Return to Worlds"
 msgstr "Torna ai Mondi"
 
@@ -569,8 +619,14 @@ msgstr ""
 "attributi."
 
 #: templates/game/rules.html:62
-msgid "Currently, these stats are automatically generated based on your character's destiny."
-msgstr "Attualmente, queste statistiche sono generate automaticamente in base al destino del tuo personaggio."
+msgid ""
+"Currently, these stats are automatically generated based on your character's "
+"background and attributes to ensure a balanced start. In the future, you may "
+"have the option to further customize your starting potential!"
+msgstr ""
+"Attualmente, queste statistiche sono generate automaticamente in base al background "
+"e agli attributi del tuo personaggio per garantire un inizio bilanciato. In futuro, "
+"potresti avere l'opzione di personalizzare ulteriormente il tuo potenziale iniziale!"
 
 #: templates/base.html:96
 msgid "Day"
@@ -1018,5 +1074,15 @@ msgstr "Incontro Attivo"
 msgid "You"
 msgstr "Tu"
 
+msgid "Adventure Summary"
+msgstr "Riepilogo Avventura"
+
 msgid "Adventure Finished"
 msgstr "Avventura Terminata"
+
+msgid "The Arrival"
+msgstr "L'Arrivo"
+
+msgid "You stepped into the world, ready for destiny..."
+msgstr "Sei entrato nel mondo, pronto per il destino..."
+

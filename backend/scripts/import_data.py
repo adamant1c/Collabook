@@ -4,11 +4,12 @@ import json
 from datetime import datetime
 from pathlib import Path
 from sqlalchemy.orm import Session
+from sqlalchemy import Table
 
 # 🔧 Backend root (./backend mounted as /app)
 sys.path.append("/app")
 
-from app.core.database import engine
+from app.core.database import engine, Base
 from app.models.db_models import (
     User,
     Story,
@@ -89,9 +90,16 @@ def main():
     
     try:
         with Session(engine) as session:
-            # Define dummy models for import
-            class Category(Base): __tablename__ = "blog_category"
-            class Post(Base): __tablename__ = "blog_post"
+            # Reflect blog tables from database
+            try:
+                class Category(Base):
+                    __table__ = Table("blog_category", Base.metadata, autoload_with=engine)
+                class Post(Base):
+                    __table__ = Table("blog_post", Base.metadata, autoload_with=engine)
+                has_blog = True
+            except Exception as e:
+                print(f"⚠️  Could not reflect blog tables: {e}")
+                has_blog = False
             
             # Import in order respecting foreign key constraints
             total = 0
@@ -99,11 +107,12 @@ def main():
             # Users first (no dependencies)
             total += import_table(session, User, "users.json")
             
-            # Blog categories
-            total += import_table(session, Category, "blog_categories.json")
-            
-            # Blog posts (depend on Users and Categories)
-            total += import_table(session, Post, "blog_posts.json")
+            if has_blog:
+                # Blog categories
+                total += import_table(session, Category, "blog_categories.json")
+                
+                # Blog posts (depend on Users and Categories)
+                total += import_table(session, Post, "blog_posts.json")
             
             # Stories depend on Users (and possibly Characters, but we'll handle that)
             total += import_table(session, Story, "stories.json")

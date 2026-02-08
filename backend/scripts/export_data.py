@@ -10,7 +10,7 @@ from sqlalchemy.inspection import inspect
 # 🔧 Backend root (./backend mounted as /app)
 sys.path.append("/app")
 
-from app.core.database import engine
+from app.core.database import engine, Base
 from app.models.db_models import (
     User,
     Story,
@@ -68,9 +68,9 @@ def export_table(session, model, filename):
 
 def main():
     print("📤 Exporting database...")
-    # Define dummy models for reflection of Django tables
-    class Category(Base): __tablename__ = "blog_category"
-    class Post(Base): __tablename__ = "blog_post"
+    # Define plain classes for reflection of Django tables (avoid Mapper exceptions)
+    class Category: __tablename__ = "blog_category"
+    class Post:     __tablename__ = "blog_post"
 
     with Session(engine) as session:
         export_table(session, User, "users.json")

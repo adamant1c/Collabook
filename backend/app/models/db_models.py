@@ -34,24 +34,31 @@ class ItemType(str, enum.Enum):
     MISC = "MISC"
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = "accounts_user"
     
-    # Authentication
-    id = Column(String, primary_key=True, default=generate_uuid)
+    # Django Auth basic fields
+    id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False, index=True)
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
     email = Column(String, unique=True, nullable=False, index=True)
-    password_hash = Column(String, nullable=False)
-    role = Column(SQLEnum(UserRole), default=UserRole.PLAYER, nullable=False)
+    password = Column(String, nullable=False)
+    is_staff = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=False)
+    date_joined = Column(DateTime, default=datetime.utcnow)
+    last_login = Column(DateTime, nullable=True)
     
-    # Character Info
-    name = Column(String, nullable=False)  # Character display name
+    # RPG / Character Info
+    role = Column(SQLEnum(UserRole), default=UserRole.PLAYER, nullable=False)
+    name = Column(String, nullable=True)  # Character display name
     profession = Column(String, nullable=True)
     description = Column(Text, nullable=True)
     avatar_description = Column(Text, nullable=True)
     
-    # RPG Stats (Phase 2 - initialized to 0 for now)
-    hp = Column(Integer, default=0)
-    max_hp = Column(Integer, default=200)
+    # RPG Stats
+    hp = Column(Integer, default=100)
+    max_hp = Column(Integer, default=100)
     strength = Column(Integer, default=0)
     magic = Column(Integer, default=0)
     dexterity = Column(Integer, default=0)
@@ -59,10 +66,7 @@ class User(Base):
     xp = Column(Integer, default=0)
     level = Column(Integer, default=1)
     
-    # Account Management
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    last_login = Column(DateTime, nullable=True)
+    # Account Management fallback
     reset_token = Column(String, nullable=True)
     reset_token_expires = Column(DateTime, nullable=True)
     
@@ -91,7 +95,7 @@ class Story(Base):
     
     # World management
     is_default = Column(Boolean, default=False)  # True for 3 predefined worlds
-    created_by = Column(String, ForeignKey("users.id"), nullable=True)  # NULL for defaults
+    created_by = Column(Integer, ForeignKey("accounts_user.id"), nullable=True)  # NULL for defaults
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -107,7 +111,7 @@ class Character(Base):
     __tablename__ = "characters"
     
     id = Column(String, primary_key=True, default=generate_uuid)
-    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("accounts_user.id"), nullable=False)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False)
     insertion_point = Column(Text, nullable=True)
     status = Column(String, default="active")  # active, inactive, dead

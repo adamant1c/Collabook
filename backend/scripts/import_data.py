@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from sqlalchemy.orm import Session
-from sqlalchemy import Table
+from sqlalchemy import Table, text
 
 # 🔧 Backend root (./backend mounted as /app)
 sys.path.append("/app")
@@ -30,7 +30,6 @@ def deserialize_value(value, column_type):
     if value is None:
         return None
     
-    # Handle datetime fields
     if "DateTime" in str(column_type) or "TIMESTAMP" in str(column_type):
         if isinstance(value, str):
             try:
@@ -41,7 +40,7 @@ def deserialize_value(value, column_type):
     
     return value
 
-def import_table(session, model, filename):
+def import_table(session, model, filename, user_map=None):
     """Import data from JSON file into database table"""
     path = EXPORT_DIR / filename
     
@@ -56,7 +55,6 @@ def import_table(session, model, filename):
         print(f"ℹ️  {model.__name__}: 0 records in {path.name}")
         return 0
     
-    # Get column information from the model
     from sqlalchemy.inspection import inspect
     mapper = inspect(model)
     columns = {col.key: col for col in mapper.columns}
@@ -64,12 +62,21 @@ def import_table(session, model, filename):
     
     imported_count = 0
     skipped_count = 0
-    
-    # Get primary key column name(s)
     pk_cols = [col.name for col in mapper.primary_key]
     
     for record_data in records:
-        # Check if record already exists based on primary key(s)
+        # Special User ID mapping for foreign keys
+        if user_map:
+            if table_name == "characters" and "user_id" in record_data:
+                old_id = record_data["user_id"]
+                if old_id in user_map:
+                    record_data["user_id"] = user_map[old_id]
+            if table_name == "stories" and "created_by" in record_data:
+                old_id = record_data["created_by"]
+                if old_id in user_map:
+                    record_data["created_by"] = user_map[old_id]
+
+        # Check if record already exists
         if pk_cols:
             filter_kwargs = {col: record_data.get(col) for col in pk_cols if col in record_data}
             if filter_kwargs:
@@ -78,30 +85,12 @@ def import_table(session, model, filename):
                     skipped_count += 1
                     continue
         
-        # Convert values to proper types
         processed_data = {}
         for key, value in record_data.items():
             if key in columns:
                 column_type = columns[key].type
                 processed_data[key] = deserialize_value(value, column_type)
         
-        # Special case for blog_post: ensure author exists
-        if table_name == "blog_post" and "author_id" in processed_data:
-            author_id = processed_data["author_id"]
-            # Check if this author exists in auth_user
-            from sqlalchemy import text
-            author_exists = session.execute(text("SELECT 1 FROM auth_user WHERE id = :id"), {"id": author_id}).first()
-            if not author_exists:
-                # Fallback to id 1 if it exists, otherwise skip
-                first_user = session.execute(text("SELECT id FROM auth_user LIMIT 1")).first()
-                if first_user:
-                    print(f"⚠️  Post '{processed_data.get('title')}' refers to non-existent author {author_id}. Mapping to {first_user[0]}")
-                    processed_data["author_id"] = first_user[0]
-                else:
-                    print(f"❌ Skipping post '{processed_data.get('title')}': No users found in auth_user table.")
-                    continue
-
-        # Create instance and add to session
         instance = model(**processed_data)
         session.add(instance)
         imported_count += 1
@@ -113,8 +102,102 @@ def import_table(session, model, filename):
     print(msg + f" from {path.name}")
     return imported_count
 
+def migrate_users(session):
+    """
+    Unified User Migration: Matches and merges Backend users into Django accounts_user.
+    """
+    print("👤 Migrating Users to unified table...")
+    
+    auth_users_path = EXPORT_DIR / "auth_users.json"
+    backend_users_path = EXPORT_DIR / "users.json"
+    
+    if not auth_users_path.exists() or not backend_users_path.exists():
+        print("❌ ERROR: Missing user export files.")
+        return {}
+
+    with open(auth_users_path, "r") as f: auth_records = json.load(f)
+    with open(backend_users_path, "r") as f: backend_records = json.load(f)
+
+    # 1. Create existing Django users from auth_users.json
+    for rec in auth_records:
+        if not session.query(User).filter_by(username=rec["username"]).first():
+            u = User(
+                username=rec["username"],
+                email=rec["email"],
+                password=rec["password"],
+                first_name=rec.get("first_name", ""),
+                last_name=rec.get("last_name", ""),
+                is_staff=rec.get("is_staff", False),
+                is_superuser=rec.get("is_superuser", False),
+                is_active=rec.get("is_active", True),
+                date_joined=deserialize_value(rec.get("date_joined"), User.date_joined.type),
+                last_login=deserialize_value(rec.get("last_login"), User.last_login.type)
+            )
+            session.add(u)
+    session.commit()
+
+    # 2. Create maps for matching
+    all_users = session.query(User).all()
+    email_map = {u.email.lower(): u.id for u in all_users if u.email}
+    username_map = {u.username.lower(): u.id for u in all_users}
+    
+    user_map = {} # { old_uuid: new_integer_id }
+    
+    # 3. Process Backend users
+    for b_rec in backend_records:
+        email = (b_rec.get("email") or "").lower()
+        username = (b_rec.get("username") or "").lower()
+        old_id = b_rec["id"]
+        
+        new_id = email_map.get(email) or username_map.get(username)
+        
+        if not new_id:
+            # Create a placeholder Auth user for this backend user to preserve data
+            print(f"  🆕 Creating missing Auth user for backend: {username or email}")
+            u = User(
+                username=b_rec.get("username") or f"user_{str(old_id)[:8]}",
+                email=b_rec.get("email", ""),
+                password="!", # Unusable password
+                first_name="",
+                last_name="",
+                role=b_rec.get("role", "PLAYER"),
+                is_active=True,
+                date_joined=datetime.utcnow()
+            )
+            session.add(u)
+            session.flush()
+            new_id = u.id
+            # Update maps to avoid duplicates if same user appears twice? (shouldn't happen)
+            if u.email: email_map[u.email.lower()] = new_id
+            username_map[u.username.lower()] = new_id
+
+        user_map[old_id] = new_id
+        
+        # Update RPG stats
+        u = session.get(User, new_id)
+        if u:
+            u.role = b_rec.get("role", "PLAYER")
+            u.name = b_rec.get("name")
+            u.profession = b_rec.get("profession")
+            u.description = b_rec.get("description")
+            u.avatar_description = b_rec.get("avatar_description")
+            u.hp = b_rec.get("hp", 100)
+            u.max_hp = b_rec.get("max_hp", 100)
+            u.strength = b_rec.get("strength", 0)
+            u.magic = b_rec.get("magic", 0)
+            u.dexterity = b_rec.get("dexterity", 0)
+            u.defense = b_rec.get("defense", 0)
+            u.xp = b_rec.get("xp", 0)
+            u.level = b_rec.get("level", 1)
+            print(f"  ✅ Linked and updated: {u.username}")
+
+    session.commit()
+    return user_map
+
 def main():
-    print("📥 Importing database from JSON exports...")
+    print("📥 Importing unified database from JSON exports...")
+    # Ensure all Backend tables exist (stories, characters, etc.)
+    Base.metadata.create_all(bind=engine)
     print(f"📂 Reading from: {EXPORT_DIR}")
     print()
     
@@ -124,75 +207,47 @@ def main():
     
     try:
         with Session(engine) as session:
-            # Reflect Django and blog tables from database
+            # 1. Migrate Users and get the UUID -> INT mapping
+            user_map = migrate_users(session)
+            total = len(user_map)
+            
+            # Reflect other Django tables
             try:
-                class AuthUser(Base):
-                    __table__ = Table("auth_user", Base.metadata, autoload_with=engine)
-                class Site(Base):
-                    __table__ = Table("django_site", Base.metadata, autoload_with=engine)
-                class SocialApp(Base):
-                    __table__ = Table("socialaccount_socialapp", Base.metadata, autoload_with=engine)
-                class SocialAccount(Base):
-                    __table__ = Table("socialaccount_socialaccount", Base.metadata, autoload_with=engine)
-                class SocialToken(Base):
-                    __table__ = Table("socialaccount_socialtoken", Base.metadata, autoload_with=engine)
-                class EmailAddress(Base):
-                    __table__ = Table("account_emailaddress", Base.metadata, autoload_with=engine)
-                class Category(Base):
-                    __table__ = Table("blog_category", Base.metadata, autoload_with=engine)
-                class Post(Base):
-                    __table__ = Table("blog_post", Base.metadata, autoload_with=engine)
-                has_django_tables = True
-            except Exception as e:
-                print(f"⚠️  Could not reflect Django/blog tables: {e}")
-                has_django_tables = False
-            
-            # Import in order respecting foreign key constraints
-            total = 0
-            
-            # Users first (no dependencies)
-            total += import_table(session, User, "users.json")
-            
-            if has_django_tables:
-                # Site and Auth data first
-                total += import_table(session, Site, "django_sites.json")
-                total += import_table(session, AuthUser, "auth_users.json")
-                total += import_table(session, EmailAddress, "email_addresses.json")
+                class Site(Base): __table__ = Table("django_site", Base.metadata, autoload_with=engine)
+                class SocialApp(Base): __table__ = Table("socialaccount_socialapp", Base.metadata, autoload_with=engine)
+                class SocialAccount(Base): __table__ = Table("socialaccount_socialaccount", Base.metadata, autoload_with=engine)
+                class SocialToken(Base): __table__ = Table("socialaccount_socialtoken", Base.metadata, autoload_with=engine)
+                class EmailAddress(Base): __table__ = Table("account_emailaddress", Base.metadata, autoload_with=engine)
+                class Category(Base): __table__ = Table("blog_category", Base.metadata, autoload_with=engine)
+                class Post(Base): __table__ = Table("blog_post", Base.metadata, autoload_with=engine)
                 
-                # Social Auth data
+                total += import_table(session, Site, "django_sites.json")
+                total += import_table(session, EmailAddress, "email_addresses.json")
                 total += import_table(session, SocialApp, "social_apps.json")
+                # SocialAccount might need user_id mapping too if it uses UUID currently?
+                # Actually Allauth social accounts link to auth_user table which now has integer IDs.
+                # Since auth_users.json was exported from a DB where auth_user had integer IDs, 
+                # social_accounts.json should also have integer user_ids that MATCH.
                 total += import_table(session, SocialAccount, "social_accounts.json")
                 total += import_table(session, SocialToken, "social_tokens.json")
-                
-                # Blog data
                 total += import_table(session, Category, "blog_categories.json")
                 total += import_table(session, Post, "blog_posts.json")
-            
-            # Stories depend on Users (and possibly Characters, but we'll handle that)
-            total += import_table(session, Story, "stories.json")
-            
-            # Characters depend on Users AND Stories
-            total += import_table(session, Character, "characters.json")
-            
-            # Turns depend on Stories
+            except Exception as e:
+                print(f"⚠️  Could not import some Django/blog tables: {e}")
+
+            # 2. Import Game data with mapping
+            total += import_table(session, Story, "stories.json", user_map)
+            total += import_table(session, Character, "characters.json", user_map)
             total += import_table(session, Turn, "turns.json")
-            
-            # Quests (no dependencies on user data)
             total += import_table(session, Quest, "quests.json")
-            
-            # PlayerQuests depend on Characters and Quests
             total += import_table(session, PlayerQuest, "player_quests.json")
-            
-            # Game entities (no dependencies on user data)
             total += import_table(session, Enemy, "enemies.json")
             total += import_table(session, NPC, "npcs.json")
             total += import_table(session, Item, "items.json")
-            
-            # Inventory depends on Characters and Items
             total += import_table(session, Inventory, "inventory.json")
             
             print()
-            print(f"🎉 Import completed successfully! Total records: {total}")
+            print(f"🎉 Unified Import completed successfully! Total records processed: {total}")
             
     except Exception as e:
         print(f"\n❌ ERROR during import: {e}")

@@ -2,7 +2,24 @@ from django.contrib import admin
 from django import forms
 from django.conf import settings
 import os
-from .models import BackendUser, Story, Character, Turn, Quest, Enemy, Item, NPC
+from .models import Story, Character, Turn, Quest, Enemy, Item, NPC
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+# Extend UserAdmin to show RPG stats
+class CustomUserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets + (
+        ('RPG Stats', {'fields': ('role', 'name', 'profession', 'description', 'avatar_description', 'hp', 'max_hp', 'strength', 'magic', 'dexterity', 'defense', 'xp', 'level')}),
+    )
+    list_display = UserAdmin.list_display + ('role', 'level', 'hp')
+
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
+admin.site.register(User, CustomUserAdmin)
 
 def get_image_choices():
     """Returns a list of image filenames from static/images"""
@@ -14,38 +31,26 @@ def get_image_choices():
         valid_extensions = ('.png', '.jpg', '.jpeg', '.webp', '.gif')
         for f in sorted(os.listdir(image_dir)):
             if f.lower().endswith(valid_extensions):
-                # Use the filename as both label and value
-                # Frontend will prepend /static/images/
                 choices.append((f, f))
     return choices
 
 class EnemyAdminForm(forms.ModelForm):
     image_url = forms.ChoiceField(choices=[], required=False)
-
     class Meta:
         model = Enemy
         fields = '__all__'
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['image_url'].choices = get_image_choices()
 
 class NPCAdminForm(forms.ModelForm):
     image_url = forms.ChoiceField(choices=[], required=False)
-
     class Meta:
         model = NPC
         fields = '__all__'
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['image_url'].choices = get_image_choices()
-
-@admin.register(BackendUser)
-class BackendUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'role', 'hp', 'max_hp', 'level', 'is_active', 'created_at')
-    search_fields = ('username', 'email')
-    list_filter = ('role', 'level', 'is_active')
 
 @admin.register(Story)
 class StoryAdmin(admin.ModelAdmin):

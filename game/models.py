@@ -1,38 +1,8 @@
 from django.db import models
+from django.conf import settings
 import uuid
 
-class BackendUser(models.Model):
-    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
-    username = models.CharField(max_length=255, unique=True)
-    email = models.CharField(max_length=255, unique=True)
-    password_hash = models.CharField(max_length=255)
-    role = models.CharField(max_length=50, default='player')
-    name = models.CharField(max_length=255)
-    profession = models.CharField(max_length=255, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    avatar_description = models.TextField(null=True, blank=True)
-    
-    # RPG Stats
-    hp = models.IntegerField(default=0)
-    max_hp = models.IntegerField(default=200)
-    strength = models.IntegerField(default=0)
-    magic = models.IntegerField(default=0)
-    dexterity = models.IntegerField(default=0)
-    defense = models.IntegerField(default=0)
-    xp = models.IntegerField(default=0)
-    level = models.IntegerField(default=1)
-    
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_login = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        managed = False
-        db_table = 'users'
-        verbose_name = "Backend User"
-
-    def __str__(self):
-        return self.username
+# BackendUser removed in favor of integrated User model
 
 class Story(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
@@ -47,6 +17,7 @@ class Story(models.Model):
 
     survival_goal_days = models.IntegerField(default=10)
     is_default = models.BooleanField(default=False)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='stories', db_column='created_by', on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -59,7 +30,7 @@ class Story(models.Model):
 
 class Character(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
-    user = models.ForeignKey(BackendUser, related_name='characters', db_column='user_id', on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='characters', db_column='user_id', on_delete=models.CASCADE)
     story = models.ForeignKey(Story, related_name='characters', db_column='story_id', on_delete=models.DO_NOTHING)
     insertion_point = models.TextField(null=True, blank=True)
     STATUS_CHOICES = [

@@ -80,58 +80,113 @@ def import_table(session, model, filename, user_map=None):
     imported_count = 0
     skipped_count = 0
     
+def import_record(session, model, table_name, record_data, columns, pk_cols, user_map):
+    """Processes and imports a single record"""
+    imported_count = 0
+    skipped_count = 0
+    
     try:
-        for record_data in records:
-            # Special User ID mapping for foreign keys
-            if user_map:
-                if table_name == "characters" and "user_id" in record_data:
-                    old_id = record_data["user_id"]
-                    if old_id in user_map:
-                        record_data["user_id"] = user_map[old_id]
-                if table_name == "stories" and "created_by" in record_data:
-                    old_id = record_data["created_by"]
-                    if old_id in user_map:
-                        record_data["created_by"] = user_map[old_id]
+        # Special User ID mapping for foreign keys
+        if user_map:
+            if table_name == "characters" and "user_id" in record_data:
+                old_id = record_data["user_id"]
+                if old_id in user_map: record_data["user_id"] = user_map[old_id]
+            if table_name == "stories" and "created_by" in record_data:
+                old_id = record_data["created_by"]
+                if old_id in user_map: record_data["created_by"] = user_map[old_id]
 
-            # Check if record already exists
-            if pk_cols:
-                filter_kwargs = {col: record_data.get(col) for col in pk_cols if col in record_data}
-                if filter_kwargs:
-                    # For declarative models, check existence
-                    if hasattr(model, "id") and hasattr(session, "query"):
-                        try:
-                            exists = session.query(model).filter_by(**filter_kwargs).first()
-                            if exists:
-                                skipped_count += 1
-                                continue
-                        except Exception:
-                            # If query fails, session might be poisoned, but we are inside a try block
-                            # and we'll rollback anyway if anything fails.
-                            pass
-            
-            processed_data = {}
-            for key, value in record_data.items():
-                if key in columns:
-                    column_type = columns[key].type
-                    processed_data[key] = deserialize_value(value, column_type)
-            
-            if hasattr(model, "id"): # Declarative model
-                instance = model(**processed_data)
-                session.add(instance)
-            else: # Table reflection / plain class
-                 from sqlalchemy import insert
-                 # Note: Table reflection here might be slow if done per record, 
-                 # but for smaller tables it's okay. Better to move out of loop.
-                 table = Table(table_name, Base.metadata, autoload_with=engine)
-                 stmt = insert(table).values(**processed_data)
-                 session.execute(stmt)
-                 
-            imported_count += 1
+        # 1. Handle existing records to avoid UniqueViolation
+        if pk_cols:
+            filter_kwargs = {col: record_data.get(col) for col in pk_cols if col in record_data}
+            if filter_kwargs:
+                # Optimized existence check for both declarative and reflected models
+                if hasattr(model, "id") and hasattr(session, "query"): # Declarative
+                    exists = session.query(model).filter_by(**filter_kwargs).first()
+                else: # Reflected / Plain class
+                    table = Table(table_name, Base.metadata, autoload_with=engine)
+                    from sqlalchemy import select
+                    stmt = select(table).filter_by(**filter_kwargs)
+                    exists = session.execute(stmt).first()
+                
+                if exists:
+                    skipped_count += 1
+                    return 0, 1
+
+        # 2. Process and insert data
+        processed_data = {}
+        for key, value in record_data.items():
+            if key in columns:
+                column_type = columns[key].type
+                processed_data[key] = deserialize_value(value, column_type)
         
+        if hasattr(model, "id"): # Declarative model
+            instance = model(**processed_data)
+            session.add(instance)
+        else: # Table reflection / plain class
+            from sqlalchemy import insert
+            table = Table(table_name, Base.metadata, autoload_with=engine)
+            stmt = insert(table).values(**processed_data)
+            session.execute(stmt)
+            
+        imported_count += 1
+    except Exception as e:
+        session.rollback()
+        print(f"❌ ERROR: Failed to import record in {table_name}: {e}")
+        # We don't abort the whole table for one record, but return 0
+        return 0, 0
+
+    return imported_count, skipped_count
+
+def import_table(session, model, filename, user_map=None, truncate=False):
+    """Import data from JSON file into database table"""
+    path = EXPORT_DIR / filename
+    
+    if not path.exists():
+        print(f"⚠️  Skipping {model.__name__ if hasattr(model, '__name__') else model}: {path.name} not found")
+        return 0
+    
+    with open(path, "r", encoding="utf-8") as f:
+        records = json.load(f)
+    
+    if not records:
+        print(f"ℹ️  {model.__name__ if hasattr(model, '__name__') else model}: 0 records in {path.name}")
+        return 0
+    
+    from sqlalchemy.inspection import inspect
+    try:
+        mapper = inspect(model)
+        columns = {col.key: col for col in mapper.columns}
+        table_name = mapper.local_table.name
+        pk_cols = [col.name for col in mapper.primary_key]
+    except Exception:
+        table_name = getattr(model, "__tablename__", None)
+        if not table_name: return 0
+        
+        try:
+            table = Table(table_name, Base.metadata, autoload_with=engine)
+            columns = {col.name: col for col in table.columns}
+            pk_cols = [col.name for col in table.primary_key]
+        except Exception as e:
+            print(f"⚠️  Skipping {model}: Table '{table_name}' lookup failed ({e})")
+            return 0
+    
+    if truncate:
+        print(f"🧹 Truncating {table_name} before import...")
+        session.execute(text(f'TRUNCATE TABLE "{table_name}" RESTART IDENTITY CASCADE'))
+
+    imported_count = 0
+    skipped_count = 0
+    
+    for record_data in records:
+        imp, skp = import_record(session, model, table_name, record_data, columns, pk_cols, user_map)
+        imported_count += imp
+        skipped_count += skp
+    
+    try:
         session.commit()
     except Exception as e:
         session.rollback()
-        print(f"❌ ERROR: Failed to import table {table_name}: {e}")
+        print(f"❌ ERROR: Failed to commit table {table_name}: {e}")
         return 0
 
     msg = f"✅ {table_name}: {imported_count} records imported"
@@ -266,7 +321,7 @@ def main():
                 class Category: __tablename__ = "blog_category"
                 class Post:     __tablename__ = "blog_post"
                 
-                total += import_table(session, Site, "django_sites.json")
+                total += import_table(session, Site, "django_sites.json", truncate=True)
                 total += import_table(session, EmailAddress, "email_addresses.json")
                 total += import_table(session, SocialApp, "social_apps.json")
                 total += import_table(session, SocialAccount, "social_accounts.json")

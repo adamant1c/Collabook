@@ -57,7 +57,7 @@ class CharacterCreate(BaseModel):
 
 class CharacterResponse(BaseModel):
     id: str
-    user_id: str
+    user_id: int
     story_id: str
     insertion_point: Optional[str]
     status: str
@@ -68,7 +68,7 @@ class CharacterResponse(BaseModel):
         from_attributes = True
 
 class UserResponse(BaseModel):
-    id: str
+    id: int
     username: str
     email: str
     role: str

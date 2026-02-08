@@ -60,9 +60,24 @@ def import_table(session, model, filename):
     from sqlalchemy.inspection import inspect
     mapper = inspect(model)
     columns = {col.key: col for col in mapper.columns}
+    table_name = mapper.local_table.name
     
     imported_count = 0
+    skipped_count = 0
+    
+    # Get primary key column name(s)
+    pk_cols = [col.name for col in mapper.primary_key]
+    
     for record_data in records:
+        # Check if record already exists based on primary key(s)
+        if pk_cols:
+            filter_kwargs = {col: record_data.get(col) for col in pk_cols if col in record_data}
+            if filter_kwargs:
+                exists = session.query(model).filter_by(**filter_kwargs).first()
+                if exists:
+                    skipped_count += 1
+                    continue
+        
         # Convert values to proper types
         processed_data = {}
         for key, value in record_data.items():
@@ -70,13 +85,32 @@ def import_table(session, model, filename):
                 column_type = columns[key].type
                 processed_data[key] = deserialize_value(value, column_type)
         
+        # Special case for blog_post: ensure author exists
+        if table_name == "blog_post" and "author_id" in processed_data:
+            author_id = processed_data["author_id"]
+            # Check if this author exists in auth_user
+            from sqlalchemy import text
+            author_exists = session.execute(text("SELECT 1 FROM auth_user WHERE id = :id"), {"id": author_id}).first()
+            if not author_exists:
+                # Fallback to id 1 if it exists, otherwise skip
+                first_user = session.execute(text("SELECT id FROM auth_user LIMIT 1")).first()
+                if first_user:
+                    print(f"⚠️  Post '{processed_data.get('title')}' refers to non-existent author {author_id}. Mapping to {first_user[0]}")
+                    processed_data["author_id"] = first_user[0]
+                else:
+                    print(f"❌ Skipping post '{processed_data.get('title')}': No users found in auth_user table.")
+                    continue
+
         # Create instance and add to session
         instance = model(**processed_data)
         session.add(instance)
         imported_count += 1
     
     session.commit()
-    print(f"✅ {model.__name__}: {imported_count} records imported from {path.name}")
+    msg = f"✅ {model.__name__}: {imported_count} records imported"
+    if skipped_count:
+        msg += f" ({skipped_count} already existed)"
+    print(msg + f" from {path.name}")
     return imported_count
 
 def main():
@@ -92,6 +126,8 @@ def main():
         with Session(engine) as session:
             # Reflect blog tables from database
             try:
+                class AuthUser(Base):
+                    __table__ = Table("auth_user", Base.metadata, autoload_with=engine)
                 class Category(Base):
                     __table__ = Table("blog_category", Base.metadata, autoload_with=engine)
                 class Post(Base):
@@ -108,10 +144,13 @@ def main():
             total += import_table(session, User, "users.json")
             
             if has_blog:
+                # Auth users first (blog posts depend on them)
+                total += import_table(session, AuthUser, "auth_users.json")
+                
                 # Blog categories
                 total += import_table(session, Category, "blog_categories.json")
                 
-                # Blog posts (depend on Users and Categories)
+                # Blog posts (depend on AuthUsers and Categories)
                 total += import_table(session, Post, "blog_posts.json")
             
             # Stories depend on Users (and possibly Characters, but we'll handle that)

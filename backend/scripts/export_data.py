@@ -69,6 +69,7 @@ def export_table(session, model, filename):
 def main():
     print("📤 Exporting database...")
     # Define plain classes for reflection of Django tables (avoid Mapper exceptions)
+    class AuthUser: __tablename__ = "auth_user"
     class Category: __tablename__ = "blog_category"
     class Post:     __tablename__ = "blog_post"
 
@@ -85,6 +86,7 @@ def main():
         export_table(session, Turn, "turns.json")
         
         # Export blog data
+        export_table(session, AuthUser, "auth_users.json")
         export_table(session, Category, "blog_categories.json")
         export_table(session, Post, "blog_posts.json")
 

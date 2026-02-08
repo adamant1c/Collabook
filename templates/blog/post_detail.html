@@ -2,7 +2,14 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{{ post.title }} | Collabook Blog{% endblock %}
+{% block title %}
+{% if LANGUAGE_CODE|slice:":2" == "it" and post.title_it %}
+{{ post.title_it }}
+{% else %}
+{{ post.title }}
+{% endif %}
+| Collabook Blog
+{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -18,7 +25,13 @@
 
         <!-- Header -->
         <header class="mb-5">
-            <h1 class="display-4 fw-bold text-white mb-3" style="font-family: 'Cinzel', serif;">{{ post.title }}</h1>
+            <h1 class="display-4 fw-bold text-white mb-3" style="font-family: 'Cinzel', serif;">
+                {% if LANGUAGE_CODE|slice:":2" == "it" and post.title_it %}
+                {{ post.title_it }}
+                {% else %}
+                {{ post.title }}
+                {% endif %}
+            </h1>
             <div class="d-flex align-items-center text-secondary">
                 <span class="me-3">
                     👤 {{ post.author.username }}
@@ -27,14 +40,25 @@
                     📅 {{ post.created_on|date:"F d, Y" }}
                 </span>
                 <span class="badge bg-gold text-dark">
+                    {% if LANGUAGE_CODE|slice:":2" == "it" and post.category.name_it %}
+                    {{ post.category.name_it }}
+                    {% else %}
                     {{ post.category.name|default:"General" }}
+                    {% endif %}
                 </span>
             </div>
         </header>
 
         {% if post.image %}
         <div class="mb-5">
-            <img src="{{ post.image.url }}" class="img-fluid rounded shadow-lg" alt="{{ post.title }}"
+            <img src="{{ post.image.url }}" class="img-fluid rounded shadow-lg"
+                alt="{% if LANGUAGE_CODE|slice:':2' == 'it' and post.title_it %}{{ post.title_it }}{% else %}{{ post.title }}{% endif %}"
+                style="width: 100%; max-height: 500px; object-fit: cover;">
+        </div>
+        {% elif post.static_image %}
+        <div class="mb-5">
+            <img src="{% static post.static_image %}" class="img-fluid rounded shadow-lg"
+                alt="{% if LANGUAGE_CODE|slice:':2' == 'it' and post.title_it %}{{ post.title_it }}{% else %}{{ post.title }}{% endif %}"
                 style="width: 100%; max-height: 500px; object-fit: cover;">
         </div>
         {% endif %}
@@ -53,7 +77,11 @@
 
         <!-- Content -->
         <article class="blog-content text-justify" style="font-size: 1.1rem; line-height: 1.8; color: #d0d0d0;">
-            {{ post.content|linebreaks }}
+            {% if LANGUAGE_CODE|slice:":2" == "it" and post.content_it %}
+            {{ post.content_it|safe }}
+            {% else %}
+            {{ post.content|safe }}
+            {% endif %}
         </article>
 
         <!-- AdSense Bottom -->

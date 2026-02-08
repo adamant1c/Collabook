@@ -7,7 +7,7 @@ import random
 User = get_user_model()
 
 class Command(BaseCommand):
-    help = 'Populates the blog with initial content'
+    help = 'Populates the blog with initial content in EN and IT'
 
     def handle(self, *args, **options):
         # Create a system user if needed
@@ -20,18 +20,56 @@ class Command(BaseCommand):
             user.save()
 
         # Create Categories
-        categories = ['Narrative', 'Game Guide', 'Lore', 'Update', 'Features']
+        categories = [
+            {'en': 'Narrative', 'it': 'Narrativa'},
+            {'en': 'Game Guide', 'it': 'Guida di Gioco'},
+            {'en': 'Lore', 'it': 'Ambientazione'},
+            {'en': 'Update', 'it': 'Aggiornamento'},
+            {'en': 'Features', 'it': 'Funzionalità'}
+        ]
+        
         cat_objs = {}
-        for cat_name in categories:
-            cat, _ = Category.objects.get_or_create(name=cat_name)
-            cat_objs[cat_name] = cat
+        for cat_data in categories:
+            cat, _ = Category.objects.get_or_create(name=cat_data['en'])
+            cat.name_it = cat_data['it']
+            cat.save()
+            cat_objs[cat_data['en']] = cat
 
         # Define specific content
         guides = [
             {
-                "title": "Guida completa ai tre mondi di Collabook",
+                "title_en": "Complete Guide to Collabook's Three Worlds",
+                "title_it": "Guida completa ai tre mondi di Collabook",
                 "category": "Lore",
-                "content": """
+                "content_en": """
+<h2>Explore the Collabook Universe</h2>
+<p>Welcome, traveler. In Collabook, you are not limited to a single reality. The multiverse opens before you with three distinct worlds, each rich in history, danger, and unique opportunities. This guide will lead you through the intricacies of each setting, helping you choose where to begin your legend.</p>
+
+<h3>1. The Realm of Eternal Magic (Fantasy)</h3>
+<p>A world where mana flows like rivers and ancient dragons guard forgotten treasures. Here, brute strength clashes with the arcane. Main factions include the Order of Mages, the Dragon Knights, and the Shadow Thieves Guild.</p>
+<h4>Key Locations:</h4>
+<ul>
+    <li><strong>The Crystal Citadel:</strong> Seat of the council of mages, a floating city accessible only to those who possess the gift.</li>
+    <li><strong>The Whispering Forest:</strong> A living labyrinth where every tree has eyes and ears. The druids here are the only ones who know the safe paths.</li>
+</ul>
+<h4>Survival Tips:</h4>
+<p>Never underestimate a spellcaster. Always carry elemental resistance potions and try to forge alliances with local magical creatures.</p>
+
+<h3>2. The Galactic Federation (Sci-Fi)</h3>
+<p>Humanity has reached the stars, but it is not alone. The Galactic Federation is a melting pot of alien cultures, interstellar diplomacy, and space conflicts. Take command of your ship and navigate through asteroids and nebulae.</p>
+<h4>Factions:</h4>
+<ul>
+    <li><strong>The Starfleet:</strong> The guardians of peace and order.</li>
+    <li><strong>The Trade Syndicate:</strong> Corporations that control trade routes and mineral resources.</li>
+</ul>
+<p>Technology here is the key. Upgrade your shields, install new warp engines, and learn to negotiate with species that think in ways completely different from yours.</p>
+
+<h3>3. Neon City 2099 (Cyberpunk)</h3>
+<p>In a dystopian future dominated by mega-corporations, the line between man and machine is blurred. Neon City is a concrete and hologram jungle, where information is worth more than gold.</p>
+<p>Here, your body is modifiable. Cybernetic arms, enhanced eyes, neural interfaces. But beware of cyber-psychosis. The more you enhance yourself, the less human you become.</p>
+<p>Choose your world wisely, adventurer. Each offers a different challenge, but glory awaits those who have the courage to seize it.</p>
+""",
+                "content_it": """
 <h2>Esplora l'Universo di Collabook</h2>
 <p>Benvenuto, viaggiatore. In Collabook, non sei limitato a una singola realtà. Il multiverso si apre davanti a te con tre distinti mondi, ognuno ricco di storia, pericoli e opportunità uniche. Questa guida ti condurrà attraverso le complessità di ogni ambientazione, aiutandoti a scegliere dove iniziare la tua leggenda.</p>
 
@@ -61,9 +99,21 @@ class Command(BaseCommand):
 """
             },
             {
-                "title": "Strategie avanzate per sopravvivere in Regno della Magia Eterna",
+                "title_en": "Advanced Strategies for Survival in the Realm of Eternal Magic",
+                "title_it": "Strategie avanzate per sopravvivere in Regno della Magia Eterna",
                 "category": "Game Guide",
-                "content": """
+                "content_en": """
+<h2>Survival in the Magic Realm</h2>
+<p>The Realm of Eternal Magic is unforgiving. Whether you are a veteran warrior or a novice mage, these advanced strategies will help you stay alive one more day.</p>
+<h3>Resource Management</h3>
+<p>In the Realm, mana is as precious as life. Do not waste your most powerful spells on minor enemies (mobs). Save mana for bosses or emergency situations. Always carry a supply of healing herbs; they are cheaper than potions and easily found in the wilderness.</p>
+<h3>Know Your Enemy</h3>
+<p>Every creature has an elemental weakness. Undead fear fire and holy light. Water creatures are vulnerable to lightning. Use your 'Observation' skill before engaging in battle to discover the enemy's resistances.</p>
+<h3>The Faction System</h3>
+<p>You cannot be friends with everyone. Allying with the Mages will make you an enemy of the Church of the Inquisition. Choose your alliances carefully, as they will unlock exclusive equipment and unique missions.</p>
+<p>Remember: a prepared adventurer is a living adventurer.</p>
+""",
+                "content_it": """
 <h2>Sopravvivenza nel Regno della Magia</h2>
 <p>Il Regno della Magia Eterna non perdona. Che tu sia un guerriero veterano o un novizio mago, queste strategie avanzate ti aiuteranno a restare in vita un giorno in più.</p>
 <h3>Gestione delle Risorse</h3>
@@ -74,105 +124,102 @@ class Command(BaseCommand):
 <p>Non puoi essere amico di tutti. Allearsi con i Maghi ti renderà nemico della Chiesa dell'Inquisizione. Scegli con cura le tue alleanze, poiché sbloccheranno equipaggiamento esclusivo e missioni uniche.</p>
 <p>Ricorda: un avventuriero preparato è un avventuriero vivo.</p>
 """
-            },
-            {
-                "title": "Tutorial passo-passo per iniziare con Collabook",
-                "category": "Features",
-                "content": """
-<h2>Iniziare la Tua Avventura</h2>
-<p>Sei nuovo su Collabook? Nessun problema. Segui questi semplici passi per tuffarti nell'azione.</p>
-<h3>Passo 1: Creazione dell'Account</h3>
-<p>Clicca su 'Login' o 'Registrati' in alto. Puoi usare il tuo account Google per un accesso immediato o creare un account con email e password.</p>
-<h3>Passo 2: Il Tuo Personaggio</h3>
-<p>Vai alla sezione 'Character'. Qui definirai chi sei. Scegli un nome evocativo. Distribuisci i tuoi punti statistica. Vuoi essere forte? Agile? Intelligente? Non c'è una scelta sbagliata, solo stili di gioco diversi.</p>
-<h3>Passo 3: Scegli il Mondo</h3>
-<p>Nella pagina 'Worlds', seleziona l'ambientazione che più ti ispira. Leggi le descrizioni e clicca su 'Entra'.</p>
-<h3>Passo 4: La Tua Prima Azione</h3>
-<p>Verrai accolto da una descrizione introduttiva. Sotto, vedrai delle opzioni predefinite, ma il vero potere di Collabook sta nella casella di testo libera. Scrivi cosa vuoi fare! "Cerco tracce di magia", "Interrogo l'oste", "Rubo la chiave alla guardia". L'AI interpreterà la tua azione e ti risponderà.</p>
-<p>Buona fortuna!</p>
-"""
-            },
-            {
-                "title": "Le meccaniche di gioco spiegate nel dettaglio",
-                "category": "Game Guide",
-                "content": """
-<h2>Sotto il Cofano di Collabook</h2>
-<p>Collabook combina la libertà della narrazione AI con la struttura solida di un RPG classico. Ecco come funziona.</p>
-<h3>Il Motore D20</h3>
-<p>Quando tenti un'azione incerta (come attaccare o scalare un muro), il sistema lancia un dado virtuale a 20 facce (D20). Al risultato si somma il tuo modificatore di statistica pertinente.</p>
-<p>Esempio: Stai cercando di colpire un goblin. Hai Forza 15 (+2 bonus). Il sistema lancia il dado ed esce un 12. Totale: 14. Se la Classe Armatura (CA) del goblin è 13 o meno, colpisci!</p>
-<h3>Combattimento a Turni</h3>
-<p>In combattimento, l'ordine di azione è determinato dall'iniziativa (basata sull'Agilità). Hai diverse opzioni: Attacco Base, Abilità Speciale, Oggetto, Fuga. Ogni scelta ha conseguenze tattiche.</p>
-<h3>L'AI Dungeon Master</h3>
-<p>L'Intelligenza Artificiale agisce come il tuo Dungeon Master. Non decide solo se hai successo o fallisci, ma *come*. Descrive la scena, interpreta i PNG (Personaggi Non Giocanti) e reagisce in modo creativo alle tue idee più folli.</p>
-"""
             }
         ]
 
-        # Generate blog posts
-        blogs = [
-            ("Come creare personaggi RPG memorabili", "Narrative"),
-            ("Guida completa ai giochi di ruolo per principianti", "Narrative"),
-            ("Storia dei giochi di ruolo: da D&D all'AI", "Lore"),
-            ("10 consigli per migliorare la tua narrazione interattiva", "Narrative"),
-            ("Come l'intelligenza artificiale sta cambiando i giochi di ruolo", "Features"),
-            ("L'arte del World Building: Creare mondi credibili", "Narrative"),
-            ("Intervistare i PNG: Come ottenere informazioni cruciali", "Game Guide"),
-            ("Gestire l'inventario: Cosa tenere e cosa vendere", "Game Guide"),
-            ("Le migliori build per la classe Mago in Collabook", "Game Guide"),
-            ("Cyberpunk vs Fantasy: Quale stile fa per te?", "Lore"),
-            ("I segreti dei Draghi Antichi", "Lore"),
-            ("Navigare nello spazio profondo: Guida alla sopravvivenza", "Game Guide"),
-            ("La psicologia del villain: Creare antagonisti complessi", "Narrative"),
-            ("Aggiornamento Patch 1.2: Nuove armi e bilanciamenti", "Update"),
-            ("Community Spotlight: Le migliori storie dei giocatori", "Narrative"),
-            ("Il futuro della narrativa generativa", "Features"),
-            ("Come scrivere prompt efficaci per l'AI", "Features"),
-            ("Guida al roleplay: Interpretare il tuo personaggio", "Narrative"),
-            ("Le fazioni di Neon City spiegate", "Lore"),
-            ("Dalla carta allo schermo: L'evoluzione dei Gdr", "Lore")
+        # Seed specific guides
+        for guide in guides:
+            slug = slugify(guide['title_en'])
+            static_img = "images/blog/guide.png" if guide['category'] == 'Game Guide' else "images/blog/narrative.png"
+            
+            post, created = Post.objects.get_or_create(
+                slug=slug,
+                defaults={
+                    'title': guide['title_en'],
+                    'title_it': guide['title_it'],
+                    'author': user,
+                    'category': cat_objs.get(guide['category'], cat_objs['Game Guide']),
+                    'content': guide['content_en'],
+                    'content_it': guide['content_it'],
+                    'status': 1,
+                    'static_image': static_img
+                }
+            )
+            if not created:
+                post.title = guide['title_en']
+                post.title_it = guide['title_it']
+                post.content = guide['content_en']
+                post.content_it = guide['content_it']
+                post.static_image = static_img
+                post.save()
+            self.stdout.write(f"Updated/Created guide: {guide['title_en']}")
+
+        # Generate generic blogs
+        blogs_it = [
+            ("Come creare personaggi RPG memorabili", "Narrativa"),
+            ("Guida completa ai giochi di ruolo per principianti", "Narrativa"),
+            ("Storia dei giochi di ruolo: da D&D all'AI", "Ambientazione"),
+            ("10 consigli per migliorare la tua narrazione interattiva", "Narrativa"),
+            ("Come l'intelligenza artificiale sta cambiando i giochi di ruolo", "Funzionalità")
+        ]
+        
+        blogs_en = [
+            ("How to Create Memorable RPG Characters", "Narrative"),
+            ("Complete Guide to Role-Playing Games for Beginners", "Narrative"),
+            ("History of RPGs: From D&D to AI", "Lore"),
+            ("10 Tips to Improve Your Interactive Storytelling", "Narrative"),
+            ("How Artificial Intelligence is Changing RPGs", "Features")
         ]
 
-        # Add predefined guides
-        for guide in guides:
-            slug = slugify(guide['title'])
-            if not Post.objects.filter(slug=slug).exists():
-                Post.objects.create(
-                    title=guide['title'],
-                    slug=slug,
-                    author=user,
-                    category=cat_objs.get(guide['category'], cat_objs['Game Guide']),
-                    content=guide['content'],
-                    status=1,
-                    meta_description=guide['content'][:150] + "..."
-                )
-                self.stdout.write(f"Created guide: {guide['title']}")
-
-        # Add generated blogs
-        for title, cat_name in blogs:
-            slug = slugify(title)
-            if not Post.objects.filter(slug=slug).exists():
-                content = f"""
-<h2>{title}</h2>
-<p>Nel vasto mondo dei giochi di ruolo, {title.lower()} è un argomento fondamentale. Che tu sia un veterano o un novizio, comprendere queste dinamiche può trasformare radicalmente la tua esperienza di gioco.</p>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        for i in range(len(blogs_en)):
+            title_en, cat_en = blogs_en[i]
+            title_it, cat_it = blogs_it[i]
+            slug = slugify(title_en)
+            
+            content_en = f"""
+<h2>{title_en}</h2>
+<p>In the vast world of role-playing games, {title_en.lower()} is a fundamental topic. Whether you're a veteran or a novice, understanding these dynamics can radically transform your gaming experience.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Experience the magic of AI storytelling.</p>
+<h3>Key Points</h3>
+<ul>
+    <li>Deepening your character's history increases immersion.</li>
+    <li>Don't be afraid to fail; the best stories are born from defeats.</li>
+    <li>Make the most of Collabook's unique mechanics.</li>
+</ul>
+<p>Keep following our blog for more insights on {cat_en.lower()} and much more!</p>
+"""
+            content_it = f"""
+<h2>{title_it}</h2>
+<p>Nel vasto mondo dei giochi di ruolo, {title_it.lower()} è un argomento fondamentale. Che tu sia un veterano o un novizio, comprendere queste dinamiche può trasformare radicalmente la tua esperienza di gioco.</p>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivi la magia della narrazione AI.</p>
 <h3>Punti Chiave</h3>
 <ul>
     <li>Approfondire la storia del tuo personaggio aumenta l'immersione.</li>
     <li>Non aver paura di fallire; le storie migliori nascono dalle sconfitte.</li>
     <li>Sfrutta al massimo le meccaniche uniche di Collabook.</li>
 </ul>
-<p>Continua a seguire il nostro blog per altri approfondimenti su {cat_name.lower()} e molto altro!</p>
+<p>Continua a seguire il nostro blog per altri approfondimenti su {cat_it.lower()} e molto altro!</p>
 """
-                Post.objects.create(
-                    title=title,
-                    slug=slug,
-                    author=user,
-                    category=cat_objs.get(cat_name, cat_objs['Narrative']),
-                    content=content,
-                    status=1,
-                    meta_description=f"Un articolo approfondito su {title}."
-                )
-                self.stdout.write(f"Created post: {title}")
+            
+            post, created = Post.objects.get_or_create(
+                slug=slug,
+                defaults={
+                    'title': title_en,
+                    'title_it': title_it,
+                    'author': user,
+                    'category': cat_objs.get(cat_en, cat_objs['Narrative']),
+                    'content': content_en,
+                    'content_it': content_it,
+                    'status': 1,
+                    'static_image': "images/blog/narrative.png"
+                }
+            )
+            if not created:
+                post.title = title_en
+                post.title_it = title_it
+                post.content = content_en
+                post.content_it = content_it
+                post.save()
+            self.stdout.write(f"Updated/Created post: {title_en}")
 
-        self.stdout.write(self.style.SUCCESS('Successfully populated blog content'))
+        self.stdout.write(self.style.SUCCESS('Successfully populated multi-language blog content'))

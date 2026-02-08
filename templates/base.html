@@ -91,8 +91,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'how_it_works' %}">
-                            ❓ {% trans "How It Works" %}
+                        <a class="nav-link" href="{% url 'game:rules' %}">
+                            📜 {% trans "Rules" %}
                         </a>
                     </li>
                     {% if request.session.token %}
@@ -104,11 +104,6 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'character:sheet' %}">
                             👤 {% trans "Character" %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'game:rules' %}">
-                            📜 {% trans "Rules" %}
                         </a>
                     </li>
                     <li class="nav-item">
@@ -183,9 +178,6 @@
                 <div class="col-md-6 text-center text-md-end">
                     <a href="{% url 'blog:home' %}" class="text-secondary text-decoration-none me-3 hover-gold">
                         Blog
-                    </a>
-                    <a href="{% url 'how_it_works' %}" class="text-secondary text-decoration-none me-3 hover-gold">
-                        How It Works
                     </a>
                     <a href="{% url 'privacy_policy' %}" class="text-secondary text-decoration-none me-3 hover-gold">
                         Privacy Policy

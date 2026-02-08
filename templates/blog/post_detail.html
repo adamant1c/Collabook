@@ -11,7 +11,7 @@
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{% url 'blog:home' %}"
-                        class="text-secondary text-decoration-none">Blog</a></li>
+                        class="text-secondary text-decoration-none">{% trans "Blog" %}</a></li>
                 <li class="breadcrumb-item active text-gold" aria-current="page">{{ post.title }}</li>
             </ol>
         </nav>

@@ -1080,6 +1080,26 @@ msgstr "Riepilogo Avventura"
 msgid "Adventure Finished"
 msgstr "Avventura Terminata"
 
+#: templates/blog/post_list.html
+msgid "Chronicles"
+msgstr "Cronache"
+
+msgid "Explore the art of storytelling, RPG guides, and the future of AI gaming."
+msgstr "Esplora l'arte della narrazione, le guide ai GDR e il futuro del gaming con l'IA."
+
+msgid "Read Article"
+msgstr "Leggi Articolo"
+
+msgid "No scrolls written yet. Check back soon!"
+msgstr "Nessuna pergamena scritta ancora. Torna presto!"
+
+#: templates/blog/post_detail.html
+msgid "Back to Blog"
+msgstr "Torna al Blog"
+
+msgid "Share:"
+msgstr "Condividi:"
+
 msgid "The Arrival"
 msgstr "L'Arrivo"
 

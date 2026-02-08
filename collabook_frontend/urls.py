@@ -35,71 +35,51 @@ def robots_txt(request):
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 def sitemap_xml(request):
-    xml_content = """<?xml version="1.0" encoding="UTF-8"?>
-                    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-                      <url>
-                        <loc>https://collabook.click/</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>weekly</changefreq>
-                        <priority>1.0</priority>
-                      </url>
-                      <url>
-                        <loc>https://collabook.click/about/</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>monthly</changefreq>
-                        <priority>0.8</priority>
-                      </url>
-                      <url>
-                        <loc>https://collabook.click/game/rules/</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>monthly</changefreq>
-                        <priority>0.8</priority>
-                      </url>
-                      <url>
-                        <loc>https://collabook.click/world/selection/</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>weekly</changefreq>
-                        <priority>0.9</priority>
-                      </url>
-                      <url>
-                        <loc>https://collabook.click/character/sheet/</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>weekly</changefreq>
-                        <priority>0.9</priority>
-                      </url>
-                      <url>
-                        <loc>https://collabook.click/privacy-policy</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>monthly</changefreq>
-                        <priority>0.6</priority>
-                      </url>
-                      <url>
-                        <loc>https://collabook.click/terms</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>monthly</changefreq>
-                        <priority>0.6</priority>
-                      </url>
-                      <url>
-                        <loc>https://collabook.click/faq</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>monthly</changefreq>
-                        <priority>0.7</priority>
-                      </url>
-                      <url>
-                        <loc>https://collabook.click/contact</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>monthly</changefreq>
-                        <priority>0.6</priority>
-                      </url>
-                      <url>
-                        <loc>https://collabook.click/how-it-works</loc>
-                        <lastmod>2026-01-27</lastmod>
-                        <changefreq>monthly</changefreq>
-                        <priority>0.7</priority>
-                      </url>
-                    </urlset>
-                    """
-    return HttpResponse(xml_content, content_type="application/xml")
+    from blog.models import Post
+    from django.urls import reverse
+    
+    base_url = "https://collabook.click"
+    static_pages = [
+        ('/', 1.0, 'weekly'),
+        ('/about/', 0.8, 'monthly'),
+        ('/game/rules/', 0.8, 'monthly'),
+        ('/world/selection/', 0.9, 'weekly'),
+        ('/character/sheet/', 0.9, 'weekly'),
+        ('/privacy-policy', 0.6, 'monthly'),
+        ('/terms', 0.6, 'monthly'),
+        ('/faq', 0.7, 'monthly'),
+        ('/contact', 0.6, 'monthly'),
+        ('/how-it-works', 0.7, 'monthly'),
+        ('/blog/', 0.9, 'weekly'),
+    ]
+    
+    xml_lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+    ]
+    
+    # Add static pages
+    for page, priority, freq in static_pages:
+        xml_lines.append(f'  <url>')
+        xml_lines.append(f'    <loc>{base_url}{page}</loc>')
+        xml_lines.append(f'    <lastmod>2026-02-08</lastmod>')
+        xml_lines.append(f'    <changefreq>{freq}</changefreq>')
+        xml_lines.append(f'    <priority>{priority}</priority>')
+        xml_lines.append(f'  </url>')
+    
+    # Add dynamic blog posts
+    published_posts = Post.objects.filter(status=1).order_by('-created_on')
+    for post in published_posts:
+        xml_lines.append(f'  <url>')
+        xml_lines.append(f'    <loc>{base_url}/blog/{post.slug}/</loc>')
+        xml_lines.append(f'    <lastmod>{post.updated_on.strftime("%Y-%m-%d")}</lastmod>')
+        xml_lines.append(f'    <changefreq>monthly</changefreq>')
+        xml_lines.append(f'    <priority>0.8</priority>')
+        xml_lines.append(f'  </url>')
+    
+    xml_lines.append('</urlset>')
+    
+    return HttpResponse("\n".join(xml_lines), content_type="application/xml")
 
 urlpatterns = [
     path('admin/', admin.site.urls),

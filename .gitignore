@@ -214,3 +214,6 @@ test.db
 
 certbot/
 /staticfiles/
+media/blog_images/guide_R4Yst7S.png
+media/blog_images/guide.png
+media/blog_images/narrative.png

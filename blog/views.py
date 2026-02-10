@@ -15,6 +15,8 @@ class PostDetail(generic.DetailView):
     template_name = 'blog/post_detail.html'
     
     def get_queryset(self):
+        if self.request.user.is_authenticated and self.request.user.is_staff:
+            return Post.objects.all()
         return Post.objects.filter(status=1)
 
 class StaffDashboard(LoginRequiredMixin, UserPassesTestMixin, generic.ListView):

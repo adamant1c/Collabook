@@ -118,6 +118,7 @@ services:
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
       - static_volume:/app/staticfiles:ro
+      - ./media:/app/media:ro
     depends_on:
       - backend
       - frontend

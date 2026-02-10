@@ -96,8 +96,10 @@ class PasswordResetView(TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        token = self.request.GET.get('token', '')
         context['request_form'] = PasswordResetRequestForm()
-        context['confirm_form'] = PasswordResetConfirmForm()
+        context['confirm_form'] = PasswordResetConfirmForm(initial={'token': token})
+        context['show_confirm'] = bool(token)
         return context
 
     def post(self, request, *args, **kwargs):

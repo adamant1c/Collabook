@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.redis_client import redis_client
+from app.api.deps import get_llm_client, get_redis_client
+from app.core.llm_client import LLMClient
+from app.core.redis_client import RedisClient
 from app.core.context_optimizer import create_compact_context, create_optimized_prompt
 from app.core.content_filter import validate_user_input, sanitize_llm_output, log_violation
 from app.core.game_rules import GameRules
@@ -23,6 +25,8 @@ async def create_interaction(
     interaction: InteractionRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
+    llm: LLMClient = Depends(get_llm_client),
+    redis: RedisClient = Depends(get_redis_client),
 ):
     """Process user action with OPTIMIZED token usage"""
 
@@ -61,7 +65,7 @@ async def create_interaction(
     ).all()
 
     # Multiplayer context
-    active_char_ids = redis_client.get_active_characters(story.id)
+    active_char_ids = redis.get_active_characters(story.id)
     other_players = []
     if active_char_ids:
         other_ids = [cid for cid in active_char_ids if cid != character.id]
@@ -114,7 +118,7 @@ async def create_interaction(
     optimized_prompt = create_optimized_prompt(compact_context, interaction.user_action)
 
     try:
-        raw_response = await generate_narration(system_prompt, optimized_prompt)
+        raw_response = await generate_narration(system_prompt, optimized_prompt, llm_client=llm)
         parsed = parse_llm_response(raw_response)
         narration = parsed.narration
         suggested_actions = parsed.suggested_actions

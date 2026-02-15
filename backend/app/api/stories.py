@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 from typing import List
 from pydantic import BaseModel
 from app.core.database import get_db
-from app.core.redis_client import redis_client
+from app.api.deps import get_redis_client, get_llm_client
+from app.core.redis_client import RedisClient
+from app.core.llm_client import LLMClient
 from app.models.schemas import StoryCreate, StoryResponse, CharacterCreate, CharacterResponse, PublicStoryResponse, PublicEntity
 from app.models.db_models import Story, Character, User, NPC, Enemy
 from app.agents.matchmaker import matchmaker_agent
@@ -56,7 +58,8 @@ async def list_public_stories(db: Session = Depends(get_db)):
 async def create_story(
     story: StoryCreate, 
     current_user: User = Depends(require_admin),  # Only admins can create worlds!
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    redis: RedisClient = Depends(get_redis_client)
 ):
     """Create a new story world (Admin only)"""
     db_story = Story(
@@ -78,7 +81,7 @@ async def create_story(
     db.refresh(db_story)
     
     # Cache story context in Redis
-    redis_client.set_story_context(db_story.id, {
+    redis.set_story_context(db_story.id, {
         "world_description": db_story.world_description,
         "genre": db_story.genre,
         "world_metadata": db_story.world_metadata
@@ -114,10 +117,12 @@ class JoinStoryRequest(BaseModel):
 
 @router.post("/{story_id}/join", response_model=CharacterResponse)
 async def join_story(
-    story_id: str, 
+    story_id: str,
     request: JoinStoryRequest,
     current_user: User = Depends(get_current_user),  # Auto-get user from token
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    redis: RedisClient = Depends(get_redis_client),
+    llm: LLMClient = Depends(get_llm_client)
 ):
     """Join an existing story with a character"""
     # Verify story exists
@@ -134,7 +139,7 @@ async def join_story(
         raise HTTPException(status_code=400, detail="You already have a character in this story")
     
     # Get story context
-    story_context = redis_client.get_story_context(story_id)
+    story_context = redis.get_story_context(story_id)
     if not story_context:
         story_context = {
             "world_description": story.world_description,
@@ -151,6 +156,7 @@ async def join_story(
     insertion_point = await matchmaker_agent.find_insertion_point(
         story_context, 
         character_info,
+        llm_client=llm,
         language=request.language
     )
     
@@ -166,6 +172,6 @@ async def join_story(
     db.refresh(db_character)
     
     # Add to active characters in Redis
-    redis_client.add_active_character(story_id, db_character.id)
+    redis.add_active_character(story_id, db_character.id)
     
     return db_character

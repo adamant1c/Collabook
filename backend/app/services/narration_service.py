@@ -10,7 +10,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from app.core.llm_client import llm_client
+from app.core.llm_client import LLMClient
 
 
 @dataclass
@@ -25,7 +25,7 @@ class NarrationResult:
     parse_error: bool = False
 
 
-async def generate_narration(system_prompt: str, user_message: str) -> str:
+async def generate_narration(system_prompt: str, user_message: str, llm_client: LLMClient) -> str:
     """
     Call the LLM and return the raw response string.
 

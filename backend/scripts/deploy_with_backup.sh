@@ -174,23 +174,21 @@ fi
 echo ""
 echo "🔑 Resetting PostgreSQL sequences..."
 $COMPOSE exec frontend python manage.py shell -c "
+from io import StringIO
+from django.core.management import call_command
+from django.apps import apps
 from django.db import connection
-with connection.cursor() as cursor:
-    cursor.execute(\"\"\"
-        SELECT 'SELECT setval(' || quote_literal(pg_get_serial_sequence(quote_ident(t.tablename), quote_ident(a.attname)))
-               || ', COALESCE(MAX(' || quote_ident(a.attname) || '), 1)) FROM ' || quote_ident(t.tablename) || ';'
-        FROM pg_tables t
-        JOIN pg_class c ON c.relname = t.tablename
-        JOIN pg_attribute a ON a.attrelid = c.oid
-        WHERE t.schemaname = 'public'
-          AND a.attnum > 0
-          AND NOT a.attisdropped
-          AND pg_get_serial_sequence(quote_ident(t.tablename), quote_ident(a.attname)) IS NOT NULL
-    \"\"\")
-    queries = cursor.fetchall()
-    for (q,) in queries:
-        cursor.execute(q)
-    print(f'✓ Reset {len(queries)} sequence(s)')
+
+app_labels = [a.label for a in apps.get_app_configs()]
+buf = StringIO()
+call_command('sqlsequencereset', *app_labels, stdout=buf, no_color=True)
+sql = buf.getvalue().strip()
+if sql:
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+    print(f'✓ Sequences reset successfully ({sql.count(chr(59))} statements)')
+else:
+    print('ℹ️  No sequences to reset')
 " || echo "   ⚠️  Could not reset sequences (non-critical)"
 
 # --------------------------------------------------

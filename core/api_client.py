@@ -1,4 +1,4 @@
-import requests
+import httpx
 import os
 from typing import Optional
 from django.utils.translation import gettext as _
@@ -6,6 +6,11 @@ from django.utils.translation import gettext as _
 # Use environment variable or default to localhost
 # In Docker, this should be http://backend:8000
 BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+
+# Module-level async HTTP client with connection pooling.
+# Reuses underlying TCP connections across requests to the backend,
+# avoiding repeated DNS lookups and TCP handshakes.
+_client = httpx.AsyncClient(base_url=BACKEND_URL, timeout=30.0)
 
 # Translation mapping for backend API error messages
 # These messages are returned by the FastAPI backend in English
@@ -57,19 +62,35 @@ def translate_api_error(error_message: str) -> str:
     return error_message
 
 
+def _handle_http_error(e: httpx.HTTPStatusError):
+    """Shared error handling for HTTP status errors."""
+    try:
+        error_data = e.response.json()
+        detail = error_data.get("detail", "")
+        if detail:
+            raise Exception(translate_api_error(detail))
+    except (ValueError, KeyError):
+        pass
+    raise Exception(f"{e.response.status_code} Client Error: {e.response.reason_phrase}")
+
 
 class CollabookAPI:
-    """API client for Collabook backend"""
+    """Async API client for Collabook backend"""
+
+    @staticmethod
+    async def close():
+        """Gracefully close the underlying HTTP client."""
+        await _client.aclose()
     
     # ==================== Authentication ====================
     
     @staticmethod
-    def register(username: str, email: str, password: str, name: str,
+    async def register(username: str, email: str, password: str, name: str,
                 profession: Optional[str] = None, description: Optional[str] = None,
                 avatar_description: Optional[str] = None) -> str:
         """Register a new player account"""
         try:
-            response = requests.post(f"{BACKEND_URL}/auth/register", json={
+            response = await _client.post("/auth/register", json={
                 "username": username,
                 "email": email,
                 "password": password,
@@ -81,67 +102,50 @@ class CollabookAPI:
             response.raise_for_status()
             data = response.json()
             return data["message"]
-        except requests.exceptions.HTTPError as e:
-            if e.response is not None:
-                try:
-                    error_data = e.response.json()
-                    detail = error_data.get("detail", "")
-                    if detail:
-                        raise Exception(translate_api_error(detail))
-                except (ValueError, KeyError):
-                    # If JSON parsing fails, use status code
-                    pass
-            raise Exception(f"{e.response.status_code} Client Error: {e.response.reason}")
+        except httpx.HTTPStatusError as e:
+            _handle_http_error(e)
     
     @staticmethod
-    def login(username: str, password: str) -> str:
+    async def login(username: str, password: str) -> str:
         """Login and get access token"""
         try:
-            response = requests.post(f"{BACKEND_URL}/auth/login",
+            response = await _client.post("/auth/login",
                                    data={"username": username, "password": password})
             response.raise_for_status()
             data = response.json()
             return data["access_token"]
-        except requests.exceptions.HTTPError as e:
-            if e.response is not None:
-                try:
-                    error_data = e.response.json()
-                    detail = error_data.get("detail", "")
-                    if detail:
-                        raise Exception(translate_api_error(detail))
-                except (ValueError, KeyError):
-                    pass
-            raise Exception(f"{e.response.status_code} Client Error: {e.response.reason}")
+        except httpx.HTTPStatusError as e:
+            _handle_http_error(e)
     
     @staticmethod
-    def get_current_user(token: str) -> dict:
+    async def get_current_user(token: str) -> dict:
         """Get current user information (including character data)"""
-        response = requests.get(f"{BACKEND_URL}/users/me",
+        response = await _client.get("/users/me",
                               headers={"Authorization": f"Bearer {token}"})
         response.raise_for_status()
         return response.json()
     
     @staticmethod
-    def update_character(token: str, character_id: str, data: dict):
+    async def update_character(token: str, character_id: str, data: dict):
         """Update character (profession, description,  etc.)"""
         headers = {"Authorization": f"Bearer {token}"}
-        response = requests.patch(f"{BACKEND_URL}/users/character/{character_id}", headers=headers, json=data)
+        response = await _client.patch(f"/users/character/{character_id}", headers=headers, json=data)
         response.raise_for_status()
         return response.json()
     
     @staticmethod
-    def request_password_reset(email: str) -> dict:
+    async def request_password_reset(email: str) -> dict:
         """Request a password reset token"""
-        response = requests.post(f"{BACKEND_URL}/auth/request-reset", json={
+        response = await _client.post("/auth/request-reset", json={
             "email": email
         })
         response.raise_for_status()
         return response.json()
     
     @staticmethod
-    def reset_password(token: str, new_password: str) -> dict:
+    async def reset_password(token: str, new_password: str) -> dict:
         """Reset password using token"""
-        response = requests.post(f"{BACKEND_URL}/auth/reset-password", json={
+        response = await _client.post("/auth/reset-password", json={
             "token": token,
             "new_password": new_password
         })
@@ -149,44 +153,44 @@ class CollabookAPI:
         return response.json()
     
     @staticmethod
-    def verify_email(token: str) -> dict:
+    async def verify_email(token: str) -> dict:
         """Verify email using token"""
-        response = requests.get(f"{BACKEND_URL}/auth/verify-email", params={"token": token})
+        response = await _client.get("/auth/verify-email", params={"token": token})
         response.raise_for_status()
         return response.json()
 
     # ==================== Stories ====================
     
     @staticmethod
-    def list_stories(token: str) -> list:
+    async def list_stories(token: str) -> list:
         """List all available stories"""
-        response = requests.get(f"{BACKEND_URL}/stories/",
+        response = await _client.get("/stories/",
                               headers={"Authorization": f"Bearer {token}"})
         response.raise_for_status()
         return response.json()
 
     @staticmethod
-    def list_public_stories() -> list:
+    async def list_public_stories() -> list:
         """List available worlds and characters (No Auth Required)"""
         try:
-            response = requests.get(f"{BACKEND_URL}/stories/public")
+            response = await _client.get("/stories/public")
             response.raise_for_status()
             return response.json()
         except Exception:
             return []
     
     @staticmethod
-    def get_story(story_id: str, token: str) -> dict:
+    async def get_story(story_id: str, token: str) -> dict:
         """Get story by ID"""
-        response = requests.get(f"{BACKEND_URL}/stories/{story_id}",
+        response = await _client.get(f"/stories/{story_id}",
                               headers={"Authorization": f"Bearer {token}"})
         response.raise_for_status()
         return response.json()
     
     @staticmethod
-    def create_story_admin(title: str, world_description: str, genre: str, token: str) -> dict:
+    async def create_story_admin(title: str, world_description: str, genre: str, token: str) -> dict:
         """Create a new story world (Admin only)"""
-        response = requests.post(f"{BACKEND_URL}/stories/", 
+        response = await _client.post("/stories/", 
                                headers={"Authorization": f"Bearer {token}"},
                                json={
                                    "title": title,
@@ -197,9 +201,9 @@ class CollabookAPI:
         return response.json()
     
     @staticmethod
-    def join_story(story_id: str, token: str, language: str = "en") -> dict:
+    async def join_story(story_id: str, token: str, language: str = "en") -> dict:
         """Join an existing story"""
-        response = requests.post(f"{BACKEND_URL}/stories/{story_id}/join",
+        response = await _client.post(f"/stories/{story_id}/join",
                                headers={"Authorization": f"Bearer {token}"},
                                json={"language": language})  # Pass language in body
         response.raise_for_status()
@@ -208,9 +212,9 @@ class CollabookAPI:
     # ==================== Interactions ====================
     
     @staticmethod
-    def interact(character_id: str, user_action: str, token: str, language: str = "en") -> dict:
+    async def interact(character_id: str, user_action: str, token: str, language: str = "en") -> dict:
         """Send a user action and get narration"""
-        response = requests.post(f"{BACKEND_URL}/interact",
+        response = await _client.post("/interact",
                                headers={"Authorization": f"Bearer {token}"},
                                json={
                                    "character_id": character_id,

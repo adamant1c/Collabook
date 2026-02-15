@@ -1,9 +1,11 @@
 from django.test import TestCase, RequestFactory
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.sessions.middleware import SessionMiddleware
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 from accounts.adapters import MyAccountAdapter
 from django.urls import reverse
+
+User = get_user_model()
 
 class AdapterTestCase(TestCase):
     def setUp(self):
@@ -24,7 +26,7 @@ class AdapterTestCase(TestCase):
         request.session.save()
         
         # Mock API response: User has NO character (or empty profession)
-        mock_api.get_current_user.return_value = {'character': {'profession': None}}
+        mock_api.get_current_user = AsyncMock(return_value={'character': {'profession': None}})
         
         url = self.adapter.get_login_redirect_url(request)
         
@@ -40,7 +42,7 @@ class AdapterTestCase(TestCase):
         request.session.save()
 
         # Mock API: User HAS profession
-        mock_api.get_current_user.return_value = {'character': {'profession': 'Warrior'}}
+        mock_api.get_current_user = AsyncMock(return_value={'character': {'profession': 'Warrior'}})
         
         url = self.adapter.get_login_redirect_url(request)
         
@@ -58,7 +60,7 @@ class AdapterTestCase(TestCase):
         request.session.save()
 
         # Mock API: User has NO character object at all
-        mock_api.get_current_user.return_value = {'character': None}
+        mock_api.get_current_user = AsyncMock(return_value={'character': None})
         
         url = self.adapter.get_login_redirect_url(request)
         

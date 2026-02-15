@@ -5,17 +5,18 @@ from django.utils.translation import gettext as _
 import random
 from core.api_client import CollabookAPI
 from .forms import CharacterCreationForm
+from asgiref.sync import sync_to_async
 
 class CharacterCreationView(View):
     template_name = 'character/creation.html'
 
-    def get(self, request):
+    async def get(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
         
         # Check if character already has profession (skip creation)
         try:
-            user = CollabookAPI.get_current_user(request.session['token'])
+            user = await CollabookAPI.get_current_user(request.session['token'])
             character = user.get('character')
             if character and character.get('profession'):
                 return redirect('world:selection') # TODO: Implement world app
@@ -26,9 +27,9 @@ class CharacterCreationView(View):
         form = CharacterCreationForm()
         stats = request.session.get('rolled_stats')
         character_name = character.get('name') if character else user.get('username', 'Hero')
-        return render(request, self.template_name, {'form': form, 'stats': stats, 'character_name': character_name})
+        return await sync_to_async(render)(request, self.template_name, {'form': form, 'stats': stats, 'character_name': character_name})
 
-    def post(self, request):
+    async def post(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
 
@@ -49,16 +50,23 @@ class CharacterCreationView(View):
         if form.is_valid():
             stats = request.session.get('rolled_stats')
             if not stats:
+                # We need user info for the error page context
+                try:
+                    user = await CollabookAPI.get_current_user(request.session['token'])
+                    username = user.get('username', 'Hero')
+                except:
+                    username = 'Hero'
+                    
                 messages.error(request, _("Please roll stats first!"))
-                return render(request, self.template_name, {
+                return await sync_to_async(render)(request, self.template_name, {
                     'form': form, 
-                    'character_name': user.get('username', 'Hero'),
+                    'character_name': username,
                     'error_popup': True,
                     'popup_message': _("You must roll your dice to determine your hero's destiny before beginning the adventure!")
                 })
             
             try:
-                user = CollabookAPI.get_current_user(request.session['token'])
+                user = await CollabookAPI.get_current_user(request.session['token'])
                 character = user.get('character')
                 if not character:
                     messages.error(request, _("Character record not found. Please contact support."))
@@ -70,7 +78,7 @@ class CharacterCreationView(View):
                 }
                 update_data.update(stats)
                 
-                CollabookAPI.update_character(request.session['token'], character['id'], update_data)
+                await CollabookAPI.update_character(request.session['token'], character['id'], update_data)
                 
                 # Clear stats
                 del request.session['rolled_stats']
@@ -82,25 +90,23 @@ class CharacterCreationView(View):
                 return redirect('character:create')
         
         stats = request.session.get('rolled_stats')
-        return render(request, self.template_name, {'form': form, 'stats': stats})
+        return await sync_to_async(render)(request, self.template_name, {'form': form, 'stats': stats})
 
 class CharacterSheetView(View):
     template_name = 'character/sheet.html'
 
-    def get(self, request):
+    async def get(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
         
         try:
-            user = CollabookAPI.get_current_user(request.session['token'])
+            user = await CollabookAPI.get_current_user(request.session['token'])
             character = user.get('character')
             if not character:
                 messages.warning(request, _("Please create a character first."))
                 return redirect('character:create')
             
-            import logging
-            logging.error(f"DEBUG_CHAR: {character}")
-            return render(request, self.template_name, {'character': character, 'user': user})
+            return await sync_to_async(render)(request, self.template_name, {'character': character, 'user': user})
         except Exception as e:
             messages.error(request, str(e))
             return redirect('world:selection')

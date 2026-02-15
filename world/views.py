@@ -2,24 +2,12 @@ from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.utils.translation import gettext as _
 from core.api_client import CollabookAPI
-# Models are imported locally in the view usually to avoid circular imports? 
-# No, standard django practice is top level. But I added them in the previous block.
-# Wait, I added them *inside* the previous block but outside the class?
-# Let's check the previous `replace_file_content` result.
-# I added `from game.models import Turn, Character, Story` in the previous step's replacement content.
-# However, to be safe and clean, I should move imports to the top if they are needed elsewhere, but they are only used in PDF view.
-# Actually, looking at the previous tool call, I included the imports in the replacement text:
-# `from game.models import Turn, Character, Story`
-# So they are now at the bottom of the file before the class. This is valid Python.
-# But I might want to double check if `BackendUser` is needed for `character.user`.
-# Character.user is a ForeignKey to BackendUser.
-# I accessed `character.user.username`. That should work if `BackendUser` is defined in `game.models` which it is.
-
-
 import json
 import re
+from asgiref.sync import sync_to_async
+from game.models import Turn, Character, Story
+from django.core.mail import send_mail
 
 def clean_narration(text):
     """
@@ -163,23 +151,18 @@ def translate_story_data(story):
         if story.get('genre_it'):
             story['genre'] = story['genre_it']
             
-    # 2. Fallback to hardcoded/gettext translations (REMOVED - DB is source of truth)
-    # The database fields (title_it, world_description_it) are verified to be populated.
-    pass
-
-
     return story
 
 class WorldSelectionView(View):
     template_name = 'world/selection.html'
 
-    def get(self, request):
+    async def get(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
         
         try:
-            stories = CollabookAPI.list_stories(request.session['token'])
-            user = CollabookAPI.get_current_user(request.session['token'])
+            stories = await CollabookAPI.list_stories(request.session['token'])
+            user = await CollabookAPI.get_current_user(request.session['token'])
             user_characters = user.get('characters', [])
             
             # Add 'existing_char' flag to stories and translate
@@ -190,16 +173,16 @@ class WorldSelectionView(View):
             default_worlds = [s for s in stories if s.get('is_default', False)]
             custom_worlds = [s for s in stories if not s.get('is_default', False)]
             
-            return render(request, self.template_name, {
+            return await sync_to_async(render)(request, self.template_name, {
                 'default_worlds': default_worlds,
                 'custom_worlds': custom_worlds,
                 'is_admin': user.get('role') == 'admin'
             })
         except Exception as e:
             messages.error(request, str(e))
-            return render(request, self.template_name, {'error': str(e)})
+            return await sync_to_async(render)(request, self.template_name, {'error': str(e)})
 
-    def post(self, request):
+    async def post(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
         
@@ -208,10 +191,10 @@ class WorldSelectionView(View):
         
         if action == 'join':
             try:
-                # Get current language code from request or session
+                # Get current language code from request (sync access to language code is fine)
                 lang = request.LANGUAGE_CODE[:2] if hasattr(request, 'LANGUAGE_CODE') else 'en'
                 
-                character = CollabookAPI.join_story(story_id, request.session['token'], language=lang)
+                character = await CollabookAPI.join_story(story_id, request.session['token'], language=lang)
                 request.session['character_id'] = character['id']
                 request.session['story_id'] = story_id
                 messages.success(request, _("Entering world..."))
@@ -222,7 +205,7 @@ class WorldSelectionView(View):
         
         elif action == 'continue':
             try:
-                user = CollabookAPI.get_current_user(request.session['token'])
+                user = await CollabookAPI.get_current_user(request.session['token'])
                 user_characters = user.get('characters', [])
                 existing_char = next((c for c in user_characters if c['story_id'] == story_id), None)
                 
@@ -243,7 +226,7 @@ class WorldSelectionView(View):
 class JourneyView(View):
     template_name = 'world/journey.html'
 
-    def get(self, request):
+    async def get(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
         
@@ -252,18 +235,10 @@ class JourneyView(View):
             return redirect('world:selection')
         
         try:
-            # We don't have a direct API to get character details by ID easily without iterating user chars
-            # But we can assume session has valid ID.
-            # Ideally we should fetch character state.
-            # For now, let's just render the page. The history is stored in session in Streamlit.
-            # In Django, we should probably store history in session too, or fetch it from backend if backend supported it (it doesn't seem to persist history in DB fully for retrieval? actually it does in `interactions` table but API might not expose it easily as a list).
-            # Streamlit app stores `st.session_state.history`.
-            # We'll use Django session for history.
-            
             history = request.session.get('history', [])
             
             # We need character info for the "Arrival" text if history is empty
-            user = CollabookAPI.get_current_user(request.session['token'])
+            user = await CollabookAPI.get_current_user(request.session['token'])
             character = next((c for c in user.get('characters', []) if c['id'] == request.session['character_id']), None)
             
             if not character:
@@ -274,29 +249,31 @@ class JourneyView(View):
             game_ended = False
             is_victory = False
             is_defeat = False
-            db_character = None
+            is_dead = False
+            
             try:
-                from game.models import Character as DBCharacter, Story as DBStory
-                db_character = DBCharacter.objects.get(id=request.session['character_id'])
-                db_story = db_character.story
+                # Async ORM access
+                db_character = await Character.objects.aget(id=request.session['character_id'])
+                # Access related field (story) asynchronously
+                db_story = await sync_to_async(lambda: db_character.story)()
                 
                 # Game ends if character is dead OR survival goal reached
                 if db_character.status == 'dead':
                     game_ended = True
                     is_defeat = True
+                    is_dead = True
                 elif db_character.days_survived >= db_story.survival_goal_days:
                     game_ended = True
                     is_victory = True
             except Exception:
-                # If we can't check, default to False (hide button)
                 pass
                 
-            return render(request, self.template_name, {
+            return await sync_to_async(render)(request, self.template_name, {
                 'history': history,
                 'character': character,
                 'user': user,
                 'game_ended': game_ended,
-                'is_dead': db_character.status == 'dead' if db_character else False,
+                'is_dead': is_dead,
                 'is_victory': is_victory,
                 'is_defeat': is_defeat,
                 'suggested_actions': request.session.get('suggested_actions', []),
@@ -306,27 +283,23 @@ class JourneyView(View):
             messages.error(request, str(e))
             return redirect('world:selection')
 
-            return redirect('world:journey')
-        except Exception as e:
-            messages.error(request, str(e))
-            return redirect('world:journey')
-
-    def request_restart(self, request):
+    async def request_restart(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
         
         try:
-            from django.core.mail import send_mail
-            from game.models import Character as DBCharacter
             character_id = request.session.get('character_id')
-            db_character = DBCharacter.objects.get(id=character_id)
+            
+            # Async ORM chain
+            db_character = await Character.objects.select_related('user', 'story').aget(id=character_id)
             user = db_character.user
             story = db_character.story
 
             subject = f"Richiesta Nuova Storia: {user.username} - {story.title}"
             message = f"L'utente {user.username} ({user.email}) ha richiesto di iniziare una nuova storia nel mondo '{story.title}'.\n\nID Personaggio: {character_id}\nID Mondo: {story.id}"
             
-            send_mail(
+            # send_mail is blocking, wrap it
+            await sync_to_async(send_mail)(
                 subject,
                 message,
                 'noreply@collabook.com',
@@ -340,13 +313,13 @@ class JourneyView(View):
             messages.error(request, f"Error sending request: {str(e)}")
             return redirect('world:journey')
 
-    def post(self, request):
+    async def post(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
         
         action = request.POST.get('action')
         if action == 'request_restart':
-            return self.request_restart(request)
+            return await self.request_restart(request)
 
         user_action = request.POST.get('user_action')
         if not user_action:
@@ -356,7 +329,7 @@ class JourneyView(View):
             lang = request.LANGUAGE_CODE[:2] if hasattr(request, 'LANGUAGE_CODE') else 'en'
             character_id = request.session['character_id']
             
-            response = CollabookAPI.interact(character_id, user_action, request.session['token'], language=lang)
+            response = await CollabookAPI.interact(character_id, user_action, request.session['token'], language=lang)
             
             history = request.session.get('history', [])
             # Fix image URLs to use Django static paths
@@ -386,14 +359,10 @@ class JourneyView(View):
             messages.error(request, str(e))
             return redirect('world:journey')
 
-# Adventure Summary
-from django.template.loader import get_template
-from game.models import Turn, Character, Story
-
 class AdventureSummaryView(View):
     template_name = 'world/adventure_summary.html'
 
-    def get(self, request):
+    async def get(self, request):
         if 'token' not in request.session:
             return redirect('accounts:login')
             
@@ -404,8 +373,18 @@ class AdventureSummaryView(View):
             
         try:
             # Fetch Character and Story Details from managed models
-            character = Character.objects.get(id=character_id)
-            story = character.story
+            # Use sync_to_async for ORM operations that are not just single object fetches
+            
+            def get_summary_data():
+                char = Character.objects.select_related('story').get(id=character_id)
+                s = char.story
+                # Clean up turns
+                ts = list(Turn.objects.filter(character_id=character_id).order_by('turn_number'))
+                for t in ts:
+                    t.narration = clean_narration(t.narration)
+                return char, s, ts
+
+            character, story, turns = await sync_to_async(get_summary_data)()
             
             # Localize Story Title
             from django.utils.translation import get_language
@@ -413,21 +392,13 @@ class AdventureSummaryView(View):
             if lang and lang.startswith('it') and story.title_it:
                 story.title = story.title_it
 
-            # Fetch turns ordered by turn number
-            turns = Turn.objects.filter(character_id=character_id).order_by('turn_number')
-            
-            # Clean narration for each turn
-            for turn in turns:
-                turn.narration = clean_narration(turn.narration)
-
-            return render(request, self.template_name, {
+            return await sync_to_async(render)(request, self.template_name, {
                 'story': story,
                 'character': character,
                 'turns': turns,
-                'date': character.created_at,  # Pass datetime object for template filter
+                'date': character.created_at,
             })
             
         except Exception as e:
             messages.error(request, f"Error generating summary: {str(e)}")
             return redirect('world:journey')
-

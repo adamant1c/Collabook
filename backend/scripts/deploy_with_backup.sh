@@ -169,6 +169,30 @@ else
 fi
 
 # --------------------------------------------------
+# 7.5. Reset PostgreSQL sequences to avoid duplicate key errors
+# --------------------------------------------------
+echo ""
+echo "🔑 Resetting PostgreSQL sequences..."
+$COMPOSE exec frontend python manage.py shell -c "
+from django.db import connection
+with connection.cursor() as cursor:
+    cursor.execute(\"\"\"
+        SELECT 'SELECT setval(' || quote_literal(pg_get_serial_sequence(quote_ident(t.tablename), quote_ident(a.attname)))
+               || ', COALESCE(MAX(' || quote_ident(a.attname) || '), 1)) FROM ' || quote_ident(t.tablename) || ';'
+        FROM pg_tables t
+        JOIN pg_class c ON c.relname = t.tablename
+        JOIN pg_attribute a ON a.attrelid = c.oid
+        WHERE t.schemaname = 'public'
+          AND a.attnum > 0
+          AND pg_get_serial_sequence(quote_ident(t.tablename), quote_ident(a.attname)) IS NOT NULL
+    \"\"\")
+    queries = cursor.fetchall()
+    for (q,) in queries:
+        cursor.execute(q)
+    print(f'✓ Reset {len(queries)} sequence(s)')
+" || echo "   ⚠️  Could not reset sequences (non-critical)"
+
+# --------------------------------------------------
 # 8. Create superuser for development
 # --------------------------------------------------
 if [[ "$EXPORT_CHOICE_OP" == "1" ]]; then

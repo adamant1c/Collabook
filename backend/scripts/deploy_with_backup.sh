@@ -184,6 +184,7 @@ with connection.cursor() as cursor:
         JOIN pg_attribute a ON a.attrelid = c.oid
         WHERE t.schemaname = 'public'
           AND a.attnum > 0
+          AND NOT a.attisdropped
           AND pg_get_serial_sequence(quote_ident(t.tablename), quote_ident(a.attname)) IS NOT NULL
     \"\"\")
     queries = cursor.fetchall()

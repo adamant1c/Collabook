@@ -15,40 +15,42 @@ _client = httpx.AsyncClient(base_url=BACKEND_URL, timeout=30.0)
 # Translation mapping for backend API error messages
 # These messages are returned by the FastAPI backend in English
 # and need to be translated based on the user's Django language preference
-API_ERROR_MESSAGES = {
+# Set of known backend API error messages to be translated
+# These strings must match exactly what the backend returns.
+KNOWN_ERROR_MESSAGES = {
     # Auth errors
-    "Username already registered": "Username already registered",
-    "Email already registered": "Email already registered",
-    "Invalid email format": "Invalid email format",
-    "Incorrect username or password": "Incorrect username or password",
-    "Please verify your email before logging in. Check your inbox for the verification link.": "Please verify your email before logging in. Check your inbox for the verification link.",
-    "Invalid or expired reset token": "Invalid or expired reset token",
-    "Reset token has expired": "Reset token has expired",
-    "Invalid verification token": "Invalid verification token",
-    "Verification token has expired": "Verification token has expired",
-    "Inactive user": "Inactive user",
-    "Admin access required": "Admin access required",
-    "Could not validate credentials": "Could not validate credentials",
+    "Username already registered",
+    "Email already registered",
+    "Invalid email format",
+    "Incorrect username or password",
+    "Please verify your email before logging in. Check your inbox for the verification link.",
+    "Invalid or expired reset token",
+    "Reset token has expired",
+    "Invalid verification token",
+    "Verification token has expired",
+    "Inactive user",
+    "Admin access required",
+    "Could not validate credentials",
     # Story/Character errors
-    "Story not found": "Story not found",
-    "Character not found": "Character not found",
-    "Not your character": "Not your character",
-    "You already have a character in this story": "You already have a character in this story",
+    "Story not found",
+    "Character not found",
+    "Not your character",
+    "You already have a character in this story",
     # Quest errors
-    "Quest not found": "Quest not found",
-    "Quest already accepted": "Quest already accepted",
-    "Quest not accepted": "Quest not accepted",
-    "Quest already completed": "Quest already completed",
+    "Quest not found",
+    "Quest already accepted",
+    "Quest not accepted",
+    "Quest already completed",
     # Combat errors
-    "No active combat": "No active combat",
-    "Invalid action": "Invalid action",
+    "No active combat",
+    "Invalid action",
     # Item errors
-    "Item not found": "Item not found",
-    "Item not found in inventory": "Item not found in inventory",
-    "Not authorized": "Not authorized",
-    "Hours must be between 1 and 24": "Hours must be between 1 and 24",
+    "Item not found",
+    "Item not found in inventory",
+    "Not authorized",
+    "Hours must be between 1 and 24",
     # User errors
-    "User not found": "User not found",
+    "User not found",
 }
 
 def translate_api_error(error_message: str) -> str:
@@ -56,8 +58,7 @@ def translate_api_error(error_message: str) -> str:
     Translate an API error message using Django's translation system.
     If the message is in our known list, translate it; otherwise return as-is.
     """
-    # Check if this is a known error message
-    if error_message in API_ERROR_MESSAGES:
+    if error_message in KNOWN_ERROR_MESSAGES:
         return _(error_message)
     return error_message
 

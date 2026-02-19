@@ -1,15 +1,16 @@
-from app.core.llm_client import llm_client
+from app.core.llm_client import LLMClient
 
 class MatchmakerAgent:
     """Matches a new character to an existing story"""
     
-    async def find_insertion_point(self, story_context: dict, character: dict, language: str = "en") -> str:
+    async def find_insertion_point(self, story_context: dict, character: dict, llm_client: LLMClient, language: str = "en") -> str:
         """
         Determine where and how to insert a new character into an ongoing story
         
         Args:
             story_context: World description, current state, active characters
             character: New character profile
+            llm_client: Injected LLM client
             language: Language for the response ("en" or "it")
         """
         # Prompt templates

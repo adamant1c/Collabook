@@ -157,12 +157,13 @@ class WorldSelectionView(View):
     template_name = 'world/selection.html'
 
     async def get(self, request):
-        if 'token' not in request.session:
+        session_token = await sync_to_async(request.session.get)('token')
+        if not session_token:
             return redirect('accounts:login')
         
         try:
-            stories = await CollabookAPI.list_stories(request.session['token'])
-            user = await CollabookAPI.get_current_user(request.session['token'])
+            stories = await CollabookAPI.list_stories(session_token)
+            user = await CollabookAPI.get_current_user(session_token)
             user_characters = user.get('characters', [])
             
             # Add 'existing_char' flag to stories and translate
@@ -183,7 +184,8 @@ class WorldSelectionView(View):
             return await sync_to_async(render)(request, self.template_name, {'error': str(e)})
 
     async def post(self, request):
-        if 'token' not in request.session:
+        session_token = await sync_to_async(request.session.get)('token')
+        if not session_token:
             return redirect('accounts:login')
         
         story_id = request.POST.get('story_id')
@@ -194,9 +196,9 @@ class WorldSelectionView(View):
                 # Get current language code from request (sync access to language code is fine)
                 lang = request.LANGUAGE_CODE[:2] if hasattr(request, 'LANGUAGE_CODE') else 'en'
                 
-                character = await CollabookAPI.join_story(story_id, request.session['token'], language=lang)
-                request.session['character_id'] = character['id']
-                request.session['story_id'] = story_id
+                character = await CollabookAPI.join_story(story_id, session_token, language=lang)
+                await sync_to_async(request.session.__setitem__)('character_id', character['id'])
+                await sync_to_async(request.session.__setitem__)('story_id', story_id)
                 messages.success(request, _("Entering world..."))
                 return redirect('world:journey')
             except Exception as e:
@@ -205,13 +207,13 @@ class WorldSelectionView(View):
         
         elif action == 'continue':
             try:
-                user = await CollabookAPI.get_current_user(request.session['token'])
+                user = await CollabookAPI.get_current_user(session_token)
                 user_characters = user.get('characters', [])
                 existing_char = next((c for c in user_characters if c['story_id'] == story_id), None)
                 
                 if existing_char:
-                    request.session['character_id'] = existing_char['id']
-                    request.session['story_id'] = story_id
+                    await sync_to_async(request.session.__setitem__)('character_id', existing_char['id'])
+                    await sync_to_async(request.session.__setitem__)('story_id', story_id)
                     messages.success(request, _("Resuming adventure..."))
                     return redirect('world:journey')
                 else:
@@ -227,19 +229,21 @@ class JourneyView(View):
     template_name = 'world/journey.html'
 
     async def get(self, request):
-        if 'token' not in request.session:
+        session_token = await sync_to_async(request.session.get)('token')
+        if not session_token:
             return redirect('accounts:login')
         
-        if 'character_id' not in request.session:
+        character_id = await sync_to_async(request.session.get)('character_id')
+        if not character_id:
             messages.warning(request, _("Please select a world first."))
             return redirect('world:selection')
         
         try:
-            history = request.session.get('history', [])
+            history = await sync_to_async(request.session.get)('history', [])
             
             # We need character info for the "Arrival" text if history is empty
-            user = await CollabookAPI.get_current_user(request.session['token'])
-            character = next((c for c in user.get('characters', []) if c['id'] == request.session['character_id']), None)
+            user = await CollabookAPI.get_current_user(session_token)
+            character = next((c for c in user.get('characters', []) if c['id'] == character_id), None)
             
             if not character:
                 messages.error(request, _("Character not found."))
@@ -253,7 +257,7 @@ class JourneyView(View):
             
             try:
                 # Async ORM access
-                db_character = await Character.objects.aget(id=request.session['character_id'])
+                db_character = await Character.objects.aget(id=character_id)
                 # Access related field (story) asynchronously
                 db_story = await sync_to_async(lambda: db_character.story)()
                 
@@ -276,7 +280,7 @@ class JourneyView(View):
                 'is_dead': is_dead,
                 'is_victory': is_victory,
                 'is_defeat': is_defeat,
-                'suggested_actions': request.session.get('suggested_actions', []),
+                'suggested_actions': await sync_to_async(request.session.get)('suggested_actions', []),
                 'combat_active': any(e.get('type') == 'enemy' and e.get('active') for e in (history[-1].get('entities', []) if history else []))
             })
         except Exception as e:
@@ -284,11 +288,12 @@ class JourneyView(View):
             return redirect('world:selection')
 
     async def request_restart(self, request):
-        if 'token' not in request.session:
+        session_token = await sync_to_async(request.session.get)('token')
+        if not session_token:
             return redirect('accounts:login')
         
         try:
-            character_id = request.session.get('character_id')
+            character_id = await sync_to_async(request.session.get)('character_id')
             
             # Async ORM chain
             db_character = await Character.objects.select_related('user', 'story').aget(id=character_id)
@@ -314,7 +319,8 @@ class JourneyView(View):
             return redirect('world:journey')
 
     async def post(self, request):
-        if 'token' not in request.session:
+        session_token = await sync_to_async(request.session.get)('token')
+        if not session_token:
             return redirect('accounts:login')
         
         action = request.POST.get('action')
@@ -327,11 +333,11 @@ class JourneyView(View):
         
         try:
             lang = request.LANGUAGE_CODE[:2] if hasattr(request, 'LANGUAGE_CODE') else 'en'
-            character_id = request.session['character_id']
+            character_id = await sync_to_async(request.session.get)('character_id')
             
-            response = await CollabookAPI.interact(character_id, user_action, request.session['token'], language=lang)
+            response = await CollabookAPI.interact(character_id, user_action, session_token, language=lang)
             
-            history = request.session.get('history', [])
+            history = await sync_to_async(request.session.get)('history', [])
             # Fix image URLs to use Django static paths
             entities = response.get('detected_entities', [])
             for entity in entities:
@@ -346,13 +352,9 @@ class JourneyView(View):
                 'entities': entities,
                 'player_stats': response.get('player_stats')
             })
-            request.session['history'] = history
-            request.session['suggested_actions'] = response.get('suggested_actions', [])
-            
-            # Clean narration in history
-            if history:
-                history[-1]['narration'] = clean_narration(history[-1]['narration'])
-                request.session['history'] = history
+            history[-1]['narration'] = clean_narration(history[-1]['narration'])
+            await sync_to_async(request.session.__setitem__)('history', history)
+            await sync_to_async(request.session.__setitem__)('suggested_actions', response.get('suggested_actions', []))
 
             return redirect('world:journey')
         except Exception as e:
@@ -363,10 +365,10 @@ class AdventureSummaryView(View):
     template_name = 'world/adventure_summary.html'
 
     async def get(self, request):
-        if 'token' not in request.session:
+        if not await sync_to_async(request.session.get)('token'):
             return redirect('accounts:login')
             
-        character_id = request.session.get('character_id')
+        character_id = await sync_to_async(request.session.get)('character_id')
         if not character_id:
             messages.warning(request, _("No active character found."))
             return redirect('world:selection')

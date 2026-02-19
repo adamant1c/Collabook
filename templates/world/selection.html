@@ -35,6 +35,13 @@
     </div>
     {% endif %}
 
+    {% if error %}
+    <div class="alert alert-danger shadow-sm border-0">
+        <h5 class="alert-heading">⚠️ {% trans "Error" %}</h5>
+        <p class="mb-0">{{ error }}</p>
+    </div>
+    {% endif %}
+
     {% if default_worlds %}
     {% for story in default_worlds %}
     <div class="quest-card">

@@ -11,7 +11,7 @@ class LandingView(View):
     template_name = 'landing.html'
 
     async def get(self, request, *args, **kwargs):
-        if 'token' in request.session:
+        if await sync_to_async(request.session.get)('token'):
             return redirect('world:selection')
         try:
             worlds = await CollabookAPI.list_public_stories()
@@ -24,7 +24,7 @@ class LoginView(View):
     template_name = 'accounts/login.html'
 
     async def get(self, request, *args, **kwargs):
-        if 'token' in request.session:
+        if await sync_to_async(request.session.get)('token'):
             return redirect('world:selection')
         form = LoginForm()
         return await sync_to_async(render)(request, self.template_name, {'form': form})
@@ -36,8 +36,8 @@ class LoginView(View):
             password = form.cleaned_data['password']
             try:
                 token = await CollabookAPI.login(username, password)
-                request.session['token'] = token
-                request.session['username'] = username
+                await sync_to_async(request.session.__setitem__)('token', token)
+                await sync_to_async(request.session.__setitem__)('username', username)
                 # Check if character exists and has a profession
                 user = await CollabookAPI.get_current_user(token)
                 character = user.get('character')

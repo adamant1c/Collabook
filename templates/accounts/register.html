@@ -122,6 +122,104 @@
     .password-toggle-btn:hover {
         opacity: 1;
     }
+
+    /* Password Rules Panel */
+    .password-rules-panel {
+        background: rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(212, 175, 55, 0.15);
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .password-rules-panel h6 {
+        color: #d4af37;
+        font-family: 'Cinzel', serif;
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0.5px;
+    }
+
+    .pwd-rule {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: #aaa;
+        padding: 2px 0;
+        transition: color 0.3s ease;
+    }
+
+    .pwd-rule .rule-icon {
+        font-size: 0.85rem;
+        width: 18px;
+        text-align: center;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .pwd-rule.valid {
+        color: #4ade80;
+    }
+
+    .pwd-rule.valid .rule-icon {
+        color: #4ade80;
+        text-shadow: 0 0 6px rgba(74, 222, 128, 0.4);
+    }
+
+    .pwd-rule.invalid {
+        color: #aaa;
+    }
+
+    .pwd-rule.invalid .rule-icon {
+        color: #ef4444;
+    }
+
+    /* Generate Password Button */
+    .btn-generate-password {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.45rem 0.75rem;
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+        border: 1px solid rgba(212, 175, 55, 0.35);
+        border-radius: 6px;
+        color: #d4af37;
+        font-size: 0.8rem;
+        font-family: 'Cinzel', serif;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        letter-spacing: 0.3px;
+    }
+
+    .btn-generate-password:hover {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.1));
+        border-color: rgba(212, 175, 55, 0.6);
+        box-shadow: 0 0 12px rgba(212, 175, 55, 0.2);
+        transform: translateY(-1px);
+    }
+
+    .btn-generate-password:active {
+        transform: translateY(0);
+    }
+
+    .copy-feedback {
+        display: inline-block;
+        color: #4ade80;
+        font-size: 0.75rem;
+        font-family: 'Inter', sans-serif;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        margin-left: 6px;
+    }
+
+    .copy-feedback.show {
+        opacity: 1;
+    }
 </style>
 
 <script>
@@ -140,6 +238,104 @@
             eyeClosed.style.display = 'block';
         }
     }
+
+    function validatePasswordRules() {
+        const pwdField = document.getElementById('id_password');
+        if (!pwdField) return;
+        const val = pwdField.value;
+
+        const rules = {
+            'rule-length': val.length >= 8,
+            'rule-digit': /\d/.test(val),
+            'rule-upper': /[A-Z]/.test(val),
+            'rule-special': /[!@#$%^&*(),.?":{}|<>]/.test(val),
+        };
+
+        for (const [id, passed] of Object.entries(rules)) {
+            const el = document.getElementById(id);
+            if (!el) continue;
+            const icon = el.querySelector('.rule-icon');
+            if (passed) {
+                el.classList.add('valid');
+                el.classList.remove('invalid');
+                icon.textContent = '✓';
+            } else {
+                el.classList.add('invalid');
+                el.classList.remove('valid');
+                icon.textContent = '✗';
+            }
+        }
+    }
+
+    function generateSecurePassword() {
+        const lower = 'abcdefghijkmnopqrstuvwxyz';
+        const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        const digits = '23456789';
+        const specials = '!@#$%&*?';
+        const all = lower + upper + digits + specials;
+
+        /* Guarantee at least one of each category */
+        let password = '';
+        password += upper[Math.floor(Math.random() * upper.length)];
+        password += lower[Math.floor(Math.random() * lower.length)];
+        password += digits[Math.floor(Math.random() * digits.length)];
+        password += specials[Math.floor(Math.random() * specials.length)];
+
+        for (let i = 4; i < 16; i++) {
+            password += all[Math.floor(Math.random() * all.length)];
+        }
+
+        /* Shuffle */
+        password = password.split('').sort(() => Math.random() - 0.5).join('');
+
+        /* Fill both fields */
+        const pwd1 = document.getElementById('id_password');
+        const pwd2 = document.getElementById('id_password_confirm');
+        if (pwd1) { pwd1.value = password; pwd1.type = 'text'; }
+        if (pwd2) { pwd2.value = password; pwd2.type = 'text'; }
+
+        /* Update eye icons to reflect visible state */
+        document.querySelectorAll('.password-wrapper').forEach(wrapper => {
+            const eyeOpen = wrapper.querySelector('.eye-open');
+            const eyeClosed = wrapper.querySelector('.eye-closed');
+            if (eyeOpen) eyeOpen.style.display = 'block';
+            if (eyeClosed) eyeClosed.style.display = 'none';
+        });
+
+        /* Re-validate rules */
+        validatePasswordRules();
+
+        /* Copy to clipboard */
+        navigator.clipboard.writeText(password).then(() => {
+            const fb = document.getElementById('copy-feedback');
+            if (fb) {
+                fb.classList.add('show');
+                setTimeout(() => fb.classList.remove('show'), 2500);
+            }
+        }).catch(() => { /* clipboard not available, ignore */ });
+
+        /* Auto-hide after 10 seconds */
+        setTimeout(() => {
+            if (pwd1 && pwd1.type === 'text') { pwd1.type = 'password'; }
+            if (pwd2 && pwd2.type === 'text') { pwd2.type = 'password'; }
+            document.querySelectorAll('.password-wrapper').forEach(wrapper => {
+                const eyeOpen = wrapper.querySelector('.eye-open');
+                const eyeClosed = wrapper.querySelector('.eye-closed');
+                if (eyeOpen) eyeOpen.style.display = 'none';
+                if (eyeClosed) eyeClosed.style.display = 'block';
+            });
+        }, 10000);
+    }
+
+    /* Attach real-time validation on page load */
+    document.addEventListener('DOMContentLoaded', function () {
+        const pwdField = document.getElementById('id_password');
+        if (pwdField) {
+            pwdField.addEventListener('input', validatePasswordRules);
+            /* Run once on load for pre-filled values */
+            validatePasswordRules();
+        }
+    });
 </script>
 
 <div class="auth-container" style="max-width: 450px; margin: 0 auto;">
@@ -216,6 +412,32 @@
                         </svg>
                     </button>
                 </div>
+                {% if field.name == 'password' %}
+                <!-- Password Rules Panel -->
+                <div class="password-rules-panel">
+                    <h6>🔒 {% trans "Password Requirements" %}</h6>
+                    <div id="rule-length" class="pwd-rule invalid">
+                        <span class="rule-icon">✗</span>
+                        <span>{% trans "At least 8 characters" %}</span>
+                    </div>
+                    <div id="rule-digit" class="pwd-rule invalid">
+                        <span class="rule-icon">✗</span>
+                        <span>{% trans "At least one digit (0-9)" %}</span>
+                    </div>
+                    <div id="rule-upper" class="pwd-rule invalid">
+                        <span class="rule-icon">✗</span>
+                        <span>{% trans "At least one uppercase letter (A-Z)" %}</span>
+                    </div>
+                    <div id="rule-special" class="pwd-rule invalid">
+                        <span class="rule-icon">✗</span>
+                        <span>{% trans "At least one special character" %}</span>
+                    </div>
+                    <button type="button" class="btn-generate-password" onclick="generateSecurePassword()">
+                        🎲 {% trans "Generate Secure Password" %}
+                        <span id="copy-feedback" class="copy-feedback">{% trans "Copied!" %} ✓</span>
+                    </button>
+                </div>
+                {% endif %}
                 {% else %}
                 <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 0.5rem; color: #d4af37;">
                     {{ field.label }}

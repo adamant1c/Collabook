@@ -264,6 +264,28 @@ msgstr "Continua la tua epica avventura"
 msgid "REGISTER"
 msgstr "REGISTRATI"
 
+#: templates/accounts/register.html - Password Rules
+msgid "Password Requirements"
+msgstr "Requisiti Password"
+
+msgid "At least 8 characters"
+msgstr "Almeno 8 caratteri"
+
+msgid "At least one digit (0-9)"
+msgstr "Almeno una cifra (0-9)"
+
+msgid "At least one uppercase letter (A-Z)"
+msgstr "Almeno una lettera maiuscola (A-Z)"
+
+msgid "At least one special character"
+msgstr "Almeno un carattere speciale"
+
+msgid "Generate Secure Password"
+msgstr "Genera Password Sicura"
+
+msgid "Copied!"
+msgstr "Copiata!"
+
 #: templates/base.html:76
 msgid "Worlds"
 msgstr "Mondi"

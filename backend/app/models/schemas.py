@@ -182,6 +182,11 @@ class InteractionResponse(BaseModel):
     detected_entities: List[Dict[str, Any]] = []
     suggested_actions: List[str] = []
     player_stats: Optional[Dict[str, Any]] = None
+    
+    # Map context
+    current_location_id: Optional[str] = None
+    current_location_name: Optional[str] = None
+    nearby_locations: List[Dict[str, str]] = []  # [{"id": "...", "name": "..."}]
     # Phase 3: LLM can suggest quest completion
     
     class Config:
@@ -350,3 +355,49 @@ class UseItemRequest(BaseModel):
 class RestRequest(BaseModel):
     character_id: str
     hours: int = Field(default=8, ge=1, le=24)
+
+
+# Map schemas
+class MapNodeResponse(BaseModel):
+    id: str
+    story_id: str
+    parent_id: Optional[str] = None
+    name: str
+    name_it: Optional[str] = None
+    description: Optional[str] = None
+    description_it: Optional[str] = None
+    node_type: str
+    x: int
+    y: int
+    icon: Optional[str] = None
+    is_starting_location: bool
+    children: List['MapNodeResponse'] = []
+
+    class Config:
+        from_attributes = True
+
+class MapCharacterPosition(BaseModel):
+    character_id: str
+    name: str
+    location_id: str
+    location_name: str
+
+class MapEdgeResponse(BaseModel):
+    id: str
+    story_id: str
+    from_node_id: str
+    to_node_id: str
+    travel_description: Optional[str] = None
+    bidirectional: bool
+
+    class Config:
+        from_attributes = True
+
+class MapResponse(BaseModel):
+    nodes: List[MapNodeResponse]
+    edges: List[MapEdgeResponse]
+    characters: List[MapCharacterPosition] = []
+
+class MoveRequest(BaseModel):
+    character_id: str
+    target_node_id: str

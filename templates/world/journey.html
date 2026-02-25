@@ -26,11 +26,21 @@
 
 <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-        <h1 style='color: #d4af37; font-family: "Cinzel", serif; margin: 0;'>
+        <h1 style='color: #d4af37; font-family: "Cinzel", serif; margin: 0; display: flex; align-items: center;'>
             📜
             {% trans "Your Journey" %}
+            {% if current_location_name %}
+            <span class="ms-3 px-3 py-1 rounded-pill"
+                style="background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); color: #d4af37; font-size: 0.9rem; font-family: 'Inter', sans-serif;">
+                <i class="fas fa-map-marker-alt me-2"></i>{{ current_location_name }}
+            </span>
+            {% endif %}
         </h1>
         <div class="d-flex gap-2">
+            <a href="{% url 'world:map' %}" class="btn-outline-gold"
+                style="padding: 0.5rem 1rem; font-size: 0.9rem; text-decoration: none;">
+                🗺️ {% trans "World Map" %}
+            </a>
             {% if game_ended %}
             <a href="{% url 'world:adventure_summary' %}" class="btn-primary"
                 style="padding: 0.5rem 1rem; font-size: 0.9rem; text-decoration: none;">
@@ -111,7 +121,8 @@
                             </div>
                             {% if entity.hp is not None %}
                             <div class="entity-hp mt-2">
-                                <small class="text-secondary">HP: {{ entity.hp }}/{{ entity.max_hp|default:entity.hp }}</small>
+                                <small class="text-secondary">HP: {{ entity.hp }}/{{ entity.max_hp|default:entity.hp
+                                    }}</small>
                                 <div class="progress" style="height: 6px; background: rgba(255,255,255,0.1);">
                                     <div class="progress-bar bg-danger"
                                         style="width: {% if entity.max_hp > 0 %}{% widthratio entity.hp entity.max_hp 100 %}{% else %}100{% endif %}%">
@@ -137,7 +148,8 @@
                 {% if not is_dead %}
                 <div class="card bg-dark text-light border-gold-dim mb-4 shadow">
                     <div class="card-header border-gold-dim py-2">
-                        <h5 class="mb-0" style="font-family: 'Cinzel', serif; color: #d4af37;">✨ {% trans "Choose Your Path" %}</h5>
+                        <h5 class="mb-0" style="font-family: 'Cinzel', serif; color: #d4af37;">✨ {% trans "Choose Your
+                            Path" %}</h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -161,13 +173,15 @@
                                 <form method="post" id="action-form">
                                     {% csrf_token %}
                                     <div class="form-group mb-3">
-                                        <label for="user_action" class="text-secondary small mb-2">{% trans "Option 3: Describe your own action" %}</label>
+                                        <label for="user_action" class="text-secondary small mb-2">{% trans "Option 3:
+                                            Describe your own action" %}</label>
                                         <textarea name="user_action" id="user_action"
                                             class="form-control bg-black text-light border-gold-dim" rows="3"
                                             placeholder="{% trans 'e.g., I cautiously approach the ancient door...' %}"
-                                                  required></textarea>
+                                            required></textarea>
                                     </div>
-                                    <button type="submit" id="submit-btn" class="btn btn-gold w-100 shadow py-2">🎭 {% trans "Take Action" %}</button>
+                                    <button type="submit" id="submit-btn" class="btn btn-gold w-100 shadow py-2">🎭 {%
+                                        trans "Take Action" %}</button>
                                 </form>
                             </div>
                         </div>
@@ -194,8 +208,10 @@
                             class="img-fluid rounded shadow" style="max-height: 200px; opacity: 0.8;"
                             onerror="this.style.display='none'">
                     </div>
-                    <h3 style="font-family: 'Cinzel', serif; color: #d4af37;" class="mb-3">⚖️ {% trans "Adventure Finished" %}</h3>
-                    <p class="mb-4">{% trans "You faced this adventure with valor, but unfortunately you could not bring it to completion. Your courage will not be forgotten." %}</p>
+                    <h3 style="font-family: 'Cinzel', serif; color: #d4af37;" class="mb-3">⚖️ {% trans "Adventure
+                        Finished" %}</h3>
+                    <p class="mb-4">{% trans "You faced this adventure with valor, but unfortunately you could not bring
+                        it to completion. Your courage will not be forgotten." %}</p>
                     {% endif %}
                     <form method="post">
                         {% csrf_token %}
@@ -214,7 +230,8 @@
                 <div class="combat-panel card bg-dark border-danger shadow animate-pop-in"
                     style="background: linear-gradient(135deg, rgba(40,0,0,0.8), rgba(0,0,0,0.9)) !important;">
                     <div class="card-header border-danger py-2 d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 text-danger" style="font-family: 'Cinzel', serif;">⚔️ {% trans "Combat Status" %}</h5>
+                        <h5 class="mb-0 text-danger" style="font-family: 'Cinzel', serif;">⚔️ {% trans "Combat Status"
+                            %}</h5>
                         <span class="badge bg-danger">{% trans "Active Encounter" %}</span>
                     </div>
                     <div class="card-body">

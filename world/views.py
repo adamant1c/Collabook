@@ -272,6 +272,16 @@ class JourneyView(View):
             except Exception:
                 pass
                 
+            # Get location name
+            current_location_name = None
+            if db_character.current_location_id:
+                try:
+                    from game.models import MapNode
+                    locNode = await MapNode.objects.aget(id=db_character.current_location_id)
+                    current_location_name = locNode.name_it if (request.LANGUAGE_CODE[:2] == 'it' and locNode.name_it) else locNode.name
+                except Exception:
+                    pass
+
             return await sync_to_async(render)(request, self.template_name, {
                 'history': history,
                 'character': character,
@@ -280,6 +290,7 @@ class JourneyView(View):
                 'is_dead': is_dead,
                 'is_victory': is_victory,
                 'is_defeat': is_defeat,
+                'current_location_name': current_location_name,
                 'suggested_actions': await sync_to_async(request.session.get)('suggested_actions', []),
                 'combat_active': any(e.get('type') == 'enemy' and e.get('active') for e in (history[-1].get('entities', []) if history else []))
             })
@@ -404,3 +415,53 @@ class AdventureSummaryView(View):
         except Exception as e:
             messages.error(request, f"Error generating summary: {str(e)}")
             return redirect('world:journey')
+
+class WorldMapView(View):
+    template_name = 'world/map.html'
+
+    async def get(self, request):
+        session_token = await sync_to_async(request.session.get)('token')
+        if not session_token:
+            return redirect('accounts:login')
+            
+        story_id = await sync_to_async(request.session.get)('story_id')
+        character_id = await sync_to_async(request.session.get)('character_id')
+        
+        if not story_id or not character_id:
+            messages.warning(request, _("Please select a world first."))
+            return redirect('world:selection')
+            
+        try:
+            map_data = await CollabookAPI.get_map(story_id, session_token)
+            user = await CollabookAPI.get_current_user(session_token)
+            character = next((c for c in user.get('characters', []) if c['id'] == character_id), None)
+            story = await CollabookAPI.get_story(story_id, session_token)
+            
+            return await sync_to_async(render)(request, self.template_name, {
+                'map_data': map_data,
+                'character': character,
+                'story': story,
+                'user': user,
+            })
+        except Exception as e:
+            messages.error(request, f"Error loading map: {str(e)}")
+            return redirect('world:journey')
+
+    async def post(self, request):
+        session_token = await sync_to_async(request.session.get)('token')
+        if not session_token:
+            return redirect('accounts:login')
+            
+        character_id = await sync_to_async(request.session.get)('character_id')
+        target_node_id = request.POST.get('target_node_id')
+        
+        if not character_id or not target_node_id:
+            return redirect('world:map')
+            
+        try:
+            await CollabookAPI.move_character(character_id, target_node_id, session_token)
+            messages.success(request, _("You have moved to a new location."))
+            return redirect('world:journey')
+        except Exception as e:
+            messages.error(request, f"Movement failed: {str(e)}")
+            return redirect('world:map')

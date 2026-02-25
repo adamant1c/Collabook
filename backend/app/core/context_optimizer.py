@@ -21,7 +21,9 @@ def create_compact_context(
     recent_turns: List[Turn],
     active_quests: List[PlayerQuest],
     max_turns: int = 3,
-    other_players: List[Character] = None  # NEW: Multiplayer support
+    other_players: List[Character] = None,
+    current_location: Any = None,
+    nearby_locations: List[Any] = None
 ) -> Dict[str, Any]:
     """Create ultra-compact context for LLM
     
@@ -43,6 +45,13 @@ def create_compact_context(
         "genre": story.genre,
         "scene": character.current_state or "Beginning of adventure"
     }
+    
+    # Map context (Ultra-compact, max ~50 tokens)
+    if current_location:
+        world_context["loc"] = current_location.name
+    if nearby_locations:
+        # Shorten names and limit to 3 to save tokens
+        world_context["near"] = [loc.name[:20] for loc in nearby_locations[:3]]
     
     # Available Entities (NEW)
     entities = {}

@@ -106,6 +106,7 @@ class Story(Base):
     quests = relationship("Quest", back_populates="story", cascade="all, delete-orphan")
     enemies = relationship("Enemy", back_populates="story", cascade="all, delete-orphan")
     npcs = relationship("NPC", back_populates="story", cascade="all, delete-orphan")
+    map_nodes = relationship("MapNode", back_populates="story", cascade="all, delete-orphan")
 
 class Character(Base):
     __tablename__ = "characters"
@@ -138,12 +139,16 @@ class Character(Base):
     # Currency (Phase 3)
     gold = Column(Integer, default=0)
     
+    # Map location tracking
+    current_location_id = Column(String, ForeignKey("map_nodes.id"), nullable=True)
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
     user = relationship("User", back_populates="characters")
     story = relationship("Story", back_populates="characters")
     turns = relationship("Turn", back_populates="character", cascade="all, delete-orphan")
+    current_location = relationship("MapNode")
     player_quests = relationship("PlayerQuest", back_populates="character", cascade="all, delete-orphan")
 
 class Turn(Base):
@@ -310,3 +315,46 @@ class Inventory(Base):
     # Relationships
     character = relationship("Character")
     item = relationship("Item", back_populates="inventory_items")
+
+
+class MapNode(Base):
+    """A location/point of interest on a world map (hierarchical)"""
+    __tablename__ = "map_nodes"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=False)
+    parent_id = Column(String, ForeignKey("map_nodes.id"), nullable=True)
+
+    name = Column(String, nullable=False)
+    name_it = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    description_it = Column(Text, nullable=True)
+    node_type = Column(String, nullable=False)  # region, city, dungeon, star_system, planet, etc.
+
+    # Visual positioning (0-1000 coordinate space)
+    x = Column(Integer, default=500)
+    y = Column(Integer, default=500)
+    icon = Column(String, nullable=True)  # emoji or CSS class
+
+    is_starting_location = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    story = relationship("Story", back_populates="map_nodes")
+    children = relationship("MapNode", backref="parent", remote_side=[id], foreign_keys=[parent_id])
+
+
+class MapEdge(Base):
+    """A connection/path between two map locations"""
+    __tablename__ = "map_edges"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=False)
+    from_node_id = Column(String, ForeignKey("map_nodes.id"), nullable=False)
+    to_node_id = Column(String, ForeignKey("map_nodes.id"), nullable=False)
+    travel_description = Column(Text, nullable=True)
+    bidirectional = Column(Boolean, default=True)
+
+    story = relationship("Story")
+    from_node = relationship("MapNode", foreign_keys=[from_node_id])
+    to_node = relationship("MapNode", foreign_keys=[to_node_id])

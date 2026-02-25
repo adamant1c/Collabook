@@ -10,7 +10,7 @@ from app.core.content_filter import validate_user_input, sanitize_llm_output, lo
 from app.core.game_rules import GameRules
 from app.api.auth import get_current_user
 from app.models.schemas import InteractionRequest, InteractionResponse
-from app.models.db_models import Turn, Character, Story, User, PlayerQuest, QuestStatus, Enemy
+from app.models.db_models import Turn, Character, Story, User, PlayerQuest, QuestStatus, Enemy, MapNode, MapEdge
 
 from app.services.combat_service import resolve_inline_combat, start_combat_from_event
 from app.services.narration_service import generate_narration, parse_llm_response
@@ -72,6 +72,38 @@ async def create_interaction(
         if other_ids:
             other_players = db.query(Character).join(User).filter(Character.id.in_(other_ids)).all()
 
+    # Map context
+    current_location = None
+    nearby_locations = []
+    if character.current_location_id:
+        current_location = db.query(MapNode).filter(MapNode.id == character.current_location_id).first()
+        if current_location:
+            # Find neighbors
+            edges = db.query(MapEdge).filter(
+                (MapEdge.from_node_id == current_location.id) |
+                (MapEdge.bidirectional & (MapEdge.to_node_id == current_location.id))
+            ).all()
+            
+            neighbor_ids = set()
+            for edge in edges:
+                if edge.from_node_id == current_location.id:
+                    neighbor_ids.add(edge.to_node_id)
+                else:
+                    neighbor_ids.add(edge.from_node_id)
+            
+            if neighbor_ids:
+                nearby_locations = db.query(MapNode).filter(MapNode.id.in_(list(neighbor_ids))).all()
+    else:
+        # Fallback: find starting location for the story
+        starting_loc = db.query(MapNode).filter(
+            MapNode.story_id == story.id,
+            MapNode.is_starting_location == True
+        ).first()
+        if starting_loc:
+            character.current_location_id = starting_loc.id
+            current_location = starting_loc
+            # (No neighbors for now till logic is fully initialized)
+
     compact_context = create_compact_context(
         user=current_user,
         character=character,
@@ -80,6 +112,8 @@ async def create_interaction(
         active_quests=active_quests,
         max_turns=3,
         other_players=other_players,
+        current_location=current_location,
+        nearby_locations=nearby_locations
     )
 
     # System prompt
@@ -93,7 +127,8 @@ async def create_interaction(
             "event": "start_combat" | null,
             "enemy": "nome_nemico" | null,
             "suggested_actions": ["azione 1", "azione 2"],
-            "rewards": {"gold": 0, "xp": 0}
+            "rewards": {"gold": 0, "xp": 0},
+            "new_location": "nome_località" | null
         }
         """
         system_prompt = f"""Sei un Dungeon Master italiano. {json_desc}
@@ -101,9 +136,10 @@ async def create_interaction(
         REGOLE:
         1. La narrazione deve essere in ITALIANO puro.
         2. Se l'utente vuole combattere, usa 'event': 'start_combat' e metti il nome del nemico.
-        3. Se ricevi una 'SYSTEM DIRECTIVE', usala come verità assoluta per la narrazione.
-        4. Includi SEMPRE 2 azioni suggerite plausibili nel campo 'suggested_actions'.
-        5. NON inventare stats del giocatore nella narrazione, usa quelle fornite nel contesto.
+        3. Se l'utente si sposta in una nuova località (tra quelle vicine o una nuova descritta), inserisci il nome esatto della località in 'new_location'.
+        4. Se ricevi una 'SYSTEM DIRECTIVE', usala come verità assoluta per la narrazione.
+        5. Includi SEMPRE 2 azioni suggerite plausibili nel campo 'suggested_actions'.
+        6. NON inventare stats del giocatore nella narrazione, usa quelle fornite nel contesto.
         """
 
     # ------------------------------------------------------------------
@@ -149,6 +185,19 @@ async def create_interaction(
             combat_active = start_combat_from_event(
                 character, story, parsed.enemy_name, turn_number, db
             )
+
+        # Handle movement from LLM
+        if parsed.new_location:
+            # Try to find the node by name (case-insensitive) in the same story
+            target_node = db.query(MapNode).filter(
+                MapNode.story_id == story.id,
+                (MapNode.name.ilike(parsed.new_location)) | (MapNode.name_it.ilike(parsed.new_location))
+            ).first()
+            
+            if target_node:
+                 character.current_location_id = target_node.id
+                 # Refresh for response
+                 current_location = target_node
 
     # Content filter
     narration, was_sanitized = sanitize_llm_output(narration)
@@ -220,4 +269,10 @@ async def create_interaction(
             "level": current_user.level,
             "gold": character.gold,
         },
+        current_location_id=character.current_location_id,
+        current_location_name=current_location.name_it if current_location and interaction.language.startswith("it") else (current_location.name if current_location else None),
+        nearby_locations=[
+            {"id": n.id, "name": n.name_it if n.name_it and interaction.language.startswith("it") else n.name}
+            for n in nearby_locations
+        ]
     )

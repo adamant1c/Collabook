@@ -22,6 +22,7 @@ class NarrationResult:
     event: Optional[str] = None
     enemy_name: Optional[str] = None
     rewards: Dict[str, Any] = field(default_factory=dict)
+    new_location: Optional[str] = None
     parse_error: bool = False
 
 
@@ -56,6 +57,7 @@ def parse_llm_response(raw_response: str) -> NarrationResult:
             result.event = _extract_field(response_data, "event")
             result.enemy_name = _extract_field(response_data, "enemy")
             result.rewards = _extract_field(response_data, "rewards") or {}
+            result.new_location = _extract_field(response_data, "new_location")
         else:
             # Fallback: try to extract narration from non-JSON text
             result.narration = _extract_narration_fallback(raw_response)

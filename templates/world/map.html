@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "World Map" %} - {{ story.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --map-bg: #f4e4bc;
+        --map-stroke: #5d4037;
+        --node-fill: #fff;
+        --node-stroke: #5d4037;
+        --node-hover: #e0cca1;
+        --text-color: #3e2723;
+        --accent: #8d6e63;
+    }
+
+    [data-theme="scifi"] {
+        --map-bg: #0b0e14;
+        --map-stroke: #1e88e5;
+        --node-fill: #1a237e;
+        --node-stroke: #42a5f5;
+        --node-hover: #0d47a1;
+        --text-color: #e3f2fd;
+        --accent: #00e5ff;
+    }
+
+    [data-theme="historical"] {
+        --map-bg: #f5f5f5;
+        --map-stroke: #333;
+        --node-fill: #eee;
+        --node-stroke: #666;
+        --node-hover: #ddd;
+        --text-color: #222;
+        --accent: #555;
+    }
+
+    .map-container {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 20px;
+        height: 70vh;
+        margin-top: 20px;
+    }
+
+    .map-canvas-wrapper {
+        background-color: var(--map-bg);
+        border: 2px solid var(--map-stroke);
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1);
+    }
+
+    svg#world-map {
+        width: 100%;
+        height: 100%;
+        cursor: grab;
+    }
+
+    svg#world-map:active {
+        cursor: grabbing;
+    }
+
+    .map-node {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .map-node circle {
+        fill: var(--node-fill);
+        stroke: var(--node-stroke);
+        stroke-width: 2;
+    }
+
+    .map-node:hover circle {
+        fill: var(--node-hover);
+        r: 18;
+    }
+
+    .map-node.active circle {
+        stroke: var(--accent);
+        stroke-width: 4;
+        filter: drop-shadow(0 0 5px var(--accent));
+    }
+
+    .map-node text {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        fill: var(--text-color);
+        pointer-events: none;
+        text-shadow: 0 0 3px var(--map-bg);
+    }
+
+    .map-edge {
+        stroke: var(--map-stroke);
+        stroke-width: 1.5;
+        stroke-dasharray: 4;
+        opacity: 0.6;
+    }
+
+    .character-marker {
+        pointer-events: none;
+    }
+
+    .character-marker circle {
+        fill: #ff5252;
+        stroke: #fff;
+        stroke-width: 2;
+        filter: drop-shadow(0 0 8px rgba(255, 82, 82, 0.8));
+    }
+
+    .map-sidebar {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        color: var(--text-color);
+    }
+
+    .node-details h3 {
+        margin-top: 0;
+        color: var(--accent);
+    }
+
+    .move-btn {
+        margin-top: auto;
+        width: 100%;
+    }
+
+    .genre-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        background: var(--accent);
+        color: white;
+        margin-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4" data-theme="{{ story.world_metadata.theme|default:'fantasy' }}">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'world:journey' %}">{% trans "Journey" %}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{% trans "Map" %}</li>
+                </ol>
+            </nav>
+            <h1 class="h2 mb-0">{{ story.title }}</h1>
+            <span class="genre-tag">{{ story.genre }}</span>
+        </div>
+        <a href="{% url 'world:journey' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Journey" %}
+        </a>
+    </div>
+
+    <div class="map-container">
+        <div class="map-canvas-wrapper">
+            <svg id="world-map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+                <g id="edges-layer"></g>
+                <g id="nodes-layer"></g>
+                <g id="character-layer"></g>
+            </svg>
+        </div>
+
+        <div class="map-sidebar">
+            <div id="selection-hint" class="text-center py-5 opacity-50">
+                <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
+                <p>{% trans "Select a location on the map to see details" %}</p>
+            </div>
+
+            <div id="node-info" class="node-details" style="display: none;">
+                <h3 id="node-name">Location Name</h3>
+                <p class="text-muted mb-2"><span id="node-type" class="badge bg-secondary">Type</span></p>
+                <p id="node-desc" class="mb-4">Description of the selected location...</p>
+
+                <div id="connectivity-info" class="mb-4">
+                    <h6>{% trans "Accessibility" %}</h6>
+                    <p id="reachability-status"></p>
+                </div>
+
+                <form id="move-form" action="{% url 'world:map' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="target_node_id" id="target-node-id">
+                    <button type="submit" class="btn btn-primary move-btn" id="confirm-move-btn">
+                        {% trans "Travel to this Location" %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ map_data|json_script:"map-data" }}
+{{ character|json_script:"character-data" }}
+
+<script>
+    const rawData = JSON.parse(document.getElementById('map-data').textContent);
+    const charData = JSON.parse(document.getElementById('character-data').textContent);
+
+    const svg = document.getElementById('world-map');
+    const nodesLayer = document.getElementById('nodes-layer');
+    const edgesLayer = document.getElementById('edges-layer');
+    const charLayer = document.getElementById('character-layer');
+
+    const nodeInfo = document.getElementById('node-info');
+    const hint = document.getElementById('selection-hint');
+    const moveForm = document.getElementById('move-form');
+
+    // Render Edges
+    rawData.edges.forEach(edge => {
+        const fromNode = rawData.nodes.find(n => n.id === edge.from_node_id);
+        const toNode = rawData.nodes.find(n => n.id === edge.to_node_id);
+        if (fromNode && toNode) {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", fromNode.x);
+            line.setAttribute("y1", fromNode.y);
+            line.setAttribute("x2", toNode.x);
+            line.setAttribute("y2", toNode.y);
+            line.setAttribute("class", "map-edge");
+            edgesLayer.appendChild(line);
+        }
+    });
+
+    // Render Nodes
+    rawData.nodes.forEach(node => {
+        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        g.setAttribute("class", `map-node ${node.id === charData.current_location_id ? 'active' : ''}`);
+        g.dataset.id = node.id;
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", node.x);
+        circle.setAttribute("cy", node.y);
+        circle.setAttribute("r", 15);
+        g.appendChild(circle);
+
+        const icon = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        icon.setAttribute("x", node.x);
+        icon.setAttribute("y", node.y + 6);
+        icon.setAttribute("text-anchor", "middle");
+        icon.setAttribute("font-size", "14px");
+        icon.textContent = node.icon || '📍';
+        g.appendChild(icon);
+
+        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        label.setAttribute("x", node.x);
+        label.setAttribute("y", node.y + 35);
+        label.setAttribute("text-anchor", "middle");
+        label.textContent = node.name_it || node.name;
+        g.appendChild(label);
+
+        g.addEventListener('click', () => selectNode(node));
+        nodesLayer.appendChild(g);
+    });
+
+    // Render Character Marker
+    if (charData.current_location_id) {
+        const curLoc = rawData.nodes.find(n => n.id === charData.current_location_id);
+        if (curLoc) {
+            const marker = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            marker.setAttribute("class", "character-marker");
+
+            const outer = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            outer.setAttribute("cx", curLoc.x);
+            outer.setAttribute("cy", curLoc.y);
+            outer.setAttribute("r", 8);
+            marker.appendChild(outer);
+
+            charLayer.appendChild(marker);
+        }
+    }
+
+    function selectNode(node) {
+        hint.style.display = 'none';
+        nodeInfo.style.display = 'block';
+
+        document.getElementById('node-name').textContent = node.name_it || node.name;
+        document.getElementById('node-type').textContent = node.node_type;
+        document.getElementById('node-desc').textContent = node.description_it || node.description || '{% trans "No description available." %}';
+        document.getElementById('target-node-id').value = node.id;
+
+        const isCurrent = node.id === charData.current_location_id;
+        const confirmBtn = document.getElementById('confirm-move-btn');
+        const statusText = document.getElementById('reachability-status');
+
+        if (isCurrent) {
+            statusText.textContent = '{% trans "You are here." %}';
+            statusText.className = 'text-success fw-bold';
+            confirmBtn.disabled = true;
+        } else {
+            // Check connectivity
+            const isConnected = rawData.edges.some(e =>
+                (e.from_node_id === charData.current_location_id && e.to_node_id === node.id) ||
+                (e.bidirectional && e.from_node_id === node.id && e.to_node_id === charData.current_location_id)
+            );
+
+            if (isConnected || !charData.current_location_id) {
+                statusText.textContent = '{% trans "Reachable" %}';
+                statusText.className = 'text-primary';
+                confirmBtn.disabled = false;
+            } else {
+                statusText.textContent = '{% trans "Not directly connected" %}';
+                statusText.className = 'text-danger';
+                confirmBtn.disabled = true;
+            }
+        }
+
+        // Highlight selected node
+        document.querySelectorAll('.map-node').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.map-node[data-id="${node.id}"]`).classList.add('active');
+    }
+</script>
+{% endblock %}

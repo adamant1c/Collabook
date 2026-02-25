@@ -237,3 +237,26 @@ class CollabookAPI:
                                    })
             response.raise_for_status()
             return response.json()
+    # ==================== Map ====================
+    
+    @staticmethod
+    async def get_map(story_id: str, token: str) -> dict:
+        """Get full map (nodes and edges) for a story"""
+        async with CollabookAPI._get_client() as client:
+            response = await client.get(f"/map/{story_id}",
+                                  headers={"Authorization": f"Bearer {token}"})
+            response.raise_for_status()
+            return response.json()
+    
+    @staticmethod
+    async def move_character(character_id: str, target_node_id: str, token: str) -> dict:
+        """Move character to a new location"""
+        async with CollabookAPI._get_client() as client:
+            response = await client.post("/map/move",
+                                   headers={"Authorization": f"Bearer {token}"},
+                                   json={
+                                       "character_id": character_id,
+                                       "target_node_id": target_node_id
+                                   })
+            response.raise_for_status()
+            return response.json()

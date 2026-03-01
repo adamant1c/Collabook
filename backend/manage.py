@@ -375,6 +375,9 @@ def seed_enemies():
         if not all([historical, fantasy, scifi]):
             click.echo(click.style("Error: Default worlds not found. Run 'seed-worlds' first!", fg='red'))
             return
+            
+        # Clear existing enemies to prevent duplicates
+        db.query(Enemy).delete()
         
         enemies = []
         
@@ -382,21 +385,31 @@ def seed_enemies():
         enemies.append(Enemy(
             story_id=historical.id,
             name="English Longbowman",
-            description="A skilled archer from across the channel.",
+            description="A skilled archer from across the channel, deadly at a distance.",
             enemy_type=EnemyType.COMMON,
             level=1, hp=15, max_hp=15, attack=8, defense=5,
             xp_reward=25, gold_min=5, gold_max=15,
-            image_url="english_longbowman.png" # Placeholder if not gen'd
+            image_url="english_longbowman.png"
         ))
         
         enemies.append(Enemy(
             story_id=historical.id,
             name="French Knight",
-            description="A formidable noble in heavy plate armor.",
+            description="A formidable noble in heavy plate armor, defending his lands.",
             enemy_type=EnemyType.ELITE,
             level=3, hp=40, max_hp=40, attack=16, defense=14,
             xp_reward=120, gold_min=30, gold_max=60,
             image_url="french_knight_enemy.png"
+        ))
+        
+        enemies.append(Enemy(
+            story_id=historical.id,
+            name="Bertrand du Guesclin",
+            description="The 'Eagle of Brittany', a legendary French commander known for his tactical brilliance.",
+            enemy_type=EnemyType.BOSS,
+            level=6, hp=85, max_hp=85, attack=24, defense=20,
+            xp_reward=450, gold_min=150, gold_max=300,
+            image_url="guard_captain.png"
         ))
         
         enemies.append(Enemy(
@@ -479,9 +492,9 @@ def seed_enemies():
         
         click.echo(click.style("\n✓ Default enemies created successfully!", fg='green'))
         click.echo(f"\n  {len(enemies)} enemies added with thematic images:")
-        click.echo("  - Echoes of the Past: English Longbowman, French Knight, Tournament Champion")
-        click.echo("  - Realm of Eternal Magic: Goblin, Dark Mage, Ancient Dragon")
-        click.echo("  - Horizon Beyond Stars: Security Drone, Alien Mercenary, AI Warlord")
+        click.echo("  - Historical (14th C): Longbowman, French Knight, Bertrand du Guesclin, Tournament Champion")
+        click.echo("  - Fantasy: Goblin, Dark Mage, Ancient Dragon")
+        click.echo("  - Sci-Fi: Security Drone, Alien Mercenary, AI Warlord")
         
     except Exception as e:
         db.rollback()
@@ -513,15 +526,36 @@ def seed_npcs():
         npcs.append(NPC(
             story_id=historical.id,
             name="King Edward III",
-            description="Regal King of England, determined to reclaim his French lands.",
-            image_url="king_george.png" # Existing regal image
+            description="The ambitious King of England who initiated the Hundred Years' War.",
+            image_url="king_george.png"
         ))
         
         npcs.append(NPC(
             story_id=historical.id,
             name="Philippe VI",
-            description="The Valois King of France, defending his crown with chivalry.",
+            description="The first Valois King of France, struggling to maintain his authority.",
             image_url="guard_captain.png" 
+        ))
+
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="Edward the Black Prince",
+            description="The eldest son of Edward III, a renowned and feared military leader.",
+            image_url="robert_fire.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="Charles V 'the Wise'",
+            description="The scholarly King of France who regained much of the territory lost to the English.",
+            image_url="Dark_mage.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="Philippa of Hainault",
+            description="The beloved Queen consort of Edward III, known for her compassion and patronage.",
+            image_url="lonely_fairy.png"
         ))
         
         # FANTASY NPCs
@@ -538,6 +572,20 @@ def seed_npcs():
             description="A survival expert living deep within the Silken Woods.",
             image_url="gentle_witch.png"
         ))
+
+        npcs.append(NPC(
+            story_id=fantasy.id,
+            name="King Stonebeard",
+            description="The stoic ruler of the Dwarven Under-Kingdom.",
+            image_url="Bandit.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=fantasy.id,
+            name="Lyra Nightshade",
+            description="A nimble halfling rogue with a penchant for rare artifacts.",
+            image_url="lonely_fairy.png"
+        ))
         
         # SCI-FI NPCs
         npcs.append(NPC(
@@ -553,6 +601,20 @@ def seed_npcs():
             description="A resourceful pilot who knows every backway in the Outer Rim.",
             image_url="alien_mercenary.png"
         ))
+
+        npcs.append(NPC(
+            story_id=scifi.id,
+            name="CEO Valerius",
+            description="The ruthless head of the OmniCorp conglomerate.",
+            image_url="security_drone.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=scifi.id,
+            name="Jax",
+            description="An infamous hacker and leader of the Cyber-Rebellion.",
+            image_url="ai_warlord.png"
+        ))
         
         # Add all npcs
         for npc in npcs:
@@ -562,9 +624,9 @@ def seed_npcs():
         
         click.echo(click.style("\n✓ Default NPCs created successfully!", fg='green'))
         click.echo(f"\n  {len(npcs)} NPCs added:")
-        click.echo("  - Historical: King Edward III, Philippe VI")
-        click.echo("  - Fantasy: Archmage Elendril, Thalia")
-        click.echo("  - Sci-Fi: Commander Chen, Smuggler Kane")
+        click.echo("  - Historical (14th C): King Edward III, Philippe VI, Black Prince, Charles V, Queen Philippa")
+        click.echo("  - Fantasy: Archmage Elendril, Thalia, King Stonebeard, Lyra Nightshade")
+        click.echo("  - Sci-Fi: Commander Chen, Smuggler Kane, CEO Valerius, Jax")
         
     except Exception as e:
         db.rollback()

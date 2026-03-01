@@ -10,7 +10,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.database import SessionLocal, engine, Base
-from app.models.db_models import User, UserRole, Story, Quest, QuestType, Map, MapNode, MapEdge
+from app.models.db_models import User, UserRole, Story, Quest, QuestType, Map, MapNode, MapEdge, NPC, Enemy, EnemyType
 from app.core.security import hash_password
 from datetime import datetime
 
@@ -378,88 +378,97 @@ def seed_enemies():
         
         enemies = []
         
-        # HISTORICAL ENEMIES
+        # HISTORICAL ENEMIES (14th C)
         enemies.append(Enemy(
             story_id=historical.id,
-            name="Bandit",
-            description="A desperate outlaw seeking easy prey",
+            name="English Longbowman",
+            description="A skilled archer from across the channel.",
             enemy_type=EnemyType.COMMON,
             level=1, hp=15, max_hp=15, attack=8, defense=5,
-            xp_reward=25, gold_min=5, gold_max=15
+            xp_reward=25, gold_min=5, gold_max=15,
+            image_url="english_longbowman.png" # Placeholder if not gen'd
         ))
         
         enemies.append(Enemy(
             story_id=historical.id,
-            name="Guard Captain",
-            description="A well-trained soldier in service to the king",
+            name="French Knight",
+            description="A formidable noble in heavy plate armor.",
             enemy_type=EnemyType.ELITE,
-            level=3, hp=35, max_hp=35, attack=15, defense=12,
-            xp_reward=100, gold_min=25, gold_max=50
+            level=3, hp=40, max_hp=40, attack=16, defense=14,
+            xp_reward=120, gold_min=30, gold_max=60,
+            image_url="french_knight_enemy.png"
         ))
         
         enemies.append(Enemy(
             story_id=historical.id,
             name="Tournament Champion",
-            description="The reigning champion, undefeated for years",
+            description="The reigning champion of the King's tournament.",
             enemy_type=EnemyType.BOSS,
-            level=5, hp=60, max_hp=60, attack=20, defense=15,
-            xp_reward=300, gold_min=100, gold_max=200
+            level=5, hp=70, max_hp=70, attack=22, defense=18,
+            xp_reward=350, gold_min=100, gold_max=250,
+            image_url="tournament_champion.png"
         ))
         
         # FANTASY ENEMIES
         enemies.append(Enemy(
             story_id=fantasy.id,
             name="Goblin Scout",
-            description="A small, cunning creature from the dark forest",
+            description="A small, cunning creature from the dark forest.",
             enemy_type=EnemyType.COMMON,
             level=1, hp=12, max_hp=12, attack=6, defense=4,
-            xp_reward=20, gold_min=3, gold_max=10
+            xp_reward=20, gold_min=3, gold_max=10,
+            image_url="goblin.png"
         ))
         
         enemies.append(Enemy(
             story_id=fantasy.id,
             name="Dark Mage",
-            description="A corrupted wizard wielding forbidden magic",
+            description="A corrupted wizard wielding forbidden magic.",
             enemy_type=EnemyType.ELITE,
             level=4, hp=40, max_hp=40, attack=18, defense=10,
-            xp_reward=150, gold_min=30, gold_max=75
+            xp_reward=150, gold_min=30, gold_max=75,
+            image_url="dark_mage.png"
         ))
         
         enemies.append(Enemy(
             story_id=fantasy.id,
             name="Ancient Dragon",
-            description="A legendary beast of immense power",
+            description="A legendary beast of immense power.",
             enemy_type=EnemyType.BOSS,
-            level=10, hp=100, max_hp=100, attack=30, defense=20,
-            xp_reward=1000, gold_min=500, gold_max=1000
+            level=10, hp=120, max_hp=120, attack=35, defense=25,
+            xp_reward=1200, gold_min=500, gold_max=1200,
+            image_url="ancient_dragon.png"
         ))
         
         # SCI-FI ENEMIES
         enemies.append(Enemy(
             story_id=scifi.id,
             name="Security Drone",
-            description="An automated patrol unit armed with lasers",
+            description="An automated patrol unit armed with lasers.",
             enemy_type=EnemyType.COMMON,
             level=2, hp=20, max_hp=20, attack=10, defense=8,
-            xp_reward=30, gold_min=10, gold_max=20
+            xp_reward=30, gold_min=10, gold_max=20,
+            image_url="security_drone.png"
         ))
         
         enemies.append(Enemy(
             story_id=scifi.id,
             name="Alien Mercenary",
-            description="A battle-hardened warrior from the outer colonies",
+            description="A battle-hardened warrior from the outer colonies.",
             enemy_type=EnemyType.ELITE,
-            level=5, hp=50, max_hp=50, attack=20, defense=15,
-            xp_reward=200, gold_min=50, gold_max=150
+            level=5, hp=55, max_hp=55, attack=22, defense=16,
+            xp_reward=250, gold_min=60, gold_max=180,
+            image_url="alien_mercenary.png"
         ))
         
         enemies.append(Enemy(
             story_id=scifi.id,
             name="AI Warlord",
-            description="A rogue AI controlling an army of machines",
+            description="A rogue AI controlling an army of machines.",
             enemy_type=EnemyType.BOSS,
-            level=8, hp=80, max_hp=80, attack=25, defense=18,
-            xp_reward=600, gold_min=300, gold_max=600
+            level=8, hp=90, max_hp=90, attack=28, defense=20,
+            xp_reward=700, gold_min=350, gold_max=700,
+            image_url="ai_warlord.png"
         ))
         
         # Add all enemies
@@ -469,14 +478,97 @@ def seed_enemies():
         db.commit()
         
         click.echo(click.style("\n✓ Default enemies created successfully!", fg='green'))
-        click.echo(f"\n  {len(enemies)} enemies added:")
-        click.echo("  - Echoes of the Past: 3 enemies (1 common, 1 elite, 1 boss)")
-        click.echo("  - Realm of Eternal Magic: 3 enemies (1 common, 1 elite, 1 boss)")
-        click.echo("  - Horizon Beyond Stars: 3 enemies (1 common, 1 elite, 1 boss)")
+        click.echo(f"\n  {len(enemies)} enemies added with thematic images:")
+        click.echo("  - Echoes of the Past: English Longbowman, French Knight, Tournament Champion")
+        click.echo("  - Realm of Eternal Magic: Goblin, Dark Mage, Ancient Dragon")
+        click.echo("  - Horizon Beyond Stars: Security Drone, Alien Mercenary, AI Warlord")
         
     except Exception as e:
         db.rollback()
         click.echo(click.style(f"Error creating enemies: {str(e)}", fg='red'))
+    finally:
+        db.close()
+
+@cli.command()
+def seed_npcs():
+    """Create thematic NPCs for the 3 worlds"""
+    db = SessionLocal()
+    
+    try:
+        # Get worlds
+        historical = db.query(Story).filter(Story.title == "Echoes of the Past").first()
+        fantasy = db.query(Story).filter(Story.title == "Realm of Eternal Magic").first()
+        scifi = db.query(Story).filter(Story.title == "Horizon Beyond Stars").first()
+        
+        if not all([historical, fantasy, scifi]):
+            click.echo(click.style("Error: Default worlds not found. Run 'seed-worlds' first!", fg='red'))
+            return
+            
+        # Clear existing NPCs to prevent duplicates
+        db.query(NPC).delete()
+        
+        npcs = []
+        
+        # HISTORICAL NPCs (14th C)
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="King Edward III",
+            description="Regal King of England, determined to reclaim his French lands.",
+            image_url="king_george.png" # Existing regal image
+        ))
+        
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="Philippe VI",
+            description="The Valois King of France, defending his crown with chivalry.",
+            image_url="guard_captain.png" 
+        ))
+        
+        # FANTASY NPCs
+        npcs.append(NPC(
+            story_id=fantasy.id,
+            name="Archmage Elendril",
+            description="Wise elder of the Arcane Citadel, watcher of the ley lines.",
+            image_url="archmage_elendril.jpg"
+        ))
+        
+        npcs.append(NPC(
+            story_id=fantasy.id,
+            name="Thalia the Woodsman",
+            description="A survival expert living deep within the Silken Woods.",
+            image_url="gentle_witch.png"
+        ))
+        
+        # SCI-FI NPCs
+        npcs.append(NPC(
+            story_id=scifi.id,
+            name="Commander Chen",
+            description="Leader of the Jupiter Orbital Garrison, uncompromising and loyal.",
+            image_url="ai_warlord.png" 
+        ))
+        
+        npcs.append(NPC(
+            story_id=scifi.id,
+            name="Smuggler Kane",
+            description="A resourceful pilot who knows every backway in the Outer Rim.",
+            image_url="alien_mercenary.png"
+        ))
+        
+        # Add all npcs
+        for npc in npcs:
+            db.add(npc)
+        
+        db.commit()
+        
+        click.echo(click.style("\n✓ Default NPCs created successfully!", fg='green'))
+        click.echo(f"\n  {len(npcs)} NPCs added:")
+        click.echo("  - Historical: King Edward III, Philippe VI")
+        click.echo("  - Fantasy: Archmage Elendril, Thalia")
+        click.echo("  - Sci-Fi: Commander Chen, Smuggler Kane")
+        
+    except Exception as e:
+        db.rollback()
+        click.echo(click.style(f"Error creating NPCs: {str(e)}", fg='red'))
     finally:
         db.close()
 
@@ -672,24 +764,24 @@ def seed_maps():
         db.add_all(s_edges)
 
         # --- HISTORICAL MAP ---
-        h_map = Map(story_id=historical.id, name="Echoes Kingdom Map", name_it="Mappa del Regno di Echoes", description="The sprawling ancient kingdom.", description_it="L'antico e vasto regno.", image_url="historical_map.jpg")
+        h_map = Map(story_id=historical.id, name="Kingdoms of the West", name_it="Regni d'Occidente", description="The territories of France and England during the Hundred Years' War.", description_it="I territori di Francia e Inghilterra durante la Guerra dei Cent'anni.", image_url="historical_map.jpg")
         db.add(h_map)
         db.flush()
 
         h_nodes = [
-            MapNode(story_id=historical.id, map_id=h_map.id, name="Royal Capital", name_it="Capitale Reale", node_type="city", x=500, y=200, icon="🏰", is_starting_location=True),
-            MapNode(story_id=historical.id, map_id=h_map.id, name="Market District", name_it="Distretto del Mercato", node_type="area", x=500, y=400, icon="⚖️"),
-            MapNode(story_id=historical.id, map_id=h_map.id, name="Northern Marches", name_it="Marche del Nord", node_type="region", x=500, y=50, icon="❄️"),
-            MapNode(story_id=historical.id, map_id=h_map.id, name="Southern Ports", name_it="Porti del Sud", node_type="region", x=500, y=900, icon="⚓")
+            MapNode(story_id=historical.id, map_id=h_map.id, name="London", name_it="Londra", node_type="city", x=500, y=200, icon="🏰", is_starting_location=True),
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Calais", name_it="Calais", node_type="city", x=500, y=400, icon="⚓"),
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Paris", name_it="Parigi", node_type="city", x=550, y=550, icon="⚜️"),
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Bordeaux", name_it="Bordeaux", node_type="city", x=200, y=800, icon="🍷")
         ]
         db.add_all(h_nodes)
         db.flush()
         
         h_n = {n.name: n.id for n in h_nodes}
         h_edges = [
-            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Royal Capital"], to_node_id=h_n["Market District"]),
-            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Royal Capital"], to_node_id=h_n["Northern Marches"]),
-            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Market District"], to_node_id=h_n["Southern Ports"])
+            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["London"], to_node_id=h_n["Calais"]),
+            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Calais"], to_node_id=h_n["Paris"]),
+            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Paris"], to_node_id=h_n["Bordeaux"])
         ]
         db.add_all(h_edges)
 

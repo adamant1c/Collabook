@@ -165,6 +165,7 @@ else
     $COMPOSE exec backend python manage.py seed-worlds
     $COMPOSE exec backend python manage.py seed-quests
     $COMPOSE exec backend python manage.py seed-enemies
+    $COMPOSE exec backend python manage.py seed-npcs || true
     $COMPOSE exec backend python manage.py seed-items || true
     $COMPOSE exec backend python manage.py seed-maps || true
 fi

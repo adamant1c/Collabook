@@ -148,6 +148,78 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(255, 129, 63, 0.6);
     }
+
+    /* Map Display Styles */
+    .map-display {
+        position: relative;
+        margin-bottom: 25px;
+        border: 1px solid rgba(212, 175, 55, 0.5);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .map-display:hover {
+        transform: scale(1.02);
+        border-color: #d4af37;
+        box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+    }
+
+    .map-img-wrapper {
+        position: relative;
+        overflow: hidden;
+        max-height: 400px;
+    }
+
+    .map-img {
+        width: 100%;
+        height: auto;
+        display: block;
+        transition: transform 0.8s ease;
+    }
+
+    .map-display:hover .map-img {
+        transform: scale(1.05);
+    }
+
+    .map-header {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+        padding: 20px;
+        color: #fff;
+    }
+
+    .map-badge {
+        display: inline-block;
+        background: #d4af37;
+        color: #000;
+        padding: 2px 10px;
+        border-radius: 4px;
+        font-family: 'Cinzel', serif;
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+
+    .map-name {
+        font-family: 'Cinzel', serif;
+        color: #d4af37;
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .map-desc {
+        font-size: 0.9rem;
+        color: #ccc;
+        margin: 0;
+        line-height: 1.4;
+    }
 </style>
 
 <div class="hero-section">
@@ -259,29 +331,29 @@
                     </p>
 
                     {% if world.maps %}
-                    <h5 class="text-gold mb-3" style="font-family: 'Cinzel', serif; font-size: 1rem;">
-                        {% trans "World Map" %}
-                    </h5>
-                    <div class="map-container mb-4">
+                    <div class="row g-4">
                         {% for map in world.maps %}
-                        <div class="map-card mb-3"
-                            style="border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 8px; overflow: hidden;">
-                            {% if map.image_url %}
-                            <img src="{% if '/static/' in map.image_url %}{{ map.image_url }}{% else %}{% static 'images/' %}{{ map.image_url }}{% endif %}"
-                                alt="{{ map.name }}"
-                                style="width: 100%; height: auto; max-height: 300px; object-fit: cover; border-bottom: 1px solid rgba(212, 175, 55, 0.3);">
-                            {% endif %}
-                            <div class="p-2" style="background: rgba(0, 0, 0, 0.5);">
-                                <strong style="color: #d4af37;">
-                                    {% if LANGUAGE_CODE|slice:":2" == "it" and map.name_it %}{{ map.name_it }}{% else
-                                    %}{{ map.name }}{% endif %}
-                                </strong>
-                                {% if map.description or map.description_it %}
-                                <p class="mb-0 text-secondary" style="font-size: 0.85rem;">
-                                    {% if LANGUAGE_CODE|slice:":2" == "it" and map.description_it %}{{
-                                    map.description_it }}{% else %}{{ map.description }}{% endif %}
-                                </p>
-                                {% endif %}
+                        <div class="col-12">
+                            <div class="map-display">
+                                <div class="map-img-wrapper">
+                                    {% if map.image_url %}
+                                    <img src="{% if '/static/' in map.image_url %}{{ map.image_url }}{% else %}{% static 'images/' %}{{ map.image_url }}{% endif %}"
+                                        alt="{{ map.name }}" class="map-img">
+                                    {% endif %}
+                                    <div class="map-header">
+                                        <span class="map-badge">{% trans "Discovery Map" %}</span>
+                                        <span class="map-name">
+                                            {% if LANGUAGE_CODE|slice:":2" == "it" and map.name_it %}{{ map.name_it }}{%
+                                            else %}{{ map.name }}{% endif %}
+                                        </span>
+                                        {% if map.description or map.description_it %}
+                                        <p class="map-desc">
+                                            {% if LANGUAGE_CODE|slice:":2" == "it" and map.description_it %}{{
+                                            map.description_it }}{% else %}{{ map.description }}{% endif %}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         {% endfor %}

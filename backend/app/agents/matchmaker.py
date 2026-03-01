@@ -21,6 +21,9 @@ class MatchmakerAgent:
 World Context:
 {world_description}
 
+Starting Location Context:
+{starting_location}
+
 Current Story State:
 {current_state}
 
@@ -46,6 +49,9 @@ Just provide the narrative description of the character entering the scene.""",
 
 Mondo: {world_description}
 
+Luogo di Partenza: 
+{starting_location}
+
 Situazione: {current_state}
 
 Nuovo Personaggio:
@@ -62,9 +68,27 @@ Scrivi 2-3 frasi che descrivono come {name} entra nella scena. Scrivi SOLO la na
         lang_key = "it" if language.lower().startswith("it") else "en"
         tmpl = templates[lang_key]
         
+        # Build starting location string
+        starting_loc = ""
+        if "starting_location" in story_context:
+            sl = story_context["starting_location"]
+            if lang_key == "it":
+                name = sl.get("name_it") or sl.get("name")
+                desc = sl.get("description_it") or sl.get("description")
+            else:
+                name = sl.get("name")
+                desc = sl.get("description")
+            
+            starting_loc = f"- Nome: {name}\n" if lang_key == "it" else f"- Name: {name}\n"
+            if desc:
+                starting_loc += f"- Descrizione: {desc}\n" if lang_key == "it" else f"- Description: {desc}\n"
+        if not starting_loc:
+            starting_loc = "Nessun luogo definito" if lang_key == "it" else "Unknown"
+
         # Format system prompt
         system_prompt = tmpl["system"].format(
             world_description=story_context.get('world_description', ''),
+            starting_location=starting_loc,
             current_state=story_context.get('current_state', 'The story is just beginning...'),
             name=character.get('name', 'Unknown'),
             profession=character.get('profession', 'Adventurer'),

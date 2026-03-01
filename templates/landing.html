@@ -258,6 +258,36 @@
                         {% endif %}
                     </p>
 
+                    {% if world.maps %}
+                    <h5 class="text-gold mb-3" style="font-family: 'Cinzel', serif; font-size: 1rem;">
+                        {% trans "World Map" %}
+                    </h5>
+                    <div class="map-container mb-4">
+                        {% for map in world.maps %}
+                        <div class="map-card mb-3"
+                            style="border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 8px; overflow: hidden;">
+                            {% if map.image_url %}
+                            <img src="{% if '/static/' in map.image_url %}{{ map.image_url }}{% else %}{% static 'images/' %}{{ map.image_url }}{% endif %}"
+                                alt="{{ map.name }}"
+                                style="width: 100%; height: auto; max-height: 300px; object-fit: cover; border-bottom: 1px solid rgba(212, 175, 55, 0.3);">
+                            {% endif %}
+                            <div class="p-2" style="background: rgba(0, 0, 0, 0.5);">
+                                <strong style="color: #d4af37;">
+                                    {% if LANGUAGE_CODE|slice:":2" == "it" and map.name_it %}{{ map.name_it }}{% else
+                                    %}{{ map.name }}{% endif %}
+                                </strong>
+                                {% if map.description or map.description_it %}
+                                <p class="mb-0 text-secondary" style="font-size: 0.85rem;">
+                                    {% if LANGUAGE_CODE|slice:":2" == "it" and map.description_it %}{{
+                                    map.description_it }}{% else %}{{ map.description }}{% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
                     {% if world.entities %}
                     <h5 class="text-gold mb-3" style="font-family: 'Cinzel', serif; font-size: 1rem;">
                         {% trans "Legendary Inhabitants" %}

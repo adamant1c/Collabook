@@ -106,6 +106,7 @@ class Story(Base):
     quests = relationship("Quest", back_populates="story", cascade="all, delete-orphan")
     enemies = relationship("Enemy", back_populates="story", cascade="all, delete-orphan")
     npcs = relationship("NPC", back_populates="story", cascade="all, delete-orphan")
+    maps = relationship("Map", back_populates="story", cascade="all, delete-orphan")
     map_nodes = relationship("MapNode", back_populates="story", cascade="all, delete-orphan")
 
 class Character(Base):
@@ -317,12 +318,31 @@ class Inventory(Base):
     item = relationship("Item", back_populates="inventory_items")
 
 
+class Map(Base):
+    """A map within a story (can be world map, continent, etc)"""
+    __tablename__ = "maps"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    story_id = Column(String, ForeignKey("stories.id"), nullable=False)
+    name = Column(String, nullable=False)
+    name_it = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    description_it = Column(Text, nullable=True)
+    image_url = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    story = relationship("Story", back_populates="maps")
+    nodes = relationship("MapNode", back_populates="map", cascade="all, delete-orphan")
+    edges = relationship("MapEdge", back_populates="map", cascade="all, delete-orphan")
+
+
 class MapNode(Base):
     """A location/point of interest on a world map (hierarchical)"""
     __tablename__ = "map_nodes"
 
     id = Column(String, primary_key=True, default=generate_uuid)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False)
+    map_id = Column(String, ForeignKey("maps.id"), nullable=True)
     parent_id = Column(String, ForeignKey("map_nodes.id"), nullable=True)
 
     name = Column(String, nullable=False)
@@ -341,6 +361,7 @@ class MapNode(Base):
 
     # Relationships
     story = relationship("Story", back_populates="map_nodes")
+    map = relationship("Map", back_populates="nodes")
     children = relationship("MapNode", backref="parent", remote_side=[id], foreign_keys=[parent_id])
 
 
@@ -350,11 +371,13 @@ class MapEdge(Base):
 
     id = Column(String, primary_key=True, default=generate_uuid)
     story_id = Column(String, ForeignKey("stories.id"), nullable=False)
+    map_id = Column(String, ForeignKey("maps.id"), nullable=True)
     from_node_id = Column(String, ForeignKey("map_nodes.id"), nullable=False)
     to_node_id = Column(String, ForeignKey("map_nodes.id"), nullable=False)
     travel_description = Column(Text, nullable=True)
     bidirectional = Column(Boolean, default=True)
 
     story = relationship("Story")
+    map = relationship("Map", back_populates="edges")
     from_node = relationship("MapNode", foreign_keys=[from_node_id])
     to_node = relationship("MapNode", foreign_keys=[to_node_id])

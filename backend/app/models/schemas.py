@@ -152,6 +152,16 @@ class PublicEntity(BaseModel):
     description: Optional[str]
     image_url: Optional[str]
 
+class PublicMap(BaseModel):
+    name: str
+    name_it: Optional[str] = None
+    description: Optional[str] = None
+    description_it: Optional[str] = None
+    image_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
 class PublicStoryResponse(BaseModel):
     id: str
     title: str
@@ -161,6 +171,7 @@ class PublicStoryResponse(BaseModel):
     world_description_it: Optional[str]
     genre_it: Optional[str]
     entities: List[PublicEntity] = []
+    maps: List[PublicMap] = []
 
     class Config:
         from_attributes = True

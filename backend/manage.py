@@ -10,7 +10,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.database import SessionLocal, engine, Base
-from app.models.db_models import User, UserRole, Story, Quest, QuestType, MapNode, MapEdge
+from app.models.db_models import User, UserRole, Story, Quest, QuestType, Map, MapNode, MapEdge
 from app.core.security import hash_password
 from datetime import datetime
 
@@ -616,72 +616,85 @@ def seed_maps():
         # Clear existing maps for these worlds to avoid duplicates
         db.query(MapEdge).filter(MapEdge.story_id.in_([historical.id, fantasy.id, scifi.id])).delete()
         db.query(MapNode).filter(MapNode.story_id.in_([historical.id, fantasy.id, scifi.id])).delete()
+        db.query(Map).filter(Map.story_id.in_([historical.id, fantasy.id, scifi.id])).delete()
         db.commit()
 
         # --- FANTASY MAP ---
+        f_map = Map(story_id=fantasy.id, name="Eternal Magic Map", name_it="Mappa di Eternal Magic", description="The world of Eternal Magic.", description_it="Il mondo di Eternal Magic.", image_url="fantasy_map.jpg")
+        db.add(f_map)
+        db.flush()
+
         f_nodes = [
-            MapNode(story_id=fantasy.id, name="Sylvan Forest", name_it="Foresta di Sylvan", node_type="region", x=250, y=250, icon="🌲", is_starting_location=True),
-            MapNode(story_id=fantasy.id, name="Iron Mountains", name_it="Montagne di Ferro", node_type="region", x=750, y=250, icon="⛰️"),
-            MapNode(story_id=fantasy.id, name="Crystal Plains", name_it="Piane di Cristallo", node_type="region", x=750, y=750, icon="💎"),
-            MapNode(story_id=fantasy.id, name="Shadow Wastes", name_it="Lande d'Ombra", node_type="region", x=250, y=750, icon="💀"),
-            MapNode(story_id=fantasy.id, name="Arcane Citadel", name_it="Cittadella Arcana", node_type="region", x=500, y=500, icon="🏰")
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Sylvan Forest", name_it="Foresta di Sylvan", node_type="region", x=250, y=250, icon="🌲", is_starting_location=True),
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Iron Mountains", name_it="Montagne di Ferro", node_type="region", x=750, y=250, icon="⛰️"),
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Crystal Plains", name_it="Piane di Cristallo", node_type="region", x=750, y=750, icon="💎"),
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Shadow Wastes", name_it="Lande d'Ombra", node_type="region", x=250, y=750, icon="💀"),
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Arcane Citadel", name_it="Cittadella Arcana", node_type="region", x=500, y=500, icon="🏰")
         ]
         db.add_all(f_nodes)
         db.flush()
         
         f_n = {n.name: n.id for n in f_nodes}
         f_edges = [
-            MapEdge(story_id=fantasy.id, from_node_id=f_n["Sylvan Forest"], to_node_id=f_n["Iron Mountains"]),
-            MapEdge(story_id=fantasy.id, from_node_id=f_n["Iron Mountains"], to_node_id=f_n["Crystal Plains"]),
-            MapEdge(story_id=fantasy.id, from_node_id=f_n["Crystal Plains"], to_node_id=f_n["Shadow Wastes"]),
-            MapEdge(story_id=fantasy.id, from_node_id=f_n["Shadow Wastes"], to_node_id=f_n["Sylvan Forest"]),
-            MapEdge(story_id=fantasy.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Sylvan Forest"]),
-            MapEdge(story_id=fantasy.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Iron Mountains"]),
-            MapEdge(story_id=fantasy.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Crystal Plains"]),
-            MapEdge(story_id=fantasy.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Shadow Wastes"])
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Sylvan Forest"], to_node_id=f_n["Iron Mountains"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Iron Mountains"], to_node_id=f_n["Crystal Plains"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Crystal Plains"], to_node_id=f_n["Shadow Wastes"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Shadow Wastes"], to_node_id=f_n["Sylvan Forest"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Sylvan Forest"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Iron Mountains"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Crystal Plains"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Shadow Wastes"])
         ]
         db.add_all(f_edges)
 
         # --- SCI-FI MAP ---
+        s_map = Map(story_id=scifi.id, name="Horizon Galaxy Map", name_it="Mappa Galaxy Horizon", description="The star systems of the Frontier.", description_it="I sistemi stellari della Frontiera.", image_url="scifi_map.jpg")
+        db.add(s_map)
+        db.flush()
+
         s_nodes = [
-            MapNode(story_id=scifi.id, name="Earth Alliance", name_it="Alleanza Terrestre", node_type="system", x=500, y=500, icon="🌍", is_starting_location=True),
-            MapNode(story_id=scifi.id, name="Mars Colony", name_it="Colonia Marziana", node_type="planet", x=400, y=400, icon="🔴"),
-            MapNode(story_id=scifi.id, name="Jupiter Station", name_it="Stazione di Giove", node_type="station", x=600, y=600, icon="🛰️"),
-            MapNode(story_id=scifi.id, name="Alpha Centauri", name_it="Alpha Centauri", node_type="system", x=800, y=200, icon="✨"),
-            MapNode(story_id=scifi.id, name="Outer Rim", name_it="Bordo Esterno", node_type="region", x=200, y=800, icon="☄️")
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Earth Alliance", name_it="Alleanza Terrestre", node_type="system", x=500, y=500, icon="🌍", is_starting_location=True),
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Mars Colony", name_it="Colonia Marziana", node_type="planet", x=400, y=400, icon="🔴"),
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Jupiter Station", name_it="Stazione di Giove", node_type="station", x=600, y=600, icon="🛰️"),
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Alpha Centauri", name_it="Alpha Centauri", node_type="system", x=800, y=200, icon="✨"),
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Outer Rim", name_it="Bordo Esterno", node_type="region", x=200, y=800, icon="☄️")
         ]
         db.add_all(s_nodes)
         db.flush()
         
         s_n = {n.name: n.id for n in s_nodes}
         s_edges = [
-            MapEdge(story_id=scifi.id, from_node_id=s_n["Earth Alliance"], to_node_id=s_n["Mars Colony"]),
-            MapEdge(story_id=scifi.id, from_node_id=s_n["Earth Alliance"], to_node_id=s_n["Jupiter Station"]),
-            MapEdge(story_id=scifi.id, from_node_id=s_n["Earth Alliance"], to_node_id=s_n["Alpha Centauri"]),
-            MapEdge(story_id=scifi.id, from_node_id=s_n["Jupiter Station"], to_node_id=s_n["Outer Rim"])
+            MapEdge(story_id=scifi.id, map_id=s_map.id, from_node_id=s_n["Earth Alliance"], to_node_id=s_n["Mars Colony"]),
+            MapEdge(story_id=scifi.id, map_id=s_map.id, from_node_id=s_n["Earth Alliance"], to_node_id=s_n["Jupiter Station"]),
+            MapEdge(story_id=scifi.id, map_id=s_map.id, from_node_id=s_n["Earth Alliance"], to_node_id=s_n["Alpha Centauri"]),
+            MapEdge(story_id=scifi.id, map_id=s_map.id, from_node_id=s_n["Jupiter Station"], to_node_id=s_n["Outer Rim"])
         ]
         db.add_all(s_edges)
 
         # --- HISTORICAL MAP ---
+        h_map = Map(story_id=historical.id, name="Echoes Kingdom Map", name_it="Mappa del Regno di Echoes", description="The sprawling ancient kingdom.", description_it="L'antico e vasto regno.", image_url="historical_map.jpg")
+        db.add(h_map)
+        db.flush()
+
         h_nodes = [
-            MapNode(story_id=historical.id, name="Royal Capital", name_it="Capitale Reale", node_type="city", x=500, y=200, icon="🏰", is_starting_location=True),
-            MapNode(story_id=historical.id, name="Market District", name_it="Distretto del Mercato", node_type="area", x=500, y=400, icon="⚖️"),
-            MapNode(story_id=historical.id, name="Northern Marches", name_it="Marche del Nord", node_type="region", x=500, y=50, icon="❄️"),
-            MapNode(story_id=historical.id, name="Southern Ports", name_it="Porti del Sud", node_type="region", x=500, y=900, icon="⚓")
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Royal Capital", name_it="Capitale Reale", node_type="city", x=500, y=200, icon="🏰", is_starting_location=True),
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Market District", name_it="Distretto del Mercato", node_type="area", x=500, y=400, icon="⚖️"),
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Northern Marches", name_it="Marche del Nord", node_type="region", x=500, y=50, icon="❄️"),
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Southern Ports", name_it="Porti del Sud", node_type="region", x=500, y=900, icon="⚓")
         ]
         db.add_all(h_nodes)
         db.flush()
         
         h_n = {n.name: n.id for n in h_nodes}
         h_edges = [
-            MapEdge(story_id=historical.id, from_node_id=h_n["Royal Capital"], to_node_id=h_n["Market District"]),
-            MapEdge(story_id=historical.id, from_node_id=h_n["Royal Capital"], to_node_id=h_n["Northern Marches"]),
-            MapEdge(story_id=historical.id, from_node_id=h_n["Market District"], to_node_id=h_n["Southern Ports"])
+            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Royal Capital"], to_node_id=h_n["Market District"]),
+            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Royal Capital"], to_node_id=h_n["Northern Marches"]),
+            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Market District"], to_node_id=h_n["Southern Ports"])
         ]
         db.add_all(h_edges)
 
         db.commit()
-        click.echo(click.style("\n✓ Map data seeded successfully!", fg='green'))
+        click.echo(click.style("✓ Map data seeded successfully!", fg='green'))
         
     except Exception as e:
         db.rollback()

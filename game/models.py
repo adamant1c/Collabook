@@ -203,9 +203,29 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
+class Map(models.Model):
+    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
+    story = models.ForeignKey(Story, db_column='story_id', related_name='maps', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    name_it = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    description_it = models.TextField(null=True, blank=True)
+    image_url = models.CharField(max_length=500, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = 'maps'
+        verbose_name = "Map"
+        verbose_name_plural = "Maps"
+
+    def __str__(self):
+        return self.name
+
 class MapNode(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
     story = models.ForeignKey(Story, db_column='story_id', on_delete=models.DO_NOTHING)
+    map = models.ForeignKey(Map, db_column='map_id', related_name='nodes', on_delete=models.CASCADE, null=True, blank=True)
     parent = models.ForeignKey('self', db_column='parent_id', on_delete=models.SET_NULL, null=True, blank=True)
     name = models.CharField(max_length=255)
     name_it = models.CharField(max_length=255, null=True, blank=True)
@@ -230,6 +250,7 @@ class MapNode(models.Model):
 class MapEdge(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
     story = models.ForeignKey(Story, db_column='story_id', on_delete=models.DO_NOTHING)
+    map = models.ForeignKey(Map, db_column='map_id', related_name='edges', on_delete=models.CASCADE, null=True, blank=True)
     from_node = models.ForeignKey(MapNode, related_name='edges_from', db_column='from_node_id', on_delete=models.CASCADE)
     to_node = models.ForeignKey(MapNode, related_name='edges_to', db_column='to_node_id', on_delete=models.CASCADE)
     travel_description = models.TextField(null=True, blank=True)

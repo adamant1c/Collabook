@@ -6,8 +6,8 @@ from app.core.database import get_db
 from app.api.deps import get_redis_client, get_llm_client
 from app.core.redis_client import RedisClient
 from app.core.llm_client import LLMClient
-from app.models.schemas import StoryCreate, StoryResponse, CharacterCreate, CharacterResponse, PublicStoryResponse, PublicEntity
-from app.models.db_models import Story, Character, User, NPC, Enemy, MapNode
+from app.models.schemas import StoryCreate, StoryResponse, CharacterCreate, CharacterResponse, PublicStoryResponse, PublicEntity, PublicMap
+from app.models.db_models import Story, Character, User, NPC, Enemy, MapNode, Map
 from app.agents.matchmaker import matchmaker_agent
 from app.api.auth import get_current_user, require_admin
 
@@ -41,6 +41,18 @@ async def list_public_stories(db: Session = Depends(get_db)):
                 image_url=enemy.image_url
             ))
             
+        # Get maps
+        public_maps = []
+        maps = db.query(Map).filter(Map.story_id == story.id).all()
+        for m in maps:
+            public_maps.append(PublicMap(
+                name=m.name,
+                name_it=m.name_it,
+                description=m.description,
+                description_it=m.description_it,
+                image_url=m.image_url
+            ))
+            
         results.append(PublicStoryResponse(
             id=story.id,
             title=story.title,
@@ -49,7 +61,8 @@ async def list_public_stories(db: Session = Depends(get_db)):
             title_it=story.title_it,
             world_description_it=story.world_description_it,
             genre_it=story.genre_it,
-            entities=public_entities
+            entities=public_entities,
+            maps=public_maps
         ))
         
     return results

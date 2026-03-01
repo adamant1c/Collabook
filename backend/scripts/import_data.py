@@ -21,6 +21,9 @@ from app.models.db_models import (
     Item,
     Inventory,
     Turn,
+    Map,
+    MapNode,
+    MapEdge
 )
 
 EXPORT_DIR = Path("/app/data/exports")
@@ -341,6 +344,9 @@ def main():
             total += import_table(session, NPC, "npcs.json")
             total += import_table(session, Item, "items.json")
             total += import_table(session, Inventory, "inventory.json")
+            total += import_table(session, Map, "maps.json")
+            total += import_table(session, MapNode, "map_nodes.json")
+            total += import_table(session, MapEdge, "map_edges.json")
             
             print()
             print(f"🎉 Unified Import completed successfully! Total records processed: {total}")

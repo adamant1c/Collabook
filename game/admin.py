@@ -2,7 +2,7 @@ from django.contrib import admin
 from django import forms
 from django.conf import settings
 import os
-from .models import Story, Character, Turn, Quest, Enemy, Item, NPC, MapNode, MapEdge
+from .models import Story, Character, Turn, Quest, Enemy, Item, NPC, MapNode, MapEdge, Map
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
 
@@ -55,22 +55,36 @@ class NPCAdminForm(forms.ModelForm):
 class MapNodeInline(admin.TabularInline):
     model = MapNode
     extra = 0
+    fk_name = 'map'
     fields = ('name', 'node_type', 'is_starting_location', 'x', 'y')
     show_change_link = True
 
 class MapEdgeInline(admin.TabularInline):
     model = MapEdge
     extra = 0
-    fk_name = 'story'
+    fk_name = 'map'
     fields = ('from_node', 'to_node', 'bidirectional', 'travel_description')
     show_change_link = True
+
+class MapInline(admin.TabularInline):
+    model = Map
+    extra = 0
+    fields = ('name', 'image_url')
+    show_change_link = True
+
+@admin.register(Map)
+class MapAdmin(admin.ModelAdmin):
+    list_display = ('name', 'story', 'created_at')
+    list_filter = ('story',)
+    search_fields = ('name', 'description')
+    inlines = [MapNodeInline, MapEdgeInline]
 
 @admin.register(Story)
 class StoryAdmin(admin.ModelAdmin):
     list_display = ('title', 'genre', 'is_default', 'created_at')
     search_fields = ('title', 'genre')
     list_filter = ('is_default', 'genre')
-    inlines = [MapNodeInline, MapEdgeInline]
+    inlines = [MapInline]
 
 @admin.register(Character)
 class CharacterAdmin(admin.ModelAdmin):
@@ -112,12 +126,12 @@ class ItemAdmin(admin.ModelAdmin):
 
 @admin.register(MapNode)
 class MapNodeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'story', 'node_type', 'is_starting_location', 'x', 'y')
-    list_filter = ('story', 'node_type', 'is_starting_location')
+    list_display = ('name', 'map', 'story', 'node_type', 'is_starting_location', 'x', 'y')
+    list_filter = ('map', 'story', 'node_type', 'is_starting_location')
     search_fields = ('name', 'description', 'name_it')
 
 @admin.register(MapEdge)
 class MapEdgeAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'story', 'bidirectional')
-    list_filter = ('story', 'bidirectional')
+    list_display = ('__str__', 'map', 'story', 'bidirectional')
+    list_filter = ('map', 'story', 'bidirectional')
 

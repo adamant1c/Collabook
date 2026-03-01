@@ -2,7 +2,7 @@ from django.contrib import admin
 from django import forms
 from django.conf import settings
 import os
-from .models import Story, Character, Turn, Quest, Enemy, Item, NPC
+from .models import Story, Character, Turn, Quest, Enemy, Item, NPC, MapNode, MapEdge
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
 
@@ -52,16 +52,30 @@ class NPCAdminForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['image_url'].choices = get_image_choices()
 
+class MapNodeInline(admin.TabularInline):
+    model = MapNode
+    extra = 0
+    fields = ('name', 'node_type', 'is_starting_location', 'x', 'y')
+    show_change_link = True
+
+class MapEdgeInline(admin.TabularInline):
+    model = MapEdge
+    extra = 0
+    fk_name = 'story'
+    fields = ('from_node', 'to_node', 'bidirectional', 'travel_description')
+    show_change_link = True
+
 @admin.register(Story)
 class StoryAdmin(admin.ModelAdmin):
     list_display = ('title', 'genre', 'is_default', 'created_at')
     search_fields = ('title', 'genre')
     list_filter = ('is_default', 'genre')
+    inlines = [MapNodeInline, MapEdgeInline]
 
 @admin.register(Character)
 class CharacterAdmin(admin.ModelAdmin):
-    list_display = ('user', 'story', 'status', 'days_survived', 'hunger', 'thirst', 'fatigue', 'gold', 'created_at')
-    list_filter = ('status', 'story')
+    list_display = ('user', 'story', 'status', 'current_location', 'days_survived', 'hunger', 'thirst', 'fatigue', 'gold', 'created_at')
+    list_filter = ('status', 'story', 'current_location')
     search_fields = ('user__username', 'story__title')
 
 @admin.register(Turn)
@@ -95,4 +109,15 @@ class ItemAdmin(admin.ModelAdmin):
     list_display = ('name', 'item_type', 'gold_cost')
     list_filter = ('item_type',)
     search_fields = ('name',)
+
+@admin.register(MapNode)
+class MapNodeAdmin(admin.ModelAdmin):
+    list_display = ('name', 'story', 'node_type', 'is_starting_location', 'x', 'y')
+    list_filter = ('story', 'node_type', 'is_starting_location')
+    search_fields = ('name', 'description', 'name_it')
+
+@admin.register(MapEdge)
+class MapEdgeAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'story', 'bidirectional')
+    list_filter = ('story', 'bidirectional')
 

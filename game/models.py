@@ -55,7 +55,7 @@ class Character(models.Model):
     can_resurrect = models.BooleanField(default=True)
     
     gold = models.IntegerField(default=0)
-    current_location_id = models.CharField(max_length=36, null=True, blank=True)
+    current_location = models.ForeignKey('MapNode', db_column='current_location_id', null=True, blank=True, on_delete=models.SET_NULL, related_name='characters_present', help_text="La posizione attuale del personaggio sulla mappa")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -221,6 +221,8 @@ class MapNode(models.Model):
     class Meta:
         managed = False
         db_table = 'map_nodes'
+        verbose_name = "Map Node"
+        verbose_name_plural = "Map Nodes"
 
     def __str__(self):
         return self.name
@@ -236,6 +238,8 @@ class MapEdge(models.Model):
     class Meta:
         managed = False
         db_table = 'map_edges'
+        verbose_name = "Map Edge"
+        verbose_name_plural = "Map Edges"
 
     def __str__(self):
         return f"{self.from_node} -> {self.to_node}"

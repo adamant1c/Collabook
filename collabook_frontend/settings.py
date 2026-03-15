@@ -16,8 +16,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security Configuration
 # ========================================
 
-# SECRET_KEY from environment variable
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-9-ku)dot=(5*jp@az3gh7@_bh=83i(xtle62i(h3qsxigg7n)_')
+# SECRET_KEY from environment variable (REQUIRED — never hardcode)
+_secret_key = os.getenv('SECRET_KEY')
+if not _secret_key:
+    if os.getenv('ENVIRONMENT', 'development') == 'production':
+        raise RuntimeError(
+            "CRITICAL: SECRET_KEY environment variable is not set! "
+            "Generate one with: openssl rand -hex 32"
+        )
+    else:
+        # Development fallback — insecure, never use in production
+        import warnings
+        warnings.warn(
+            "⚠️  SECRET_KEY not set — using insecure development default. "
+            "Set SECRET_KEY in your .env file.",
+            stacklevel=2,
+        )
+        _secret_key = 'django-insecure-dev-only-change-me-in-production'
+SECRET_KEY = _secret_key
 
 # Environment-based DEBUG
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development')
@@ -303,9 +319,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.getenv('SMTP_SERVER', 'smtp.gmail.com')
 EMAIL_PORT = int(os.getenv('SMTP_PORT', 587))
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('SMTP_USERNAME', 'mycollabook@gmail.com')
+EMAIL_HOST_USER = os.getenv('SMTP_USERNAME', '')
 EMAIL_HOST_PASSWORD = os.getenv('SMTP_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.getenv('SMTP_SENDER', 'mycollabook@gmail.com')
+DEFAULT_FROM_EMAIL = os.getenv('SMTP_SENDER', 'noreply@collabook.com')
 
 # If in development, we could use console backend
 if ENVIRONMENT == 'development':

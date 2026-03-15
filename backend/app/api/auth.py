@@ -140,17 +140,25 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     # Frontend URLs for accounts are at root path (""), so use /verify-email/
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:8501")
     verification_link = f"{frontend_url}/verify-email/?token={verification_token}"
-    
+
     email_body = f"""
-    Welcome to Collabook, {db_user.username}!
-    
-    Please click the link below to verify your account:
-    {verification_link}
-    
-    If you did not request this, please ignore this email.
+    <html>
+    <body>
+        <p>Welcome to Collabook, {db_user.username}!</p>
+
+        <p>Please click the link below to verify your account:</p>
+
+        <p>
+            <a href="{verification_link}">Verify your account</a>
+        </p>
+
+        <p>If you did not request this, please ignore this email.</p>
+    </body>
+    </html>
     """
-    
+
     send_email(db_user.email, "Verify your Collabook Account", email_body)
+
     print(f"📧 [DEBUG] Verification link: {verification_link}")
     
     return {"message": "Registration successful. Please check your email to verify your account."}

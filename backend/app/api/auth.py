@@ -29,7 +29,7 @@ def send_email(to_email: str, subject: str, content: str):
     msg["From"] = sender_email
     msg["To"] = to_email
     msg["Subject"] = subject
-    msg.attach(MIMEText(content, "plain"))
+    msg.attach(MIMEText(content, "html"))
     
     try:
         # Connect to server

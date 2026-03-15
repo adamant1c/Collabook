@@ -67,6 +67,8 @@ class RegisterView(View):
             try:
                 await CollabookAPI.register(username, email, password, name=username)
                 messages.success(request, _("Registration successful! Please check your email to verify your account."))
+                await sync_to_async(request.session.pop)("access_token", None)
+                await sync_to_async(request.session.pop)("user", None)
                 return redirect('accounts:login')
             except Exception as e:
                 messages.error(request, str(e))

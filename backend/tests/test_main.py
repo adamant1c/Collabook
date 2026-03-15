@@ -46,7 +46,7 @@ def test_user(db_session):
     user = User(
         username="testuser",
         email="test@example.com",
-        password_hash=hash_password("password123"),
+        password=hash_password("password123"),
         name="Test User",
         role="player"
     )

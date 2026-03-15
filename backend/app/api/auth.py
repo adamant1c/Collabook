@@ -113,9 +113,11 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     db_user = User(
         username=username,
         email=user_data.email,
-        password_hash=hash_password(user_data.password),
+        password=hash_password(user_data.password),
         role=UserRole.PLAYER,
         name=name,
+        first_name="",  # Required by schema
+        last_name="",   # Required by schema
         profession=user_data.profession,
         description=user_data.description,
         avatar_description=user_data.avatar_description,
@@ -159,8 +161,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
     """Login with username and password (rate limited: 5/minute)"""
     
     user = db.query(User).filter(User.username == form_data.username).first()
-    
-    if not user or not verify_password(form_data.password, user.password_hash):
+    if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -231,7 +232,7 @@ async def reset_password(reset_data: PasswordReset, db: Session = Depends(get_db
         raise HTTPException(status_code=400, detail="Reset token has expired")
     
     # Update password
-    user.password_hash = hash_password(reset_data.new_password)
+    user.password = hash_password(reset_data.new_password)
     user.reset_token = None
     user.reset_token_expires = None
     db.commit()

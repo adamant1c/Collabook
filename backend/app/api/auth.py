@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -130,7 +130,7 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     # Generate verification token (reusing reset_token logic for simplicity)
     verification_token = generate_reset_token()
     db_user.reset_token = verification_token
-    db_user.reset_token_expires = datetime.utcnow() + timedelta(hours=24)
+    db_user.reset_token_expires = datetime.now(timezone.utc) + timedelta(hours=24)
     
     db.add(db_user)
     db.commit()
@@ -172,7 +172,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
         raise HTTPException(status_code=400, detail="Please verify your email before logging in. Check your inbox for the verification link.")
     
     # Update last login
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now(timezone.utc)
     db.commit()
     
     # Create access token
@@ -194,7 +194,7 @@ async def request_password_reset(request: Request, reset_request: PasswordResetR
     # Generate reset token (valid for 1 hour)
     reset_token = generate_reset_token()
     user.reset_token = reset_token
-    user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+    user.reset_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
     
     db.commit()
     
@@ -228,7 +228,7 @@ async def reset_password(reset_data: PasswordReset, db: Session = Depends(get_db
     if not user:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
     
-    if user.reset_token_expires < datetime.utcnow():
+    if user.reset_token_expires < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Reset token has expired")
     
     # Update password
@@ -248,7 +248,7 @@ async def verify_email(token: str, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=400, detail="Invalid verification token")
         
-    if user.reset_token_expires and user.reset_token_expires < datetime.utcnow():
+    if user.reset_token_expires and user.reset_token_expires < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Verification token has expired")
         
     # Activate user

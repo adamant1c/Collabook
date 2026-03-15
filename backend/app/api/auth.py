@@ -145,13 +145,13 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     <html>
     <body>
         <p>Welcome to Collabook, {db_user.username}!</p>
-
+        
         <p>Please click the link below to verify your account:</p>
-
+        <br>
         <p>
             <a href="{verification_link}">Verify your account</a>
         </p>
-
+        
         <p>If you did not request this, please ignore this email.</p>
     </body>
     </html>

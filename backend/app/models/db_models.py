@@ -362,7 +362,10 @@ class MapNode(Base):
     # Relationships
     story = relationship("Story", back_populates="map_nodes")
     map = relationship("Map", back_populates="nodes")
-    children = relationship("MapNode", backref="parent", remote_side=[id], foreign_keys=[parent_id])
+    
+    # Self-referential relationship for hierarchy
+    parent = relationship("MapNode", remote_side=[id], back_populates="children")
+    children = relationship("MapNode", back_populates="parent", cascade="all, delete-orphan")
 
 
 class MapEdge(Base):

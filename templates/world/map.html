@@ -14,6 +14,8 @@
         --node-hover: #e0cca1;
         --text-color: #3e2723;
         --accent: #8d6e63;
+        --sidebar-bg: rgba(255, 255, 255, 0.9);
+        --sidebar-text: #222;
     }
 
     [data-theme="scifi"] {
@@ -24,6 +26,8 @@
         --node-hover: #0d47a1;
         --text-color: #e3f2fd;
         --accent: #00e5ff;
+        --sidebar-bg: rgba(11, 14, 20, 0.9);
+        --sidebar-text: #e3f2fd;
     }
 
     [data-theme="historical"] {
@@ -34,92 +38,49 @@
         --node-hover: #ddd;
         --text-color: #222;
         --accent: #555;
+        --sidebar-bg: rgba(245, 245, 245, 0.95);
+        --sidebar-text: #222;
     }
 
     .map-container {
-        display: grid;
-        grid-template-columns: 1fr 300px;
+        display: flex;
+        flex-direction: column;
         gap: 20px;
-        height: 70vh;
-        margin-top: 20px;
+        width: 100%;
+        margin-top: 10px;
     }
 
     .map-canvas-wrapper {
-        background-color: var(--map-bg);
+        background-color: transparent !important;
         border: 2px solid var(--map-stroke);
         border-radius: 8px;
         position: relative;
         overflow: hidden;
-        box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.1);
+        height: 750px;
+        /* Large fixed height for better visibility */
+        width: 100%;
     }
 
-    svg#world-map {
+    #world-map-network {
         width: 100%;
         height: 100%;
-        cursor: grab;
     }
 
-    svg#world-map:active {
-        cursor: grabbing;
-    }
-
-    .map-node {
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .map-node circle {
-        fill: var(--node-fill);
-        stroke: var(--node-stroke);
-        stroke-width: 2;
-    }
-
-    .map-node:hover circle {
-        fill: var(--node-hover);
-        r: 18;
-    }
-
-    .map-node.active circle {
-        stroke: var(--accent);
-        stroke-width: 4;
-        filter: drop-shadow(0 0 5px var(--accent));
-    }
-
-    .map-node text {
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        fill: var(--text-color);
-        pointer-events: none;
-        text-shadow: 0 0 3px var(--map-bg);
-    }
-
-    .map-edge {
-        stroke: var(--map-stroke);
-        stroke-width: 1.5;
-        stroke-dasharray: 4;
-        opacity: 0.6;
-    }
-
-    .character-marker {
-        pointer-events: none;
-    }
-
-    .character-marker circle {
-        fill: #ff5252;
-        stroke: #fff;
-        stroke-width: 2;
-        filter: drop-shadow(0 0 8px rgba(255, 82, 82, 0.8));
+    /* Vis.js specific overrides */
+    div.vis-network {
+        outline: none;
     }
 
     .map-sidebar {
-        background: rgba(255, 255, 255, 0.05);
+        background: var(--sidebar-bg);
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         padding: 20px;
         display: flex;
         flex-direction: column;
-        color: var(--text-color);
+        color: var(--sidebar-text);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     }
 
     .node-details h3 {
@@ -142,10 +103,11 @@
         margin-bottom: 10px;
     }
 </style>
+
 {% endblock %}
 
 {% block content %}
-<div class="container py-4" data-theme="{{ story.world_metadata.theme|default:'fantasy' }}">
+<div class="container-fluid py-4" data-theme="{{ story.world_metadata.theme|default:'fantasy' }}">
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <nav aria-label="breadcrumb">
@@ -163,12 +125,9 @@
     </div>
 
     <div class="map-container">
-        <div class="map-canvas-wrapper">
-            <svg id="world-map" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
-                <g id="edges-layer"></g>
-                <g id="nodes-layer"></g>
-                <g id="character-layer"></g>
-            </svg>
+        <div class="map-canvas-wrapper" style="overflow: hidden;">
+            <iframe id="world-map-iframe" srcdoc="{{ html_graph|escape }}"
+                style="width: 100%; height: 100%; border: none;"></iframe>
         </div>
 
         <div class="map-sidebar">
@@ -206,77 +165,22 @@
     const rawData = JSON.parse(document.getElementById('map-data').textContent);
     const charData = JSON.parse(document.getElementById('character-data').textContent);
 
-    const svg = document.getElementById('world-map');
-    const nodesLayer = document.getElementById('nodes-layer');
-    const edgesLayer = document.getElementById('edges-layer');
-    const charLayer = document.getElementById('character-layer');
-
     const nodeInfo = document.getElementById('node-info');
     const hint = document.getElementById('selection-hint');
-    const moveForm = document.getElementById('move-form');
+    // Explicit Javascript color themes to guarantee Vis.js styling works
+    const theme = document.querySelector('.container').dataset.theme || 'fantasy';
 
-    // Render Edges
-    rawData.edges.forEach(edge => {
-        const fromNode = rawData.nodes.find(n => n.id === edge.from_node_id);
-        const toNode = rawData.nodes.find(n => n.id === edge.to_node_id);
-        if (fromNode && toNode) {
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("x1", fromNode.x);
-            line.setAttribute("y1", fromNode.y);
-            line.setAttribute("x2", toNode.x);
-            line.setAttribute("y2", toNode.y);
-            line.setAttribute("class", "map-edge");
-            edgesLayer.appendChild(line);
+    // Handle Selection via postMessage from iframe
+    window.addEventListener("message", function (event) {
+        if (!event.data) return;
+
+        if (event.data.type === 'nodeSelected') {
+            selectNode(event.data.node);
+        } else if (event.data.type === 'nodeDeselected') {
+            hint.style.display = 'block';
+            nodeInfo.style.display = 'none';
         }
     });
-
-    // Render Nodes
-    rawData.nodes.forEach(node => {
-        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        g.setAttribute("class", `map-node ${node.id === charData.current_location_id ? 'active' : ''}`);
-        g.dataset.id = node.id;
-
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", node.x);
-        circle.setAttribute("cy", node.y);
-        circle.setAttribute("r", 15);
-        g.appendChild(circle);
-
-        const icon = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        icon.setAttribute("x", node.x);
-        icon.setAttribute("y", node.y + 6);
-        icon.setAttribute("text-anchor", "middle");
-        icon.setAttribute("font-size", "14px");
-        icon.textContent = node.icon || '📍';
-        g.appendChild(icon);
-
-        const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-        label.setAttribute("x", node.x);
-        label.setAttribute("y", node.y + 35);
-        label.setAttribute("text-anchor", "middle");
-        label.textContent = node.name_it || node.name;
-        g.appendChild(label);
-
-        g.addEventListener('click', () => selectNode(node));
-        nodesLayer.appendChild(g);
-    });
-
-    // Render Character Marker
-    if (charData.current_location_id) {
-        const curLoc = rawData.nodes.find(n => n.id === charData.current_location_id);
-        if (curLoc) {
-            const marker = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            marker.setAttribute("class", "character-marker");
-
-            const outer = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            outer.setAttribute("cx", curLoc.x);
-            outer.setAttribute("cy", curLoc.y);
-            outer.setAttribute("r", 8);
-            marker.appendChild(outer);
-
-            charLayer.appendChild(marker);
-        }
-    }
 
     function selectNode(node) {
         hint.style.display = 'none';
@@ -312,10 +216,6 @@
                 confirmBtn.disabled = true;
             }
         }
-
-        // Highlight selected node
-        document.querySelectorAll('.map-node').forEach(el => el.classList.remove('active'));
-        document.querySelector(`.map-node[data-id="${node.id}"]`).classList.add('active');
     }
 </script>
 {% endblock %}

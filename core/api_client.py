@@ -46,6 +46,8 @@ KNOWN_ERROR_MESSAGES = {
     "Hours must be between 1 and 24",
     # User errors
     "User not found",
+    "Locations are not connected",
+    "Target location not found in this world",
 }
 
 def translate_api_error(error_message: str) -> str:

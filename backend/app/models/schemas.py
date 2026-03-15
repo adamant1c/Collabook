@@ -382,7 +382,14 @@ class MapNodeResponse(BaseModel):
     y: int
     icon: Optional[str] = None
     is_starting_location: bool
-    children: List['MapNodeResponse'] = []
+    children: List['MapNodeResponse'] = Field(default_factory=list)
+
+    @field_validator('children', mode='before')
+    @classmethod
+    def validate_children(cls, v):
+        if v is None:
+            return []
+        return v
 
     class Config:
         from_attributes = True

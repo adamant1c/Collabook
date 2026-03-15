@@ -18,3 +18,5 @@ Pillow
 
 
 django-allauth[socialaccount]
+pyvis
+networkx

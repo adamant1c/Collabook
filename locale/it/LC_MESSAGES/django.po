@@ -1128,3 +1128,18 @@ msgstr "L'Arrivo"
 msgid "You stepped into the world, ready for destiny..."
 msgstr "Sei entrato nel mondo, pronto per il destino..."
 
+
+msgid "World Map"
+msgstr "Mappa del Mondo"
+
+
+msgid "Travel to this Location"
+msgstr "Viaggia verso questo Luogo"
+
+
+msgid "Locations are not connected"
+msgstr "I luoghi non sono collegati"
+
+msgid "Target location not found in this world"
+msgstr "Luogo di destinazione non trovato in questo mondo"
+

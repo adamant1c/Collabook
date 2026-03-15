@@ -59,8 +59,17 @@ async def move_character(
     if not character:
         raise HTTPException(status_code=404, detail="Character not found")
     
+    # Check if already at target location
+    if character.current_location_id == request.target_node_id:
+        return MapCharacterPosition(
+            character_id=character.id,
+            name=character.user.name or character.user.username,
+            location_id=character.current_location_id,
+            location_name=db.query(MapNode).filter(MapNode.id == character.current_location_id).first().name
+        )
+    
     # Verify ownership (or admin)
-    if character.user.username != current_user and current_user != "admin": # Simple check, refine if needed
+    if character.user.username != current_user.username and current_user.username != "admin": # Simple check, refine if needed
          raise HTTPException(status_code=403, detail="Not authorized to move this character")
 
     # Verify target node exists in the same story

@@ -169,18 +169,42 @@
     .map-img-wrapper {
         position: relative;
         overflow: hidden;
-        max-height: 400px;
+        min-height: 200px;
+        max-height: 250px;
+        cursor: pointer;
     }
 
     .map-img {
         width: 100%;
-        height: auto;
+        height: 100%;
+        object-fit: cover;
+        object-position: top;
         display: block;
-        transition: transform 0.8s ease;
+        transition: transform 0.8s ease, filter 0.3s ease;
     }
 
     .map-display:hover .map-img {
         transform: scale(1.05);
+        filter: brightness(0.7);
+    }
+
+    .map-zoom-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.5);
+        color: #fff;
+        font-size: 3rem;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        z-index: 10;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .map-display:hover .map-zoom-icon {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
     }
 
     .map-header {
@@ -335,21 +359,30 @@
                         {% for map in world.maps %}
                         <div class="col-12">
                             <div class="map-display">
-                                <div class="map-img-wrapper">
+                                <div class="map-img-wrapper" data-bs-toggle="modal" data-bs-target="#mapModal"
+                                    data-map-src="{% if '/static/' in map.image_url %}{{ map.image_url }}{% else %}{% static 'images/' %}{{ map.image_url }}{% endif %}"
+                                    data-map-title="{% if LANGUAGE_CODE|slice:':2' == 'it' and map.name_it %}{{ map.name_it }}{% else %}{{ map.name }}{% endif %}">
                                     {% if map.image_url %}
                                     <img src="{% if '/static/' in map.image_url %}{{ map.image_url }}{% else %}{% static 'images/' %}{{ map.image_url }}{% endif %}"
                                         alt="{{ map.name }}" class="map-img">
+                                    <div class="map-zoom-icon"><i class="fas fa-search-plus"></i></div>
                                     {% endif %}
                                     <div class="map-header">
                                         <span class="map-badge">{% trans "Discovery Map" %}</span>
                                         <span class="map-name">
-                                            {% if LANGUAGE_CODE|slice:":2" == "it" and map.name_it %}{{ map.name_it }}{%
-                                            else %}{{ map.name }}{% endif %}
+                                            {% if LANGUAGE_CODE|slice:":2" == "it" and map.name_it %}
+                                            {{ map.name_it }}
+                                            {% else %}
+                                            {{ map.name }}
+                                            {% endif %}
                                         </span>
                                         {% if map.description or map.description_it %}
                                         <p class="map-desc">
-                                            {% if LANGUAGE_CODE|slice:":2" == "it" and map.description_it %}{{
-                                            map.description_it }}{% else %}{{ map.description }}{% endif %}
+                                            {% if LANGUAGE_CODE|slice:":2" == "it" and map.description_it %}
+                                            {{ map.description_it }}
+                                            {% else %}
+                                            {{ map.description }}
+                                            {% endif %}
                                         </p>
                                         {% endif %}
                                     </div>
@@ -425,5 +458,44 @@
         class="btn btn-coffee btn-lg px-4">
         ☕ {% trans "Buy Me a Coffee" %}
     </a>
+</div>
+
+<!-- Map Image Modal -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark border-gold">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title font-cinzel text-gold" id="mapModalLabel">Map Viewer</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img id="mapModalImage" src="" alt="Full Map" class="img-fluid w-100"
+                    style="max-height: 85vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var mapModal = document.getElementById('mapModal');
+        if (mapModal) {
+            mapModal.addEventListener('show.bs.modal', function (event) {
+                var triggerElement = event.relatedTarget;
+                var mapSrc = triggerElement.getAttribute('data-map-src');
+                var mapTitle = triggerElement.getAttribute('data-map-title');
+
+                var modalImage = mapModal.querySelector('#mapModalImage');
+                var modalTitle = mapModal.querySelector('.modal-title');
+
+                modalImage.src = mapSrc;
+                modalTitle.textContent = mapTitle;
+            });
+        }
+    });
+</script>
+☕ {% trans "Buy Me a Coffee" %}
+</a>
 </div>
 {% endblock %}

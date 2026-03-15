@@ -437,11 +437,168 @@ class WorldMapView(View):
             character = next((c for c in user.get('characters', []) if c['id'] == character_id), None)
             story = await CollabookAPI.get_story(story_id, session_token)
             
+            # Construct pyvis graph
+            from pyvis.network import Network
+            import networkx as nx
+            
+            theme = story.get('world_metadata', {}).get('theme', 'fantasy')
+            if theme == 'scifi':
+                bgcolor = '#0b0e14'
+                font_color = '#e3f2fd'
+                edge_color = '#1e88e5'
+                node_color = '#1a237e'
+                node_border = '#42a5f5'
+                accent = '#00e5ff'
+            elif theme == 'historical':
+                bgcolor = '#f5f5f5'
+                font_color = '#222222'
+                edge_color = '#333333'
+                node_color = '#eeeeee'
+                node_border = '#666666'
+                accent = '#555555'
+            else:
+                bgcolor = '#f4e4bc'
+                font_color = '#3e2723'
+                edge_color = '#5d4037'
+                node_color = '#ffffff'
+                node_border = '#5d4037'
+                accent = '#8d6e63'
+
+            net = Network(height='100%', width='100%', bgcolor='transparent', font_color=font_color)
+            
+            # Disable physics initially so nodes stay at predefined (x,y) if they exist, but pyvis expects them via add_node layout if we don't supply x,y.
+            net.toggle_physics(False)
+
+            current_loc_id = character.get('current_location_id') if character else None
+
+            # Add nodes
+            for n in map_data.get('nodes', []):
+                is_current = n['id'] == current_loc_id
+                
+                # Combine icon and name correctly
+                icon = n.get('icon', '📍')
+                # For language we can check request.LANGUAGE_CODE if needed, for simplicity use name_it if present
+                lang = request.LANGUAGE_CODE[:2] if hasattr(request, 'LANGUAGE_CODE') else 'en'
+                label = f"{icon}\n{n.get('name_it') if lang == 'it' and n.get('name_it') else n.get('name')}"
+                
+                # Assign visual properties
+                color_dict = {
+                    'background': node_color,
+                    'border': accent if is_current else node_border,
+                    'highlight': {'background': node_color, 'border': accent},
+                    'hover': {'background': node_color, 'border': node_border}
+                }
+
+                # Set coordinates if provided; need to scale them for pyvis
+                x = n.get('x', None)
+                y = n.get('y', None)
+                if x is not None: x = int(x)
+                if y is not None: y = int(y)
+
+                # Store all node properties to pass to js easily
+                import re
+                desc = n.get('description_it') if lang == 'it' and n.get('description_it') else n.get('description', '')
+                if desc is None:
+                    desc = ''
+                clean_desc = re.sub('<[^<]+>', '', str(desc))
+                title_text = f"{label.replace(chr(10), ' ')}\n{clean_desc}"
+
+                net.add_node(
+                    n['id'], 
+                    label=label, 
+                    title=title_text, 
+                    color=color_dict,
+                    size=40 if is_current else 25,
+                    borderWidth=4 if is_current else 2,
+                    x=x, y=y,
+                    shape='dot',
+                    font={'color': font_color, 'size': 14, 'face': 'Inter'},
+                    raw_data=n  # Custom attribute containing the raw dict
+                )
+
+            # Add edges
+            for e in map_data.get('edges', []):
+                net.add_edge(
+                    e['from_node_id'], 
+                    e['to_node_id'],
+                    color=edge_color,
+                    width=2,
+                    arrows='' if e.get('bidirectional') else 'to',
+                    dashes=True
+                )
+            
+            # We want to enable interaction
+            net.set_options("""
+            var options = {
+              "physics": {
+                "enabled": false
+              },
+              "interaction": {
+                "hover": true,
+                "zoomView": true,
+                "dragView": true
+              },
+              "edges": {
+                "smooth": {
+                  "type": "continuous",
+                  "roundness": 0.5
+                }
+              }
+            }
+            """)
+            
+            # Generate the HTML string without dumping it to a file
+            html_graph = net.generate_html()
+            
+            # Inject a custom JS event listener within the generated HTML so it auto-posts
+            # messages to the parent window when a node is selected.
+            # Pyvis generates a script block initializing `network`. We can append our event directly to it.
+            custom_js = """
+            network.on("selectNode", function (params) {
+                if (params.nodes.length > 0) {
+                    var nodeId = params.nodes[0];
+                    var nodeData = nodes.get(nodeId);
+                    window.parent.postMessage({ type: "nodeSelected", node: nodeData.raw_data }, "*");
+                }
+            });
+            network.on("deselectNode", function (params) {
+                window.parent.postMessage({ type: "nodeDeselected" }, "*");
+            });
+            """
+            html_graph = html_graph.replace("return network;", custom_js + "\nreturn network;")
+            
+            # Inject style for transparency and remove potential margins
+            transparency_style = """
+            <style>
+                * {
+                    background-color: transparent !important;
+                }
+                html, body, .card, .card-body, #mynetwork, .vis-network {
+                    background-color: transparent !important;
+                    background: transparent !important;
+                    border: none !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    height: 100vh !important;
+                    width: 100vw !important;
+                    overflow: hidden !important;
+                    box-shadow: none !important;
+                    color: inherit !important;
+                }
+                /* Hide the default Pyvis Bootstrap card if it exists */
+                .card {
+                    border: none !important;
+                }
+            </style>
+            """
+            html_graph = html_graph.replace("</head>", transparency_style + "</head>")
+
             return await sync_to_async(render)(request, self.template_name, {
                 'map_data': map_data,
                 'character': character,
                 'story': story,
                 'user': user,
+                'html_graph': html_graph,
             })
         except Exception as e:
             messages.error(request, f"Error loading map: {str(e)}")

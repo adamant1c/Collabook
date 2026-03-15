@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Text, Integer, DateTime, ForeignKey, JSON, Enum as SQLEnum, Boolean
 from sqlalchemy.orm import relationship
-from datetime import datetime, timezone
+from datetime import datetime
 from app.core.database import Base
 import uuid
 import enum
@@ -46,8 +46,8 @@ class User(Base):
     is_staff = Column(Boolean, nullable=False, default=False)
     is_active = Column(Boolean, nullable=False, default=True)
     is_superuser = Column(Boolean, nullable=False, default=False)
-    date_joined = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
-    last_login = Column(DateTime(timezone=True), nullable=True)
+    date_joined = Column(DateTime, nullable=False, default=datetime.utcnow)
+    last_login = Column(DateTime, nullable=True)
     
     # RPG / Character Info
     role = Column(SQLEnum(UserRole), default=UserRole.PLAYER, nullable=False)
@@ -68,7 +68,7 @@ class User(Base):
     
     # Account Management fallback
     reset_token = Column(String, nullable=True)
-    reset_token_expires = Column(DateTime(timezone=True), nullable=True)
+    reset_token_expires = Column(DateTime, nullable=True)
     
     # Relationships
     characters = relationship("Character", back_populates="user", cascade="all, delete-orphan")

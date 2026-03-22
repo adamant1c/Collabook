@@ -39,14 +39,14 @@ class User(Base):
     # Django Auth basic fields
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False, index=True)
-    first_name = Column(String, nullable=True)
-    last_name = Column(String, nullable=True)
+    first_name = Column(String, nullable=False, default="")
+    last_name = Column(String, nullable=False, default="")
     email = Column(String, unique=True, nullable=False, index=True)
     password = Column(String, nullable=False)
-    is_staff = Column(Boolean, default=False)
-    is_active = Column(Boolean, default=True)
-    is_superuser = Column(Boolean, default=False)
-    date_joined = Column(DateTime, default=datetime.utcnow)
+    is_staff = Column(Boolean, nullable=False, default=False)
+    is_active = Column(Boolean, nullable=False, default=True)
+    is_superuser = Column(Boolean, nullable=False, default=False)
+    date_joined = Column(DateTime, nullable=False, default=datetime.utcnow)
     last_login = Column(DateTime, nullable=True)
     
     # RPG / Character Info
@@ -57,14 +57,14 @@ class User(Base):
     avatar_description = Column(Text, nullable=True)
     
     # RPG Stats
-    hp = Column(Integer, default=100)
-    max_hp = Column(Integer, default=100)
-    strength = Column(Integer, default=0)
-    magic = Column(Integer, default=0)
-    dexterity = Column(Integer, default=0)
-    defense = Column(Integer, default=0)
-    xp = Column(Integer, default=0)
-    level = Column(Integer, default=1)
+    hp = Column(Integer, nullable=False, default=100)
+    max_hp = Column(Integer, nullable=False, default=100)
+    strength = Column(Integer, nullable=False, default=0)
+    magic = Column(Integer, nullable=False, default=0)
+    dexterity = Column(Integer, nullable=False, default=0)
+    defense = Column(Integer, nullable=False, default=0)
+    xp = Column(Integer, nullable=False, default=0)
+    level = Column(Integer, nullable=False, default=1)
     
     # Account Management fallback
     reset_token = Column(String, nullable=True)

@@ -23,7 +23,7 @@ def verify_win_condition_fix():
         user = User(
             username=username,
             email=f"{username}@test.com",
-            password_hash="fakehash",
+            password="fakehash",
             name="Verify User",
             role=UserRole.PLAYER,
             hp=100,

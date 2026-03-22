@@ -100,7 +100,7 @@ class Character(models.Model):
 class Turn(models.Model):
     id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
     story = models.ForeignKey(Story, db_column='story_id', on_delete=models.DO_NOTHING)
-    character = models.ForeignKey(Character, db_column='character_id', on_delete=models.DO_NOTHING)
+    character = models.ForeignKey(Character, db_column='character_id', on_delete=models.CASCADE)
     user_action = models.TextField()
     narration = models.TextField()
     turn_number = models.IntegerField()

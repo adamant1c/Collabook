@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -29,7 +29,7 @@ def send_email(to_email: str, subject: str, content: str):
     msg["From"] = sender_email
     msg["To"] = to_email
     msg["Subject"] = subject
-    msg.attach(MIMEText(content, "plain"))
+    msg.attach(MIMEText(content, "html"))
     
     try:
         # Connect to server
@@ -113,9 +113,11 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     db_user = User(
         username=username,
         email=user_data.email,
-        password_hash=hash_password(user_data.password),
+        password=hash_password(user_data.password),
         role=UserRole.PLAYER,
         name=name,
+        first_name="",  # Required by schema
+        last_name="",   # Required by schema
         profession=user_data.profession,
         description=user_data.description,
         avatar_description=user_data.avatar_description,
@@ -128,7 +130,7 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     # Generate verification token (reusing reset_token logic for simplicity)
     verification_token = generate_reset_token()
     db_user.reset_token = verification_token
-    db_user.reset_token_expires = datetime.utcnow() + timedelta(hours=24)
+    db_user.reset_token_expires = datetime.now(timezone.utc) + timedelta(hours=24)
     
     db.add(db_user)
     db.commit()
@@ -138,17 +140,25 @@ async def register(request: Request, user_data: UserRegister, db: Session = Depe
     # Frontend URLs for accounts are at root path (""), so use /verify-email/
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:8501")
     verification_link = f"{frontend_url}/verify-email/?token={verification_token}"
-    
+
     email_body = f"""
-    Welcome to Collabook, {db_user.username}!
-    
-    Please click the link below to verify your account:
-    {verification_link}
-    
-    If you did not request this, please ignore this email.
+    <html>
+    <body>
+        <p>Welcome to Collabook, {db_user.username}!</p>
+        
+        <p>Please click the link below to verify your account:</p>
+        <br>
+        <p>
+            <a href="{verification_link}">Verify your account</a>
+        </p>
+        
+        <p>If you did not request this, please ignore this email.</p>
+    </body>
+    </html>
     """
-    
+
     send_email(db_user.email, "Verify your Collabook Account", email_body)
+
     print(f"📧 [DEBUG] Verification link: {verification_link}")
     
     return {"message": "Registration successful. Please check your email to verify your account."}
@@ -159,8 +169,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
     """Login with username and password (rate limited: 5/minute)"""
     
     user = db.query(User).filter(User.username == form_data.username).first()
-    
-    if not user or not verify_password(form_data.password, user.password_hash):
+    if not user or not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -171,7 +180,7 @@ async def login(request: Request, form_data: OAuth2PasswordRequestForm = Depends
         raise HTTPException(status_code=400, detail="Please verify your email before logging in. Check your inbox for the verification link.")
     
     # Update last login
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.now(timezone.utc)
     db.commit()
     
     # Create access token
@@ -193,7 +202,7 @@ async def request_password_reset(request: Request, reset_request: PasswordResetR
     # Generate reset token (valid for 1 hour)
     reset_token = generate_reset_token()
     user.reset_token = reset_token
-    user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+    user.reset_token_expires = datetime.now(timezone.utc) + timedelta(hours=1)
     
     db.commit()
     
@@ -227,11 +236,11 @@ async def reset_password(reset_data: PasswordReset, db: Session = Depends(get_db
     if not user:
         raise HTTPException(status_code=400, detail="Invalid or expired reset token")
     
-    if user.reset_token_expires < datetime.utcnow():
+    if user.reset_token_expires < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Reset token has expired")
     
     # Update password
-    user.password_hash = hash_password(reset_data.new_password)
+    user.password = hash_password(reset_data.new_password)
     user.reset_token = None
     user.reset_token_expires = None
     db.commit()
@@ -247,7 +256,7 @@ async def verify_email(token: str, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=400, detail="Invalid verification token")
         
-    if user.reset_token_expires and user.reset_token_expires < datetime.utcnow():
+    if user.reset_token_expires and user.reset_token_expires < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Verification token has expired")
         
     # Activate user

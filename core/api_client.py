@@ -18,7 +18,7 @@ KNOWN_ERROR_MESSAGES = {
     "Email already registered",
     "Invalid email format",
     "Incorrect username or password",
-    "Please verify your email before logging in. Check your inbox for the verification link.",
+    "Please verify your email before logging in. Check your inbox/spam for the verification link.",
     "Invalid or expired reset token",
     "Reset token has expired",
     "Invalid verification token",

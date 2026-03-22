@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-from datetime import datetime
+from datetime import datetime, timezone
 from app.core.database import get_db
 from app.api.auth import get_current_user, require_admin
 from app.core.rpg_stats import award_xp
@@ -157,7 +157,7 @@ async def complete_quest(
     
     # Mark as complete
     player_quest.status = QuestStatus.COMPLETED
-    player_quest.completed_at = datetime.utcnow()
+    player_quest.completed_at = datetime.now(timezone.utc)
     
     # Award rewards
     user = current_user

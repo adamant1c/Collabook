@@ -43,7 +43,7 @@ def create_admin(username, password, email, name):
         admin = User(
             username=username,
             email=email,
-            password_hash=hash_password(password),
+            password=hash_password(password),
             role=UserRole.ADMIN,
             name=name,
             profession="Administrator",

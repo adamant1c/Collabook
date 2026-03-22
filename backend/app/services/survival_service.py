@@ -6,7 +6,7 @@ interactions endpoint.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
@@ -57,10 +57,10 @@ def process_survival_turn(
     result.hp_drain = survival_data["penalties"]["hp_drain"]
 
     # --- Day counter ---
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
     if character.last_played_date is None or character.last_played_date.date() != today:
         character.days_survived += 1
-        character.last_played_date = datetime.utcnow()
+        character.last_played_date = datetime.now(timezone.utc)
 
         goal = story.survival_goal_days if hasattr(story, "survival_goal_days") else 10
 

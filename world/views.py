@@ -74,6 +74,13 @@ def clean_narration(text):
                 extracted = extract_from_dict(data)
                 if extracted:
                     return extracted.strip()
+                # Fallback: check nested dicts for message/narration
+                for key, value in data.items():
+                    if isinstance(value, dict):
+                        for inner_key in ['message', 'narration', 'text', 'description', 'content']:
+                            inner_val = value.get(inner_key)
+                            if inner_val and isinstance(inner_val, str):
+                                return inner_val.strip()
             elif isinstance(data, list) and data:
                 # If it's a list, check the first element
                 if isinstance(data[0], dict):

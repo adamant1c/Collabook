@@ -107,6 +107,15 @@ def _extract_narration(data: dict) -> Optional[str]:
         if key in data and data[key] and isinstance(data[key], str):
             return data[key]
 
+    # Fallback: check nested dicts for a message/narration field
+    # e.g. {"action": {"message": "..."}}
+    for key, value in data.items():
+        if isinstance(value, dict):
+            for inner_key in ("message", "narration", "text", "description", "content"):
+                inner_val = value.get(inner_key)
+                if inner_val and isinstance(inner_val, str):
+                    return inner_val
+
     return None
 
 

@@ -83,7 +83,27 @@ async def create_interaction(
     )
 
     # System prompt
-    system_prompt = "You are a Dungeon Master. Respond in JSON format."
+    json_desc_en = """
+    IMPORTANT: Respond ONLY in valid JSON format.
+    JSON structure:
+    {
+        "narration": "story text...",
+        "event": "start_combat" | null,
+        "enemy": "enemy_name" | null,
+        "suggested_actions": ["action 1", "action 2"],
+        "rewards": {"gold": 0, "xp": 0}
+    }
+    """
+    system_prompt = f"""You are a Dungeon Master. {json_desc_en}
+
+    RULES:
+    1. The narration must be engaging and descriptive.
+    2. If the user wants to fight, use 'event': 'start_combat' and put the enemy name in 'enemy'.
+    3. If you receive a 'SYSTEM DIRECTIVE', use it as absolute truth for the narration.
+    4. ALWAYS include 2 plausible suggested actions in the 'suggested_actions' field.
+    5. Do NOT invent player stats in the narration, use the ones provided in context.
+    6. Do NOT add extra fields beyond the ones specified above.
+    """
     if interaction.language and interaction.language.lower().startswith("it"):
         json_desc = """
         IMPORTANTE: Rispondi SOLO in formato JSON valido.

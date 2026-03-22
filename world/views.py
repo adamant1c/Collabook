@@ -90,20 +90,23 @@ def clean_narration(text):
                 return extracted.strip()
 
     # Step 3: Handle mixed strings or legacy cleanup
-    # Remove common JSON keys and their values if parsing failed
+    # Remove any JSON key-value pairs that are NOT narrative text fields.
+    # Use a broad approach: strip any "key": <value> where key is not a known
+    # narrative field, to prevent unknown LLM fields from leaking through.
+    narrative_keys = {'narration', 'message', 'description', 'response', 'text', 'content'}
+    
+    # Remove JSON arrays: "key": [...]
     cleanup_patterns = [
-        r',?\s*"suggested_actions"\s*:\s*\[.*?\]',
-        r',?\s*"suggested_actions"\s*:\s*\{.*?\}',
-        r',?\s*"player_stats"\s*:\s*\{.*?\}',
-        r',?\s*"world"\s*:\s*\{.*?\}',
-        r',?\s*"event"\s*:\s*[^,}\]]+',
-        r',?\s*"enemy"\s*:\s*[^,}\]]+',
-        r',?\s*"status"\s*:\s*[^,}\]]+',
-        r',?\s*"metadata"\s*:\s*\{.*?\}',
-        r',?\s*"char"\s*:\s*\{[^}]*\}',
-        r',?\s*"history"\s*:\s*\[[^\]]*\]',
-        r',?\s*"entities"\s*:\s*\{[^}]*(?:\{[^}]*\}[^}]*)*\}?',
+        r',?\s*"(?!' + '|'.join(narrative_keys) + r')([^"]+)"\s*:\s*\[(?:[^\[\]]|\[(?:[^\[\]]|\[[^\[\]]*\])*\])*\]',
     ]
+    # Remove JSON objects: "key": {...}
+    cleanup_patterns.append(
+        r',?\s*"(?!' + '|'.join(narrative_keys) + r')([^"]+)"\s*:\s*\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}'
+    )
+    # Remove JSON scalar values: "key": "value" or "key": number or "key": null
+    cleanup_patterns.append(
+        r',?\s*"(?!' + '|'.join(narrative_keys) + r')([^"]+)"\s*:\s*(?:"(?:[^"\\]|\\.)*"|[\d.]+|null|true|false)'
+    )
     
     cleaned_text = text
     for pattern in cleanup_patterns:

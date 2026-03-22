@@ -46,13 +46,20 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
-        width: 100%;
+        /* Break out of parent .container to use full viewport width */
+        width: 100vw;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 0 20px;
         margin-top: 10px;
+        box-sizing: border-box;
     }
 
     .map-canvas-wrapper {
         background-color: transparent !important;
-        border: 2px solid var(--map-stroke);
+        background: transparent !important;
+        border: none;
         border-radius: 8px;
         position: relative;
         overflow: hidden;
@@ -127,7 +134,8 @@
     <div class="map-container">
         <div class="map-canvas-wrapper" style="overflow: hidden;">
             <iframe id="world-map-iframe" srcdoc="{{ html_graph|escape }}"
-                style="width: 100%; height: 100%; border: none;"></iframe>
+                style="width: 100%; height: 100%; border: none; background: transparent;"
+                allowtransparency="true"></iframe>
         </div>
 
         <div class="map-sidebar">

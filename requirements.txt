@@ -11,6 +11,8 @@ dj-database-url
 psycopg2-binary
 Pillow
 django-allauth[socialaccount]
+pyvis>=0.3.1
+networkx>=3.0
 
 # Production server
 gunicorn==21.2.0

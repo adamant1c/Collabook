@@ -147,8 +147,7 @@
                 {% if not is_dead %}
                 <div class="card bg-dark text-light border-gold-dim mb-4 shadow">
                     <div class="card-header border-gold-dim py-2">
-                        <h5 class="mb-0" style="font-family: 'Cinzel', serif; color: #d4af37;">✨ {% trans "Choose Your
-                            Path" %}</h5>
+                        <h5 class="mb-0" style="font-family: 'Cinzel', serif; color: #d4af37;">✨ {% trans "Choose Your Path" %}</h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -172,15 +171,13 @@
                                 <form method="post" id="action-form">
                                     {% csrf_token %}
                                     <div class="form-group mb-3">
-                                        <label for="user_action" class="text-secondary small mb-2">{% trans "Option 3:
-                                            Describe your own action" %}</label>
+                                        <label for="user_action" class="text-secondary small mb-2">{% trans "Option 3: Describe your own action" %}</label>
                                         <textarea name="user_action" id="user_action"
                                             class="form-control bg-black text-light border-gold-dim" rows="3"
                                             placeholder="{% trans 'e.g., I cautiously approach the ancient door...' %}"
                                             required></textarea>
                                     </div>
-                                    <button type="submit" id="submit-btn" class="btn btn-gold w-100 shadow py-2">🎭 {%
-                                        trans "Take Action" %}</button>
+                                    <button type="submit" id="submit-btn" class="btn btn-gold w-100 shadow py-2">🎭 {% trans "Take Action" %}</button>
                                 </form>
                             </div>
                         </div>

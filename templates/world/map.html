@@ -6,224 +6,119 @@
 
 {% block extra_css %}
 <style>
-    :root {
-        --map-bg: #f4e4bc;
-        --map-stroke: #5d4037;
-        --node-fill: #fff;
-        --node-stroke: #5d4037;
-        --node-hover: #e0cca1;
-        --text-color: #3e2723;
-        --accent: #8d6e63;
-        --sidebar-bg: rgba(255, 255, 255, 0.9);
-        --sidebar-text: #222;
-    }
-
-    [data-theme="scifi"] {
-        --map-bg: #0b0e14;
-        --map-stroke: #1e88e5;
-        --node-fill: #1a237e;
-        --node-stroke: #42a5f5;
-        --node-hover: #0d47a1;
-        --text-color: #e3f2fd;
-        --accent: #00e5ff;
-        --sidebar-bg: rgba(11, 14, 20, 0.9);
-        --sidebar-text: #e3f2fd;
-    }
-
-    [data-theme="historical"] {
-        --map-bg: #f5f5f5;
-        --map-stroke: #333;
-        --node-fill: #eee;
-        --node-stroke: #666;
-        --node-hover: #ddd;
-        --text-color: #222;
-        --accent: #555;
-        --sidebar-bg: rgba(245, 245, 245, 0.95);
-        --sidebar-text: #222;
-    }
-
-    .map-container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        /* Break out of parent .container to use full viewport width */
-        width: 100vw;
-        position: relative;
-        left: 50%;
-        transform: translateX(-50%);
+    .map-page-container {
+        max-width: 1200px;
+        margin: 0 auto;
         padding: 0 20px;
-        margin-top: 10px;
-        box-sizing: border-box;
-    }
-
-    .map-canvas-wrapper {
-        background-color: transparent !important;
-        background: transparent !important;
-        border: none;
-        border-radius: 8px;
-        position: relative;
-        overflow: hidden;
-        height: 750px;
-        /* Large fixed height for better visibility */
-        width: 100%;
-    }
-
-    #world-map-network {
-        width: 100%;
-        height: 100%;
-    }
-
-    /* Vis.js specific overrides */
-    div.vis-network {
-        outline: none;
-    }
-
-    .map-sidebar {
-        background: var(--sidebar-bg);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        padding: 20px;
         display: flex;
-        flex-direction: column;
-        color: var(--sidebar-text);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        justify-content: center;
     }
 
-    .node-details h3 {
-        margin-top: 0;
-        color: var(--accent);
+    .map-image-wrapper {
+        position: relative;
+        border: 1px solid rgba(212, 175, 55, 0.5);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        margin-top: 20px;
     }
 
-    .move-btn {
-        margin-top: auto;
+    .map-image-wrapper:hover {
+        transform: scale(1.01);
+        border-color: #d4af37;
+        box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+    }
+
+    .map-image-wrapper img {
         width: 100%;
+        display: block;
+        transition: transform 0.8s ease, filter 0.3s ease;
     }
 
-    .genre-tag {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        background: var(--accent);
-        color: white;
-        margin-bottom: 10px;
+    .map-image-wrapper:hover img {
+        transform: scale(1.03);
+        filter: brightness(0.8);
+    }
+
+    .map-zoom-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.5);
+        color: #fff;
+        font-size: 3rem;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        z-index: 10;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .map-image-wrapper:hover .map-zoom-icon {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+
+
+    .no-map-placeholder {
+        text-align: center;
+        padding: 80px 20px;
+        color: #999;
+    }
+
+    .no-map-placeholder i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.4;
     }
 </style>
-
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4" data-theme="{{ story.world_metadata.theme|default:'fantasy' }}">
-    <div class="d-flex justify-content-between align-items-center">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'world:journey' %}">{% trans "Journey" %}</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{% trans "Map" %}</li>
-                </ol>
-            </nav>
-            <h1 class="h2 mb-0">{{ story.title }}</h1>
-            <span class="genre-tag">{{ story.genre }}</span>
-        </div>
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h2 mb-0">{{ story.title }}</h1>
         <a href="{% url 'world:journey' %}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-2"></i>{% trans "Back to Journey" %}
         </a>
     </div>
 
-    <div class="map-container">
-        <div class="map-canvas-wrapper" style="overflow: hidden;">
-            <iframe id="world-map-iframe" srcdoc="{{ html_graph|escape }}"
-                style="width: 100%; height: 100%; border: none; background: transparent;"
-                allowtransparency="true"></iframe>
+    <div class="map-page-container">
+        {% if map_image_url %}
+        <div class="map-image-wrapper" data-bs-toggle="modal" data-bs-target="#mapModal">
+            <img src="{% if '/static/' in map_image_url %}{{ map_image_url }}{% else %}{% static 'images/' %}{{ map_image_url }}{% endif %}"
+                 alt="{{ map_name|default:'World Map' }}">
+            <div class="map-zoom-icon"><i class="fas fa-search-plus"></i></div>
+
         </div>
+        {% else %}
+        <div class="no-map-placeholder">
+            <i class="fas fa-map-marked-alt"></i>
+            <p>{% trans "No map available for this world yet." %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
 
-        <div class="map-sidebar">
-            <div id="selection-hint" class="text-center py-5 opacity-50">
-                <i class="fas fa-map-marker-alt fa-3x mb-3"></i>
-                <p>{% trans "Select a location on the map to see details" %}</p>
+{% if map_image_url %}
+<!-- Full-size Map Modal -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark border-gold">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title font-cinzel text-gold" id="mapModalLabel">{{ map_name|default:"World Map" }}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-
-            <div id="node-info" class="node-details" style="display: none;">
-                <h3 id="node-name">Location Name</h3>
-                <p class="text-muted mb-2"><span id="node-type" class="badge bg-secondary">Type</span></p>
-                <p id="node-desc" class="mb-4">Description of the selected location...</p>
-
-                <div id="connectivity-info" class="mb-4">
-                    <h6>{% trans "Accessibility" %}</h6>
-                    <p id="reachability-status"></p>
-                </div>
-
-                <form id="move-form" action="{% url 'world:map' %}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="target_node_id" id="target-node-id">
-                    <button type="submit" class="btn btn-primary move-btn" id="confirm-move-btn">
-                        {% trans "Travel to this Location" %}
-                    </button>
-                </form>
+            <div class="modal-body text-center p-0">
+                <img src="{% if '/static/' in map_image_url %}{{ map_image_url }}{% else %}{% static 'images/' %}{{ map_image_url }}{% endif %}"
+                     alt="{{ map_name|default:'World Map' }}" class="img-fluid w-100"
+                     style="max-height: 85vh; object-fit: contain;">
             </div>
         </div>
     </div>
 </div>
-
-{{ map_data|json_script:"map-data" }}
-{{ character|json_script:"character-data" }}
-
-<script>
-    const rawData = JSON.parse(document.getElementById('map-data').textContent);
-    const charData = JSON.parse(document.getElementById('character-data').textContent);
-
-    const nodeInfo = document.getElementById('node-info');
-    const hint = document.getElementById('selection-hint');
-    // Explicit Javascript color themes to guarantee Vis.js styling works
-    const theme = document.querySelector('.container').dataset.theme || 'fantasy';
-
-    // Handle Selection via postMessage from iframe
-    window.addEventListener("message", function (event) {
-        if (!event.data) return;
-
-        if (event.data.type === 'nodeSelected') {
-            selectNode(event.data.node);
-        } else if (event.data.type === 'nodeDeselected') {
-            hint.style.display = 'block';
-            nodeInfo.style.display = 'none';
-        }
-    });
-
-    function selectNode(node) {
-        hint.style.display = 'none';
-        nodeInfo.style.display = 'block';
-
-        document.getElementById('node-name').textContent = node.name_it || node.name;
-        document.getElementById('node-type').textContent = node.node_type;
-        document.getElementById('node-desc').textContent = node.description_it || node.description || '{% trans "No description available." %}';
-        document.getElementById('target-node-id').value = node.id;
-
-        const isCurrent = node.id === charData.current_location_id;
-        const confirmBtn = document.getElementById('confirm-move-btn');
-        const statusText = document.getElementById('reachability-status');
-
-        if (isCurrent) {
-            statusText.textContent = '{% trans "You are here." %}';
-            statusText.className = 'text-success fw-bold';
-            confirmBtn.disabled = true;
-        } else {
-            // Check connectivity
-            const isConnected = rawData.edges.some(e =>
-                (e.from_node_id === charData.current_location_id && e.to_node_id === node.id) ||
-                (e.bidirectional && e.from_node_id === node.id && e.to_node_id === charData.current_location_id)
-            );
-
-            if (isConnected || !charData.current_location_id) {
-                statusText.textContent = '{% trans "Reachable" %}';
-                statusText.className = 'text-primary';
-                confirmBtn.disabled = false;
-            } else {
-                statusText.textContent = '{% trans "Not directly connected" %}';
-                statusText.className = 'text-danger';
-                confirmBtn.disabled = true;
-            }
-        }
-    }
-</script>
+{% endif %}
 {% endblock %}

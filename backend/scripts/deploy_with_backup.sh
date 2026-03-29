@@ -216,3 +216,42 @@ fi
 
 echo ""
 echo "✅ Deploy completed successfully!"
+
+# --------------------------------------------------
+# 9. Run Regression Tests
+# --------------------------------------------------
+echo ""
+echo "🧪 Running Regression Tests..."
+
+# Create a temporary virtual environment for tests to avoid polluting the host
+if [ ! -d "test/venv" ]; then
+    python3 -m venv test/venv
+fi
+
+# Activate venv and install requirements
+source test/venv/bin/activate
+pip install -r test/requirements.txt -q
+
+# Set environment variable based on user choice
+if [[ "$EXPORT_CHOICE_OP" == "1" ]]; then
+    export TEST_ENV="dev"
+elif [[ "$EXPORT_CHOICE_OP" == "2" ]]; then
+    # Give production containers a few seconds to fully boot and register with nginx
+    echo "⏳ Waiting a moment for production services to stabilize..."
+    sleep 10
+    export TEST_ENV="prod"
+fi
+
+# Run pytest
+echo "🚀 Executing pytest suite..."
+pytest test/ -v
+
+TEST_EXIT_CODE=$?
+deactivate
+
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+    echo "❌ WARNING: Regression tests failed! The deployed application may have issues."
+    exit 1
+else
+    echo "✅ Regression tests passed successfully!"
+fi

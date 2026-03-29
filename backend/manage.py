@@ -10,7 +10,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.database import SessionLocal, engine, Base
-from app.models.db_models import User, UserRole, Story, Quest, QuestType
+from app.models.db_models import User, UserRole, Story, Quest, QuestType, Map, MapNode, MapEdge, NPC, Enemy, EnemyType
 from app.core.security import hash_password
 from datetime import datetime
 
@@ -375,91 +375,113 @@ def seed_enemies():
         if not all([historical, fantasy, scifi]):
             click.echo(click.style("Error: Default worlds not found. Run 'seed-worlds' first!", fg='red'))
             return
+            
+        # Clear existing enemies to prevent duplicates
+        db.query(Enemy).delete()
         
         enemies = []
         
-        # HISTORICAL ENEMIES
+        # HISTORICAL ENEMIES (14th C)
         enemies.append(Enemy(
             story_id=historical.id,
-            name="Bandit",
-            description="A desperate outlaw seeking easy prey",
+            name="English Longbowman",
+            description="A skilled archer from across the channel, deadly at a distance.",
             enemy_type=EnemyType.COMMON,
             level=1, hp=15, max_hp=15, attack=8, defense=5,
-            xp_reward=25, gold_min=5, gold_max=15
+            xp_reward=25, gold_min=5, gold_max=15,
+            image_url="english_longbowman.png"
         ))
         
         enemies.append(Enemy(
             story_id=historical.id,
-            name="Guard Captain",
-            description="A well-trained soldier in service to the king",
+            name="French Knight",
+            description="A formidable noble in heavy plate armor, defending his lands.",
             enemy_type=EnemyType.ELITE,
-            level=3, hp=35, max_hp=35, attack=15, defense=12,
-            xp_reward=100, gold_min=25, gold_max=50
+            level=3, hp=40, max_hp=40, attack=16, defense=14,
+            xp_reward=120, gold_min=30, gold_max=60,
+            image_url="french_knight_enemy.png"
+        ))
+        
+        enemies.append(Enemy(
+            story_id=historical.id,
+            name="Bertrand du Guesclin",
+            description="The 'Eagle of Brittany', a legendary French commander known for his tactical brilliance.",
+            enemy_type=EnemyType.BOSS,
+            level=6, hp=85, max_hp=85, attack=24, defense=20,
+            xp_reward=450, gold_min=150, gold_max=300,
+            image_url="guard_captain.png"
         ))
         
         enemies.append(Enemy(
             story_id=historical.id,
             name="Tournament Champion",
-            description="The reigning champion, undefeated for years",
+            description="The reigning champion of the King's tournament.",
             enemy_type=EnemyType.BOSS,
-            level=5, hp=60, max_hp=60, attack=20, defense=15,
-            xp_reward=300, gold_min=100, gold_max=200
+            level=5, hp=70, max_hp=70, attack=22, defense=18,
+            xp_reward=350, gold_min=100, gold_max=250,
+            image_url="tournament_champion.png"
         ))
         
         # FANTASY ENEMIES
         enemies.append(Enemy(
             story_id=fantasy.id,
             name="Goblin Scout",
-            description="A small, cunning creature from the dark forest",
+            description="A small, cunning creature from the dark forest.",
             enemy_type=EnemyType.COMMON,
             level=1, hp=12, max_hp=12, attack=6, defense=4,
-            xp_reward=20, gold_min=3, gold_max=10
+            xp_reward=20, gold_min=3, gold_max=10,
+            image_url="goblin.png"
         ))
         
         enemies.append(Enemy(
             story_id=fantasy.id,
             name="Dark Mage",
-            description="A corrupted wizard wielding forbidden magic",
+            description="A corrupted wizard wielding forbidden magic.",
             enemy_type=EnemyType.ELITE,
             level=4, hp=40, max_hp=40, attack=18, defense=10,
-            xp_reward=150, gold_min=30, gold_max=75
+            xp_reward=150, gold_min=30, gold_max=75,
+            image_url="dark_mage.png"
         ))
         
         enemies.append(Enemy(
             story_id=fantasy.id,
             name="Ancient Dragon",
-            description="A legendary beast of immense power",
+            description="A legendary beast of immense power.",
             enemy_type=EnemyType.BOSS,
-            level=10, hp=100, max_hp=100, attack=30, defense=20,
-            xp_reward=1000, gold_min=500, gold_max=1000
+            level=10, hp=120, max_hp=120, attack=35, defense=25,
+            xp_reward=1200, gold_min=500, gold_max=1200,
+            image_url="ancient_dragon.png"
         ))
         
         # SCI-FI ENEMIES
         enemies.append(Enemy(
             story_id=scifi.id,
             name="Security Drone",
-            description="An automated patrol unit armed with lasers",
+            description="An automated patrol unit armed with lasers.",
             enemy_type=EnemyType.COMMON,
             level=2, hp=20, max_hp=20, attack=10, defense=8,
-            xp_reward=30, gold_min=10, gold_max=20
+            xp_reward=30, gold_min=10, gold_max=20,
+            image_url="security_drone.png"
         ))
         
         enemies.append(Enemy(
             story_id=scifi.id,
             name="Alien Mercenary",
-            description="A battle-hardened warrior from the outer colonies",
+            description="A battle-hardened warrior from the outer colonies.",
             enemy_type=EnemyType.ELITE,
-            level=5, hp=50, max_hp=50, attack=20, defense=15,
-            xp_reward=200, gold_min=50, gold_max=150
+            level=5, hp=55, max_hp=55, attack=22, defense=16,
+            xp_reward=250, gold_min=60, gold_max=180,
+            image_url="alien_mercenary.png"
         ))
         
         enemies.append(Enemy(
             story_id=scifi.id,
             name="AI Warlord",
-            description="A rogue AI controlling an army of machines",
+            description="A rogue AI controlling an army of machines.",
             enemy_type=EnemyType.BOSS,
-            level=8, hp=80, max_hp=80, attack=25, defense=18,
-            xp_reward=600, gold_min=300, gold_max=600
+            level=8, hp=90, max_hp=90, attack=28, defense=20,
+            xp_reward=700, gold_min=350, gold_max=700,
+            image_url="ai_warlord.png"
         ))
         
         # Add all enemies
@@ -469,14 +491,146 @@ def seed_enemies():
         db.commit()
         
         click.echo(click.style("\n✓ Default enemies created successfully!", fg='green'))
-        click.echo(f"\n  {len(enemies)} enemies added:")
-        click.echo("  - Echoes of the Past: 3 enemies (1 common, 1 elite, 1 boss)")
-        click.echo("  - Realm of Eternal Magic: 3 enemies (1 common, 1 elite, 1 boss)")
-        click.echo("  - Horizon Beyond Stars: 3 enemies (1 common, 1 elite, 1 boss)")
+        click.echo(f"\n  {len(enemies)} enemies added with thematic images:")
+        click.echo("  - Historical (14th C): Longbowman, French Knight, Bertrand du Guesclin, Tournament Champion")
+        click.echo("  - Fantasy: Goblin, Dark Mage, Ancient Dragon")
+        click.echo("  - Sci-Fi: Security Drone, Alien Mercenary, AI Warlord")
         
     except Exception as e:
         db.rollback()
         click.echo(click.style(f"Error creating enemies: {str(e)}", fg='red'))
+    finally:
+        db.close()
+
+@cli.command()
+def seed_npcs():
+    """Create thematic NPCs for the 3 worlds"""
+    db = SessionLocal()
+    
+    try:
+        # Get worlds
+        historical = db.query(Story).filter(Story.title == "Echoes of the Past").first()
+        fantasy = db.query(Story).filter(Story.title == "Realm of Eternal Magic").first()
+        scifi = db.query(Story).filter(Story.title == "Horizon Beyond Stars").first()
+        
+        if not all([historical, fantasy, scifi]):
+            click.echo(click.style("Error: Default worlds not found. Run 'seed-worlds' first!", fg='red'))
+            return
+            
+        # Clear existing NPCs to prevent duplicates
+        db.query(NPC).delete()
+        
+        npcs = []
+        
+        # HISTORICAL NPCs (14th C)
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="King Edward III",
+            description="The ambitious King of England who initiated the Hundred Years' War.",
+            image_url="king_george.png"
+        ))
+        
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="Philippe VI",
+            description="The first Valois King of France, struggling to maintain his authority.",
+            image_url="guard_captain.png" 
+        ))
+
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="Edward the Black Prince",
+            description="The eldest son of Edward III, a renowned and feared military leader.",
+            image_url="robert_fire.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="Charles V 'the Wise'",
+            description="The scholarly King of France who regained much of the territory lost to the English.",
+            image_url="Dark_mage.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=historical.id,
+            name="Philippa of Hainault",
+            description="The beloved Queen consort of Edward III, known for her compassion and patronage.",
+            image_url="lonely_fairy.png"
+        ))
+        
+        # FANTASY NPCs
+        npcs.append(NPC(
+            story_id=fantasy.id,
+            name="Archmage Elendril",
+            description="Wise elder of the Arcane Citadel, watcher of the ley lines.",
+            image_url="archmage_elendril.jpg"
+        ))
+        
+        npcs.append(NPC(
+            story_id=fantasy.id,
+            name="Thalia the Woodsman",
+            description="A survival expert living deep within the Silken Woods.",
+            image_url="gentle_witch.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=fantasy.id,
+            name="King Stonebeard",
+            description="The stoic ruler of the Dwarven Under-Kingdom.",
+            image_url="Bandit.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=fantasy.id,
+            name="Lyra Nightshade",
+            description="A nimble halfling rogue with a penchant for rare artifacts.",
+            image_url="lonely_fairy.png"
+        ))
+        
+        # SCI-FI NPCs
+        npcs.append(NPC(
+            story_id=scifi.id,
+            name="Commander Chen",
+            description="Leader of the Jupiter Orbital Garrison, uncompromising and loyal.",
+            image_url="ai_warlord.png" 
+        ))
+        
+        npcs.append(NPC(
+            story_id=scifi.id,
+            name="Smuggler Kane",
+            description="A resourceful pilot who knows every backway in the Outer Rim.",
+            image_url="alien_mercenary.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=scifi.id,
+            name="CEO Valerius",
+            description="The ruthless head of the OmniCorp conglomerate.",
+            image_url="security_drone.png"
+        ))
+
+        npcs.append(NPC(
+            story_id=scifi.id,
+            name="Jax",
+            description="An infamous hacker and leader of the Cyber-Rebellion.",
+            image_url="ai_warlord.png"
+        ))
+        
+        # Add all npcs
+        for npc in npcs:
+            db.add(npc)
+        
+        db.commit()
+        
+        click.echo(click.style("\n✓ Default NPCs created successfully!", fg='green'))
+        click.echo(f"\n  {len(npcs)} NPCs added:")
+        click.echo("  - Historical (14th C): King Edward III, Philippe VI, Black Prince, Charles V, Queen Philippa")
+        click.echo("  - Fantasy: Archmage Elendril, Thalia, King Stonebeard, Lyra Nightshade")
+        click.echo("  - Sci-Fi: Commander Chen, Smuggler Kane, CEO Valerius, Jax")
+        
+    except Exception as e:
+        db.rollback()
+        click.echo(click.style(f"Error creating NPCs: {str(e)}", fg='red'))
     finally:
         db.close()
 
@@ -595,6 +749,110 @@ def seed_items():
     except Exception as e:
         db.rollback()
         click.echo(click.style(f"Error creating items: {str(e)}", fg='red'))
+    finally:
+        db.close()
+
+@cli.command()
+def seed_maps():
+    """Create default map nodes and edges for the 3 worlds"""
+    db = SessionLocal()
+    
+    try:
+        # Get worlds
+        historical = db.query(Story).filter(Story.title == "Echoes of the Past").first()
+        fantasy = db.query(Story).filter(Story.title == "Realm of Eternal Magic").first()
+        scifi = db.query(Story).filter(Story.title == "Horizon Beyond Stars").first()
+        
+        if not all([historical, fantasy, scifi]):
+            click.echo(click.style("Error: Default worlds not found. Run 'seed-worlds' first!", fg='red'))
+            return
+            
+        # Clear existing maps for these worlds to avoid duplicates
+        db.query(MapEdge).filter(MapEdge.story_id.in_([historical.id, fantasy.id, scifi.id])).delete()
+        db.query(MapNode).filter(MapNode.story_id.in_([historical.id, fantasy.id, scifi.id])).delete()
+        db.query(Map).filter(Map.story_id.in_([historical.id, fantasy.id, scifi.id])).delete()
+        db.commit()
+
+        # --- FANTASY MAP ---
+        f_map = Map(story_id=fantasy.id, name="Eternal Magic Map", name_it="Mappa di Eternal Magic", description="The world of Eternal Magic.", description_it="Il mondo di Eternal Magic.", image_url="fantasy_map.jpg")
+        db.add(f_map)
+        db.flush()
+
+        f_nodes = [
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Sylvan Forest", name_it="Foresta di Sylvan", node_type="region", x=250, y=250, icon="🌲", is_starting_location=True),
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Iron Mountains", name_it="Montagne di Ferro", node_type="region", x=750, y=250, icon="⛰️"),
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Crystal Plains", name_it="Piane di Cristallo", node_type="region", x=750, y=750, icon="💎"),
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Shadow Wastes", name_it="Lande d'Ombra", node_type="region", x=250, y=750, icon="💀"),
+            MapNode(story_id=fantasy.id, map_id=f_map.id, name="Arcane Citadel", name_it="Cittadella Arcana", node_type="region", x=500, y=500, icon="🏰")
+        ]
+        db.add_all(f_nodes)
+        db.flush()
+        
+        f_n = {n.name: n.id for n in f_nodes}
+        f_edges = [
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Sylvan Forest"], to_node_id=f_n["Iron Mountains"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Iron Mountains"], to_node_id=f_n["Crystal Plains"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Crystal Plains"], to_node_id=f_n["Shadow Wastes"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Shadow Wastes"], to_node_id=f_n["Sylvan Forest"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Sylvan Forest"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Iron Mountains"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Crystal Plains"]),
+            MapEdge(story_id=fantasy.id, map_id=f_map.id, from_node_id=f_n["Arcane Citadel"], to_node_id=f_n["Shadow Wastes"])
+        ]
+        db.add_all(f_edges)
+
+        # --- SCI-FI MAP ---
+        s_map = Map(story_id=scifi.id, name="Horizon Galaxy Map", name_it="Mappa Galaxy Horizon", description="The star systems of the Frontier.", description_it="I sistemi stellari della Frontiera.", image_url="scifi_map.jpg")
+        db.add(s_map)
+        db.flush()
+
+        s_nodes = [
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Earth Alliance", name_it="Alleanza Terrestre", node_type="system", x=500, y=500, icon="🌍", is_starting_location=True),
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Mars Colony", name_it="Colonia Marziana", node_type="planet", x=400, y=400, icon="🔴"),
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Jupiter Station", name_it="Stazione di Giove", node_type="station", x=600, y=600, icon="🛰️"),
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Alpha Centauri", name_it="Alpha Centauri", node_type="system", x=800, y=200, icon="✨"),
+            MapNode(story_id=scifi.id, map_id=s_map.id, name="Outer Rim", name_it="Bordo Esterno", node_type="region", x=200, y=800, icon="☄️")
+        ]
+        db.add_all(s_nodes)
+        db.flush()
+        
+        s_n = {n.name: n.id for n in s_nodes}
+        s_edges = [
+            MapEdge(story_id=scifi.id, map_id=s_map.id, from_node_id=s_n["Earth Alliance"], to_node_id=s_n["Mars Colony"]),
+            MapEdge(story_id=scifi.id, map_id=s_map.id, from_node_id=s_n["Earth Alliance"], to_node_id=s_n["Jupiter Station"]),
+            MapEdge(story_id=scifi.id, map_id=s_map.id, from_node_id=s_n["Earth Alliance"], to_node_id=s_n["Alpha Centauri"]),
+            MapEdge(story_id=scifi.id, map_id=s_map.id, from_node_id=s_n["Jupiter Station"], to_node_id=s_n["Outer Rim"])
+        ]
+        db.add_all(s_edges)
+
+        # --- HISTORICAL MAP ---
+        h_map = Map(story_id=historical.id, name="Kingdoms of the West", name_it="Regni d'Occidente", description="The territories of France and England during the Hundred Years' War.", description_it="I territori di Francia e Inghilterra durante la Guerra dei Cent'anni.", image_url="historical_map.jpg")
+        db.add(h_map)
+        db.flush()
+
+        h_nodes = [
+            MapNode(story_id=historical.id, map_id=h_map.id, name="London", name_it="Londra", node_type="city", x=500, y=200, icon="🏰", is_starting_location=True),
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Calais", name_it="Calais", node_type="city", x=500, y=400, icon="⚓"),
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Paris", name_it="Parigi", node_type="city", x=550, y=550, icon="⚜️"),
+            MapNode(story_id=historical.id, map_id=h_map.id, name="Bordeaux", name_it="Bordeaux", node_type="city", x=200, y=800, icon="🍷")
+        ]
+        db.add_all(h_nodes)
+        db.flush()
+        
+        h_n = {n.name: n.id for n in h_nodes}
+        h_edges = [
+            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["London"], to_node_id=h_n["Calais"]),
+            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Calais"], to_node_id=h_n["Paris"]),
+            MapEdge(story_id=historical.id, map_id=h_map.id, from_node_id=h_n["Paris"], to_node_id=h_n["Bordeaux"])
+        ]
+        db.add_all(h_edges)
+
+        db.commit()
+        click.echo(click.style("✓ Map data seeded successfully!", fg='green'))
+        
+    except Exception as e:
+        db.rollback()
+        click.echo(click.style(f"Error seeding maps: {str(e)}", fg='red'))
     finally:
         db.close()
 

@@ -55,6 +55,7 @@ class Character(models.Model):
     can_resurrect = models.BooleanField(default=True)
     
     gold = models.IntegerField(default=0)
+    current_location = models.ForeignKey('MapNode', db_column='current_location_id', null=True, blank=True, on_delete=models.SET_NULL, related_name='characters_present', help_text="La posizione attuale del personaggio sulla mappa")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -201,3 +202,65 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
+class Map(models.Model):
+    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
+    story = models.ForeignKey(Story, db_column='story_id', related_name='maps', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    name_it = models.CharField(max_length=200, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    description_it = models.TextField(null=True, blank=True)
+    image_url = models.CharField(max_length=500, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = 'maps'
+        verbose_name = "Map"
+        verbose_name_plural = "Maps"
+
+    def __str__(self):
+        return self.name
+
+class MapNode(models.Model):
+    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
+    story = models.ForeignKey(Story, db_column='story_id', on_delete=models.DO_NOTHING)
+    map = models.ForeignKey(Map, db_column='map_id', related_name='nodes', on_delete=models.CASCADE, null=True, blank=True)
+    parent = models.ForeignKey('self', db_column='parent_id', on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=255)
+    name_it = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    description_it = models.TextField(null=True, blank=True)
+    node_type = models.CharField(max_length=50)
+    x = models.IntegerField(default=500)
+    y = models.IntegerField(default=500)
+    icon = models.CharField(max_length=100, null=True, blank=True)
+    is_starting_location = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = 'map_nodes'
+        verbose_name = "Map Node"
+        verbose_name_plural = "Map Nodes"
+
+    def __str__(self):
+        return self.name
+
+class MapEdge(models.Model):
+    id = models.CharField(primary_key=True, max_length=36, default=uuid.uuid4)
+    story = models.ForeignKey(Story, db_column='story_id', on_delete=models.DO_NOTHING)
+    map = models.ForeignKey(Map, db_column='map_id', related_name='edges', on_delete=models.CASCADE, null=True, blank=True)
+    from_node = models.ForeignKey(MapNode, related_name='edges_from', db_column='from_node_id', on_delete=models.CASCADE)
+    to_node = models.ForeignKey(MapNode, related_name='edges_to', db_column='to_node_id', on_delete=models.CASCADE)
+    travel_description = models.TextField(null=True, blank=True)
+    bidirectional = models.BooleanField(default=True)
+
+    class Meta:
+        managed = False
+        db_table = 'map_edges'
+        verbose_name = "Map Edge"
+        verbose_name_plural = "Map Edges"
+
+    def __str__(self):
+        return f"{self.from_node} -> {self.to_node}"

@@ -8,7 +8,7 @@ from sqlalchemy import text
 from app.core.database import engine, Base, SessionLocal
 from app.core.security_utils import validate_secret_key, get_cors_origins
 from app.core.content_filter import validate_content_filter_config
-from app.api import users, stories, interactions, auth, quests, combat, items
+from app.api import users, stories, interactions, auth, quests, combat, items, map
 
 # Validate SECRET_KEY on startup (QA recommendation)
 validate_secret_key()
@@ -47,6 +47,7 @@ app.include_router(interactions.router)
 app.include_router(quests.router)  # Phase 3: Quests
 app.include_router(combat.router)  # Phase 4: Combat
 app.include_router(items.router)
+app.include_router(map.router)
 
 @app.get("/")
 async def root():

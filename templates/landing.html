@@ -148,6 +148,102 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(255, 129, 63, 0.6);
     }
+
+    /* Map Display Styles */
+    .map-display {
+        position: relative;
+        margin-bottom: 25px;
+        border: 1px solid rgba(212, 175, 55, 0.5);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .map-display:hover {
+        transform: scale(1.02);
+        border-color: #d4af37;
+        box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+    }
+
+    .map-img-wrapper {
+        position: relative;
+        overflow: hidden;
+        min-height: 200px;
+        max-height: 250px;
+        cursor: pointer;
+    }
+
+    .map-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top;
+        display: block;
+        transition: transform 0.8s ease, filter 0.3s ease;
+    }
+
+    .map-display:hover .map-img {
+        transform: scale(1.05);
+        filter: brightness(0.7);
+    }
+
+    .map-zoom-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.5);
+        color: #fff;
+        font-size: 3rem;
+        opacity: 0;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        z-index: 10;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .map-display:hover .map-zoom-icon {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .map-header {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+        padding: 20px;
+        color: #fff;
+    }
+
+    .map-badge {
+        display: inline-block;
+        background: #d4af37;
+        color: #000;
+        padding: 2px 10px;
+        border-radius: 4px;
+        font-family: 'Cinzel', serif;
+        font-size: 0.7rem;
+        font-weight: bold;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+
+    .map-name {
+        font-family: 'Cinzel', serif;
+        color: #d4af37;
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .map-desc {
+        font-size: 0.9rem;
+        color: #ccc;
+        margin: 0;
+        line-height: 1.4;
+    }
 </style>
 
 <div class="hero-section">
@@ -258,6 +354,45 @@
                         {% endif %}
                     </p>
 
+                    {% if world.maps %}
+                    <div class="row g-4">
+                        {% for map in world.maps %}
+                        <div class="col-12">
+                            <div class="map-display">
+                                <div class="map-img-wrapper" data-bs-toggle="modal" data-bs-target="#mapModal"
+                                    data-map-src="{% if '/static/' in map.image_url %}{{ map.image_url }}{% else %}{% static 'images/' %}{{ map.image_url }}{% endif %}"
+                                    data-map-title="{% if LANGUAGE_CODE|slice:':2' == 'it' and map.name_it %}{{ map.name_it }}{% else %}{{ map.name }}{% endif %}">
+                                    {% if map.image_url %}
+                                    <img src="{% if '/static/' in map.image_url %}{{ map.image_url }}{% else %}{% static 'images/' %}{{ map.image_url }}{% endif %}"
+                                        alt="{{ map.name }}" class="map-img">
+                                    <div class="map-zoom-icon"><i class="fas fa-search-plus"></i></div>
+                                    {% endif %}
+                                    <div class="map-header">
+                                        <span class="map-badge">{% trans "Discovery Map" %}</span>
+                                        <span class="map-name">
+                                            {% if LANGUAGE_CODE|slice:":2" == "it" and map.name_it %}
+                                            {{ map.name_it }}
+                                            {% else %}
+                                            {{ map.name }}
+                                            {% endif %}
+                                        </span>
+                                        {% if map.description or map.description_it %}
+                                        <p class="map-desc">
+                                            {% if LANGUAGE_CODE|slice:":2" == "it" and map.description_it %}
+                                            {{ map.description_it }}
+                                            {% else %}
+                                            {{ map.description }}
+                                            {% endif %}
+                                        </p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
                     {% if world.entities %}
                     <h5 class="text-gold mb-3" style="font-family: 'Cinzel', serif; font-size: 1rem;">
                         {% trans "Legendary Inhabitants" %}
@@ -323,5 +458,44 @@
         class="btn btn-coffee btn-lg px-4">
         ☕ {% trans "Buy Me a Coffee" %}
     </a>
+</div>
+
+<!-- Map Image Modal -->
+<div class="modal fade" id="mapModal" tabindex="-1" aria-labelledby="mapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content bg-dark border-gold">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title font-cinzel text-gold" id="mapModalLabel">Map Viewer</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-0">
+                <img id="mapModalImage" src="" alt="Full Map" class="img-fluid w-100"
+                    style="max-height: 85vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var mapModal = document.getElementById('mapModal');
+        if (mapModal) {
+            mapModal.addEventListener('show.bs.modal', function (event) {
+                var triggerElement = event.relatedTarget;
+                var mapSrc = triggerElement.getAttribute('data-map-src');
+                var mapTitle = triggerElement.getAttribute('data-map-title');
+
+                var modalImage = mapModal.querySelector('#mapModalImage');
+                var modalTitle = mapModal.querySelector('.modal-title');
+
+                modalImage.src = mapSrc;
+                modalTitle.textContent = mapTitle;
+            });
+        }
+    });
+</script>
+☕ {% trans "Buy Me a Coffee" %}
+</a>
 </div>
 {% endblock %}

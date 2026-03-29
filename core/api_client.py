@@ -46,6 +46,8 @@ KNOWN_ERROR_MESSAGES = {
     "Hours must be between 1 and 24",
     # User errors
     "User not found",
+    "Locations are not connected",
+    "Target location not found in this world",
 }
 
 def translate_api_error(error_message: str) -> str:
@@ -237,3 +239,16 @@ class CollabookAPI:
                                    })
             response.raise_for_status()
             return response.json()
+    # ==================== Map ====================
+    
+    @staticmethod
+    async def get_map(story_id: str, token: str) -> dict:
+        """Get full map (nodes and edges) for a story"""
+        async with CollabookAPI._get_client() as client:
+            response = await client.get(f"/map/{story_id}",
+                                  headers={"Authorization": f"Bearer {token}"})
+            response.raise_for_status()
+            return response.json()
+    
+
+

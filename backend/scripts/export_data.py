@@ -22,6 +22,9 @@ from app.models.db_models import (
     Item,
     Inventory,
     Turn,
+    Map,
+    MapNode,
+    MapEdge
 )
 
 EXPORT_DIR = Path("/app/data/exports")
@@ -105,6 +108,9 @@ def main():
         export_table(session, Item, "items.json")
         export_table(session, Inventory, "inventory.json")
         export_table(session, Turn, "turns.json")
+        export_table(session, Map, "maps.json")
+        export_table(session, MapNode, "map_nodes.json")
+        export_table(session, MapEdge, "map_edges.json")
         
         # Django / Auth / Blog Tables
         export_table(session, AuthUser, "auth_users.json")

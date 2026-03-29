@@ -51,6 +51,7 @@ async def get_user_profile(
                 "story_id": c.story_id,
                 "status": c.status,
                 "insertion_point": c.insertion_point,
+                "current_location_id": c.current_location_id,
                 "name": current_user.name,  # Users act through character identities
                 "level": current_user.level,
                 "hp": current_user.hp,

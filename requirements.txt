@@ -12,5 +12,7 @@ psycopg2-binary
 Pillow
 django-allauth[socialaccount]
 
+
+
 # Production server
 gunicorn==21.2.0
